@@ -1,0 +1,638 @@
+<title>טיק יומן מסחר</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700&family=Assistant:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: one-column phone app, max 560px, four tabs on a fixed bottom bar. Ink-navy trading desk with a brass accent. */
+:root{
+  --bg:#0D131E; --surface:#151D2B; --surface2:#1C2637; --line:#283447;
+  --fg:#E7EBF3; --muted:#8E99AD; --accent:#E2A64A; --accent-ink:#1B1306; --accent-soft:rgba(226,166,74,.14);
+  --up:#41C38E; --up-soft:rgba(65,195,142,.14); --down:#F2706C; --down-soft:rgba(242,112,108,.14);
+  --shadow:0 10px 30px rgba(0,0,0,.35);
+  --f-display:"Rubik","Assistant",system-ui,sans-serif;
+  --f-body:"Assistant","Rubik",system-ui,-apple-system,sans-serif;
+  --f-num:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  color-scheme:dark;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){
+  --bg:#EDF0F5; --surface:#FFFFFF; --surface2:#F4F6FA; --line:#D8DEE8;
+  --fg:#111827; --muted:#5A6477; --accent:#A8690F; --accent-ink:#FFFFFF; --accent-soft:rgba(168,105,15,.10);
+  --up:#11845A; --up-soft:rgba(17,132,90,.10); --down:#C7362F; --down-soft:rgba(199,54,47,.09);
+  --shadow:0 10px 30px rgba(17,24,39,.12); color-scheme:light;
+}}
+:root[data-theme="light"]{
+  --bg:#EDF0F5; --surface:#FFFFFF; --surface2:#F4F6FA; --line:#D8DEE8;
+  --fg:#111827; --muted:#5A6477; --accent:#A8690F; --accent-ink:#FFFFFF; --accent-soft:rgba(168,105,15,.10);
+  --up:#11845A; --up-soft:rgba(17,132,90,.10); --down:#C7362F; --down-soft:rgba(199,54,47,.09);
+  --shadow:0 10px 30px rgba(17,24,39,.12); color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{margin:0;color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+[hidden]{display:none!important}
+.app{max-width:560px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px calc(96px + env(safe-area-inset-bottom,0px))}
+.view{display:grid;gap:14px}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance;line-height:1.2}
+h1{font-size:1.65rem;font-weight:700}
+h2{font-size:1.05rem;font-weight:600}
+.eyebrow{font-size:.78rem;color:var(--muted);letter-spacing:.04em;font-weight:600}
+.muted{color:var(--muted)}
+.small{font-size:.86rem}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate;font-weight:500}
+.up{color:var(--up)} .down{color:var(--down)}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-top:6px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:grid;gap:12px;min-width:0}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.between{justify-content:space-between}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:.8rem;font-weight:600;background:var(--surface2);border:1px solid var(--line);white-space:nowrap}
+.chip.ok{background:var(--up-soft);color:var(--up);border-color:transparent}
+.chip.bad{background:var(--down-soft);color:var(--down);border-color:transparent}
+.chip.acc{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+.dot{width:8px;height:8px;border-radius:50%;background:currentColor}
+.pulse .dot{animation:pulse 1.8s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.pulse .dot{animation:none}}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:var(--surface2);border-radius:12px;padding:10px 12px;display:grid;gap:2px;min-width:0}
+.stat .v{font-size:1.15rem}
+.stat .k{font-size:.78rem;color:var(--muted)}
+.big{font-size:2rem;font-weight:700;line-height:1.1}
+.btn{appearance:none;border:1px solid var(--line);background:var(--surface2);border-radius:12px;padding:11px 14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.btn.danger{color:var(--down)}
+.btn.ghost{background:transparent}
+.btn.block{width:100%}
+.btn:focus-visible,.tab:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.check:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.btn:active{transform:scale(.98)}
+label.f{display:grid;gap:5px;font-size:.84rem;color:var(--muted);font-weight:600;min-width:0}
+input[type=text],input[type=number],input[type=date],input[type=time],select,textarea{width:100%;background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:16px;color:var(--fg);min-height:44px;outline:none}
+input[type=number]{font-family:var(--f-num);direction:ltr;text-align:right}
+textarea{min-height:80px;resize:vertical}
+input,select{min-width:0;max-width:100%}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px}
+.seg button{border:0;background:transparent;border-radius:9px;padding:8px;font-weight:700;cursor:pointer;min-height:38px}
+.seg button[aria-pressed="true"]{background:var(--surface);box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.seg button.L[aria-pressed="true"]{color:var(--up)} .seg button.S[aria-pressed="true"]{color:var(--down)}
+.check{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line);cursor:pointer}
+.check:first-child{border-top:0}
+.check input{position:absolute;opacity:0;width:1px;height:1px}
+.box{flex:none;width:24px;height:24px;border-radius:7px;border:2px solid var(--line);display:grid;place-items:center;margin-top:1px;transition:background .15s}
+.check input:checked + .box{background:var(--accent);border-color:var(--accent)}
+.check input:checked + .box::after{content:"";width:6px;height:11px;border:solid var(--accent-ink);border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.check input:checked ~ span{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line)}
+.bar{height:10px;border-radius:99px;background:var(--surface2);overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:inherit}
+.trade{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line);cursor:pointer;background:none;border-inline:0;border-bottom:0;width:100%;text-align:start}
+.trade:first-child{border-top:0}
+.side{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-weight:700;font-size:.8rem}
+.side.L{background:var(--up-soft);color:var(--up)} .side.S{background:var(--down-soft);color:var(--down)}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:3px}
+.tag{font-size:.72rem;padding:1px 7px;border-radius:6px;background:var(--surface2);color:var(--muted)}
+.banner{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:10px 14px;border-radius:12px;background:var(--accent-soft);color:var(--fg);font-size:.88rem}
+.insight{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line);font-size:.95rem}
+.insight:first-child{border-top:0}
+.insight b.i{flex:none;width:8px;height:8px;margin-top:8px;border-radius:50%;background:var(--muted)}
+.insight.up b.i{background:var(--up)} .insight.down b.i{background:var(--down)} .insight.acc b.i{background:var(--accent)}
+.result{display:grid;gap:4px;justify-items:center;text-align:center;padding:18px 12px;border-radius:14px;background:var(--surface2)}
+.result .big{font-size:3rem;color:var(--accent)}
+.warn{padding:10px 12px;border-radius:10px;background:var(--down-soft);color:var(--down);font-size:.9rem;font-weight:600}
+.okmsg{padding:10px 12px;border-radius:10px;background:var(--up-soft);color:var(--up);font-size:.9rem;font-weight:600}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th,td{padding:8px 6px;text-align:start;border-top:1px solid var(--line);white-space:nowrap}
+th{font-size:.76rem;color:var(--muted);font-weight:600;border-top:0}
+.rem{display:grid;grid-template-columns:1fr auto;gap:8px;padding:12px 0;border-top:1px solid var(--line)}
+.rem:first-child{border-top:0}
+.days{display:flex;gap:4px;flex-wrap:wrap}
+.days button{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--surface2);font-weight:700;font-size:.8rem;cursor:pointer}
+.days button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.switch{position:relative;width:48px;height:28px;flex:none}
+.switch input{opacity:0;width:100%;height:100%;position:absolute;margin:0;cursor:pointer;z-index:1}
+.switch span{position:absolute;inset:0;border-radius:99px;background:var(--line);transition:.2s}
+.switch span::after{content:"";position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.2s}
+.switch input:checked + span{background:var(--up)}
+.switch input:checked + span::after{right:23px}
+.rule{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+.rule:first-child{border-top:0}
+.rule .n{flex:none;font-family:var(--f-num);color:var(--accent);font-weight:700;width:22px}
+.rule p{margin:0;flex:1;min-width:0}
+.x{border:0;background:none;color:var(--muted);cursor:pointer;padding:4px 8px;font-size:1.1rem;min-height:32px}
+svg.chart{width:100%;height:auto;display:block}
+.tabs{position:fixed;inset:auto 0 0 0;z-index:20;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:6px max(10px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px))}
+.tabs nav{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+.tab{border:0;background:none;display:grid;justify-items:center;gap:2px;padding:6px 0;font-size:.74rem;font-weight:600;color:var(--muted);cursor:pointer;border-radius:10px}
+.tab svg{width:24px;height:24px}
+.tab[aria-current="page"]{color:var(--accent)}
+.sheet-bg{position:fixed;inset:0;z-index:40;background:rgba(5,8,14,.55);display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:560px;max-height:92vh;max-height:92dvh;overflow-y:auto;background:var(--surface);border-radius:20px 20px 0 0;padding:18px max(16px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:grid;gap:12px;box-shadow:var(--shadow);animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(30px);opacity:.5}}
+@media (prefers-reduced-motion:reduce){.sheet{animation:none}}
+.grab{width:40px;height:5px;border-radius:9px;background:var(--line);margin:0 auto}
+.toast{position:fixed;z-index:60;left:50%;transform:translateX(-50%);top:calc(12px + env(safe-area-inset-top,0px));width:min(520px,calc(100% - 32px));background:var(--surface);border:1px solid var(--line);border-inline-start:4px solid var(--accent);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow);display:flex;gap:10px;align-items:center;justify-content:space-between}
+.empty{padding:24px 8px;text-align:center;color:var(--muted)}
+details summary{cursor:pointer;font-weight:600;list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::after{content:"＋";float:left;color:var(--muted)}
+details[open] summary::after{content:"−"}
+code.ics{display:block;max-height:140px;overflow:auto;font-family:var(--f-num);font-size:.7rem;background:var(--surface2);padding:8px;border-radius:8px;direction:ltr;text-align:left;white-space:pre}
+@media (max-width:380px){.grid3{grid-template-columns:1fr 1fr}.result .big{font-size:2.5rem}}
+</style>
+
+<div class="app" id="app" dir="rtl" lang="he">
+  <section class="view" id="v-today" data-view="today"></section>
+  <section class="view" id="v-calc" data-view="calc" hidden></section>
+  <section class="view" id="v-journal" data-view="journal" hidden></section>
+  <section class="view" id="v-plan" data-view="plan" hidden></section>
+</div>
+
+<div class="tabs" dir="rtl">
+  <nav aria-label="ניווט ראשי">
+    <button class="tab" data-go="today" aria-current="page">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M7 4v3M7 17v3M17 7v3M17 18v2"/><rect x="5" y="7" width="4" height="10" rx="1" fill="currentColor" fill-opacity=".18"/><rect x="15" y="10" width="4" height="8" rx="1"/></svg>היום</button>
+    <button class="tab" data-go="calc">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8 7h8M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01"/></svg>מחשבון</button>
+    <button class="tab" data-go="journal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 3h11a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6z"/><path d="M6 3v18M10 8h5M10 12h5"/></svg>יומן</button>
+    <button class="tab" data-go="plan">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M10.5 20a1.7 1.7 0 0 0 3 0"/></svg>תוכנית</button>
+  </nav>
+</div>
+
+<div class="sheet-bg" id="sheetBg" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+<div class="toast" id="toast" dir="rtl" role="status" hidden></div>
+
+<script>
+(function(){
+"use strict";
+/* ---------- contracts (CME specs: tick size, $ per tick) ---------- */
+const C={
+  ES:{n:"E-mini S&P 500",tick:.25,tv:12.5,q:1},
+  MES:{n:"Micro S&P 500",tick:.25,tv:1.25,q:1,big:"ES"},
+  NQ:{n:"E-mini Nasdaq-100",tick:.25,tv:5,q:1},
+  MNQ:{n:"Micro Nasdaq-100",tick:.25,tv:.5,q:1,big:"NQ"},
+  YM:{n:"E-mini Dow",tick:1,tv:5,q:1},
+  MYM:{n:"Micro Dow",tick:1,tv:.5,q:1,big:"YM"},
+  RTY:{n:"E-mini Russell 2000",tick:.1,tv:5,q:1},
+  M2K:{n:"Micro Russell 2000",tick:.1,tv:.5,q:1,big:"RTY"},
+  CL:{n:"Crude Oil",tick:.01,tv:10},
+  MCL:{n:"Micro Crude Oil",tick:.01,tv:1,big:"CL"},
+  NG:{n:"Natural Gas",tick:.001,tv:10},
+  GC:{n:"Gold",tick:.1,tv:10},
+  MGC:{n:"Micro Gold",tick:.1,tv:1,big:"GC"},
+  SI:{n:"Silver",tick:.005,tv:25},
+  ZN:{n:"10-Year T-Note",tick:.015625,tv:15.625},
+  ZB:{n:"30-Year T-Bond",tick:.03125,tv:31.25},
+  "6E":{n:"Euro FX",tick:.00005,tv:6.25},
+  MBT:{n:"Micro Bitcoin",tick:5,tv:.5}
+};
+const MICRO={ES:"MES",NQ:"MNQ",YM:"MYM",RTY:"M2K",CL:"MCL",GC:"MGC"};
+const pv=s=>C[s].tv/C[s].tick;
+
+const EMO=["רגוע","ממוקד","בטוח מדי","פוחד","חמדן","נקמה","משועמם","עייף"];
+const DAYN=["א","ב","ג","ד","ה","ו","ש"];
+const ROUTINE=[
+  {id:"cal",t:"בדקתי את הלוח הכלכלי להיום (CPI, NFP, FOMC, נאומים)"},
+  {id:"lvl",t:"סימנתי רמות: שיא ושפל של אתמול, טווח הלילה, VWAP"},
+  {id:"bias",t:"כתבתי תרחיש ללונג ותרחיש לשורט, ומה מבטל כל אחד"},
+  {id:"risk",t:"קבעתי הפסד יומי מקסימלי ומספר עסקאות מקסימלי"},
+  {id:"mind",t:"אני ישן, רגוע, ולא צריך להחזיר הפסד של אתמול"}
+];
+const PRETRADE=[
+  "העסקה היא אחד הסטאפים בתוכנית שלי",
+  "הסטופ מוגדר על רמה, לא על סכום שנוח לי",
+  "יחס סיכוי-סיכון לפחות 1:1.5",
+  "אין פרסום נתונים ב-5 הדקות הקרובות",
+  "לא עברתי את ההפסד היומי ולא את מכסת העסקאות"
+];
+
+/* ---------- storage ---------- */
+const LS="tick_v1";
+const todayKey=(d=new Date())=>d.toLocaleDateString("en-CA");
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+function daysAgo(n){const d=new Date();d.setDate(d.getDate()-n);return todayKey(d)}
+function sampleTrades(){
+  const raw=[
+    [9,"MES","L",2,5868.25,5874.5,5865,"פריצת טווח פתיחה","ממוקד",1,"10:05"],
+    [8,"MES","S",2,5881,5884,5878.5,"דחייה מ-VWAP","רגוע",1,"09:48"],
+    [8,"MES","L",3,5872,5866.5,5869,"נקמה אחרי סטופ","נקמה",0,"10:20"],
+    [7,"MNQ","L",3,20765,20812,20748,"פריצת טווח פתיחה","ממוקד",1,"09:40"],
+    [6,"MES","S",2,5899.5,5890.25,5903,"דחייה מ-VWAP","רגוע",1,"11:15"],
+    [5,"MCL","L",2,68.42,68.18,68.25,"ללא סטאפ","משועמם",0,"13:30"],
+    [3,"MES","L",2,5904,5911.75,5900.5,"פולבק במגמה","ממוקד",1,"10:02"],
+    [2,"MNQ","S",2,20930,20951,20920,"דחייה מ-VWAP","בטוח מדי",1,"10:40"],
+    [1,"MES","L",2,5918.25,5926,5914.5,"פולבק במגמה","רגוע",1,"09:55"]
+  ];
+  return raw.map(r=>({id:uid(),sample:true,d:daysAgo(r[0]),time:r[10],sym:r[1],side:r[2],qty:r[3],entry:r[4],exit:r[5],stop:r[6],setup:r[7],emo:r[8],plan:!!r[9],fee:+(0.62*2*r[3]).toFixed(2),note:""}));
+}
+function defaults(){
+  return {v:1,
+    settings:{account:25000,riskPct:1,maxDaily:500,maxTrades:4,commission:1.24,sym:"MES"},
+    trades:sampleTrades(),
+    reminders:[
+      {id:uid(),time:"15:30",days:[1,2,3,4,5],label:"הכנה לפני הפתיחה: לוח כלכלי, רמות ותרחישים",on:true},
+      {id:uid(),time:"16:25",days:[1,2,3,4,5],label:"5 דקות לפתיחת ניו יורק. צ'קליסט לפני כל כניסה",on:true},
+      {id:uid(),time:"23:05",days:[1,2,3,4,5],label:"סגירת יום: עדכן את היומן וכתוב שיעור אחד",on:true},
+      {id:uid(),time:"20:00",days:[0],label:"סקירה שבועית: מה עבד, מה לא, וחוק אחד לשבוע הבא",on:true}
+    ],
+    rules:[
+      "סיכון של עד 1% מהחשבון בעסקה אחת",
+      "סטופ נקבע לפני הכניסה ולא זז נגדי",
+      "אחרי 2 הפסדים ברצף: הפסקה של 30 דקות",
+      "מגעתי להפסד היומי? סוגר את הפלטפורמה עד מחר",
+      "לא נכנס 5 דקות לפני ואחרי פרסום נתונים",
+      "בגלגול החוזה עובר לחוזה החדש ביום הגלגול"
+    ],
+    routine:{date:todayKey(),done:{}},
+    days:{}
+  };
+}
+function load(){try{const s=JSON.parse(localStorage.getItem(LS));if(s&&s.v===1)return s}catch(e){}return defaults()}
+let S=load();
+function save(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}}
+if(S.routine.date!==todayKey())S.routine={date:todayKey(),done:{}};
+
+/* ---------- helpers ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const usd0=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0});
+const usd2=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",minimumFractionDigits:2,maximumFractionDigits:2});
+function money(v,dec){if(v==null||!isFinite(v))return "–";const f=(dec?usd2:usd0).format(Math.abs(v));return (v<0?"−":v>0?"+":"")+f}
+function moneyPlain(v){return usd0.format(v||0)}
+const cls=v=>v>0?"up":v<0?"down":"";
+const N=(v,d=2)=>(v==null||!isFinite(v))?"–":(+v).toFixed(d);
+function priceDec(sym){const t=C[sym].tick;const s=String(t);return s.includes(".")?Math.min(s.split(".")[1].length,6):0}
+function calcT(t){const dir=t.side==="L"?1:-1;const gross=(t.exit-t.entry)*dir*pv(t.sym)*t.qty;const net=gross-(t.fee||0);let r=null;if(t.stop){const risk=Math.abs(t.entry-t.stop)*pv(t.sym)*t.qty;if(risk>0)r=gross/risk}return{gross,net,r}}
+function sortedTrades(){return [...S.trades].sort((a,b)=>(a.d+(a.time||"")).localeCompare(b.d+(b.time||"")))}
+const sum=a=>a.reduce((x,y)=>x+y,0);
+function fmtDur(m){m=Math.max(0,Math.round(m));const d=Math.floor(m/1440),h=Math.floor(m%1440/60),mm=m%60;return (d?d+" ימ' ":"")+(h?h+" ש' ":"")+(d?"":mm+" ד'")}
+const localHM=ms=>new Date(Date.now()+ms*60000).toLocaleTimeString("he-IL",{hour:"2-digit",minute:"2-digit"});
+
+/* ---------- market clock (CME Globex, Chicago time) ---------- */
+function ctNow(){
+  const o={};new Intl.DateTimeFormat("en-US",{timeZone:"America/Chicago",weekday:"short",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).formatToParts(new Date()).forEach(p=>o[p.type]=p.value);
+  return{wd:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].indexOf(o.weekday),min:(+o.hour%24)*60+ +o.minute};
+}
+function market(){
+  const{wd,min}=ctNow();
+  let globex;if(wd===6)globex=false;else if(wd===0)globex=min>=1020;else if(wd===5)globex=min<960;else globex=!(min>=960&&min<1020);
+  const rth=wd>=1&&wd<=5&&min>=510&&min<900;
+  let toOpen=null,toClose=null;
+  if(rth)toClose=900-min;else for(let d=0;d<8;d++){const w=(wd+d)%7;if(w>=1&&w<=5){const diff=d*1440+510-min;if(diff>0){toOpen=diff;break}}}
+  let toGlobex=null;if(!globex){for(let d=0;d<8;d++){const w=(wd+d)%7;const at=(w===0||(w>=1&&w<=4))?1020:null;if(at==null)continue;const diff=d*1440+at-min;if(diff>0){toGlobex=diff;break}}}
+  return{globex,rth,toOpen,toClose,toGlobex,halt:wd>=1&&wd<=4&&min>=960&&min<1020};
+}
+
+/* ---------- quarterly roll (equity index: H M U Z, expiry 3rd Friday, roll 8 days before) ---------- */
+function thirdFriday(y,m){const d=new Date(y,m,1);const add=(5-d.getDay()+7)%7;return new Date(y,m,1+add+14)}
+function rolls(count=4){
+  const out=[];const now=new Date();now.setHours(0,0,0,0);
+  for(let y=now.getFullYear();out.length<count;y++)for(const m of[2,5,8,11]){
+    const exp=thirdFriday(y,m);if(exp<now)continue;const roll=new Date(exp);roll.setDate(exp.getDate()-8);
+    const code={2:"H",5:"M",8:"U",11:"Z"}[m]+String(y).slice(-1);
+    const nm=m===11?2:m+3, ny=m===11?y+1:y;
+    const nextCode={2:"H",5:"M",8:"U",11:"Z"}[nm]+String(ny).slice(-1);
+    out.push({exp,roll,code,nextCode});if(out.length>=count)break;
+  }
+  return out;
+}
+const dmy=d=>d.toLocaleDateString("he-IL",{day:"numeric",month:"short"});
+const dayDiff=d=>{const n=new Date();n.setHours(0,0,0,0);return Math.round((d-n)/864e5)};
+
+/* ---------- stats ---------- */
+function stats(ts){
+  const rows=ts.map(t=>({t,...calcT(t)}));const nets=rows.map(r=>r.net);
+  const w=nets.filter(x=>x>0),l=nets.filter(x=>x<0);
+  const gw=sum(w),gl=Math.abs(sum(l));
+  let eq=0,peak=0,dd=0;const curve=[0];nets.forEach(x=>{eq+=x;curve.push(eq);peak=Math.max(peak,eq);dd=Math.min(dd,eq-peak)});
+  const rs=rows.filter(r=>r.r!=null).map(r=>r.r);
+  return{n:ts.length,total:sum(nets),win:ts.length?w.length/ts.length:0,pf:gl?gw/gl:(gw?Infinity:0),avgW:w.length?gw/w.length:0,avgL:l.length?gl/l.length:0,
+    exp:ts.length?sum(nets)/ts.length:0,avgR:rs.length?sum(rs)/rs.length:null,dd,curve,rows,plan:ts.length?ts.filter(t=>t.plan).length/ts.length:0};
+}
+function groupBy(rows,key){const m={};rows.forEach(r=>{const k=key(r.t)||"—";(m[k]??=[]).push(r.net)});return Object.entries(m).map(([k,v])=>({k,n:v.length,total:sum(v),win:v.filter(x=>x>0).length/v.length}))}
+const M=v=>`<span class="num">${money(v)}</span>`,MP=v=>`<span class="num">${moneyPlain(v)}</span>`;
+function insights(st){
+  const out=[];if(st.n<3)return[{tone:"",text:"אחרי 3 עסקאות ביומן יופיעו כאן תובנות על ההרגלים שלך."}];
+  const off=st.rows.filter(r=>!r.t.plan),on=st.rows.filter(r=>r.t.plan);
+  if(off.length){const s=sum(off.map(r=>r.net));out.push({tone:s<0?"down":"up",text:`${off.length} עסקאות מחוץ לתוכנית הניבו ${M(s)}. עסקאות לפי התוכנית: ${M(sum(on.map(r=>r.net)))}.`})}
+  const emo=groupBy(st.rows,t=>t.emo).filter(g=>g.n>=1).sort((a,b)=>a.total-b.total);
+  if(emo.length>1&&emo[0].total<0)out.push({tone:"down",text:`המצב הרגשי היקר ביותר: "${esc(emo[0].k)}" (${M(emo[0].total)} ב-${emo[0].n} עסקאות). כשזה מופיע, הפסקה.`});
+  const set=groupBy(st.rows,t=>t.setup).sort((a,b)=>b.total-a.total);
+  if(set.length&&set[0].total>0)out.push({tone:"up",text:`הסטאפ החזק שלך: "${esc(set[0].k)}" עם ${M(set[0].total)} ו-${Math.round(set[0].win*100)}% הצלחה. תן לו עדיפות.`});
+  if(st.avgW&&st.avgL){const ratio=st.avgW/st.avgL;out.push({tone:ratio>=1?"up":"acc",text:`רווח ממוצע ${MP(st.avgW)} מול הפסד ממוצע ${MP(st.avgL)} (יחס ${ratio.toFixed(2)}). ${ratio<1?"ההפסדים גדולים מהרווחים: בדוק אם אתה מזיז סטופים או סוגר רווחים מוקדם.":"אתה נותן לרווחים לרוץ. המשך כך."}`})}
+  const byDay={};st.rows.forEach(r=>(byDay[r.t.d]??=[]).push(r.net));
+  const busy=Object.values(byDay).filter(v=>v.length>S.settings.maxTrades);
+  if(busy.length)out.push({tone:"down",text:`ב-${busy.length} ימים עברת את מכסת ${S.settings.maxTrades} העסקאות. סה"כ באותם ימים: ${M(sum(busy.flat()))}.`});
+  return out;
+}
+
+/* ---------- views ---------- */
+function todayTrades(){const k=todayKey();return S.trades.filter(t=>t.d===k)}
+function streak(){
+  let n=0;const d=new Date();const k=todayKey(d);
+  if(!S.days[k])d.setDate(d.getDate()-1);
+  for(let i=0;i<400;i++){const w=d.getDay();if(w===0||w===6){d.setDate(d.getDate()-1);continue}if(S.days[todayKey(d)]){n++;d.setDate(d.getDate()-1)}else break}
+  return n;
+}
+function nextReminder(){
+  const now=new Date();let best=null;
+  S.reminders.filter(r=>r.on&&r.days.length).forEach(r=>{for(let i=0;i<8;i++){const d=new Date(now);d.setDate(now.getDate()+i);if(!r.days.includes(d.getDay()))continue;const[h,m]=r.time.split(":");d.setHours(+h,+m,0,0);if(d>now){if(!best||d<best.at)best={r,at:d};break}}});
+  return best;
+}
+
+function renderToday(){
+  const m=market(),tt=todayTrades(),pnl=sum(tt.map(t=>calcT(t).net)),lim=S.settings.maxDaily;
+  const used=pnl<0?Math.min(1,-pnl/lim):0,stop=pnl<=-lim||tt.length>=S.settings.maxTrades;
+  const done=ROUTINE.filter(r=>S.routine.done[r.id]).length;
+  const nr=nextReminder(),rl=rolls(1)[0],rd=dayDiff(rl.roll);
+  const month=S.trades.filter(t=>t.d.slice(0,7)===todayKey().slice(0,7));
+  const st=stats(sortedTrades().filter(t=>t.d.slice(0,7)===todayKey().slice(0,7)));
+  const hello=(()=>{const h=new Date().getHours();return h<12?"בוקר טוב":h<17?"צהריים טובים":h<21?"ערב טוב":"לילה טוב"})();
+  const sk=streak();
+  let mkt;
+  if(m.rth)mkt=`<span class="chip ok pulse"><span class="dot"></span>ניו יורק פתוחה</span><span class="muted small">נסגרת בעוד ${fmtDur(m.toClose)} (${localHM(m.toClose)})</span>`;
+  else if(m.globex)mkt=`<span class="chip acc pulse"><span class="dot"></span>גלובקס פתוח</span><span class="muted small">פתיחת ניו יורק בעוד ${fmtDur(m.toOpen)} (${localHM(m.toOpen)})</span>`;
+  else mkt=`<span class="chip bad"><span class="dot"></span>${m.halt?"הפסקה יומית":"השוק סגור"}</span><span class="muted small">נפתח בעוד ${fmtDur(m.toGlobex)} (${localHM(m.toGlobex)})</span>`;
+  $("#v-today").innerHTML=`
+  <div class="top"><div><div class="eyebrow">${new Date().toLocaleDateString("he-IL",{weekday:"long",day:"numeric",month:"long"})}</div><h1>${hello}</h1></div>
+    <span class="chip ${sk?"acc":""}" title="ימי מסחר רצופים עם שגרת הכנה מלאה"><span class="num">${sk}</span> ימי שגרה ברצף</span></div>
+  <div class="card"><div class="row between"><h2>מצב השוק</h2><span class="muted small">חוזי CME</span></div><div class="row">${mkt}</div></div>
+  <div class="card">
+    <div class="row between"><h2>הסיכון של היום</h2><span class="chip ${stop?"bad":"ok"}">${stop?"עצור להיום":"אפשר לסחור"}</span></div>
+    <div class="row between"><div><div class="big num ${cls(pnl)}">${money(pnl)}</div><div class="muted small"><span class="num">${tt.length}</span> מתוך <span class="num">${S.settings.maxTrades}</span> עסקאות</div></div>
+      <div class="muted small" style="text-align:left">הפסד מקסימלי<br><span class="num">${moneyPlain(lim)}</span></div></div>
+    <div class="bar" role="img" aria-label="ניצול ההפסד היומי ${Math.round(used*100)}%"><i style="width:${Math.max(used*100,2)}%;background:${used>.75?"var(--down)":used>.4?"var(--accent)":"var(--up)"}"></i></div>
+    ${stop?`<div class="warn">${pnl<=-lim?"הגעת להפסד היומי. סוגרים את הפלטפורמה. מחר יום חדש.":"הגעת למכסת העסקאות להיום. מספיק."}</div>`:""}
+  </div>
+  <div class="card">
+    <div class="row between"><h2>שגרת הכנה</h2><span class="chip ${done===ROUTINE.length?"ok":""}"><span class="num">${done}/${ROUTINE.length}</span></span></div>
+    <div id="routine">${ROUTINE.map(r=>`<label class="check"><input type="checkbox" data-r="${r.id}" ${S.routine.done[r.id]?"checked":""}><span class="box"></span><span>${r.t}</span></label>`).join("")}</div>
+  </div>
+  <div class="grid2">
+    <div class="card"><div class="eyebrow">התזכורת הבאה</div>${nr?`<div class="num" style="font-size:1.4rem;font-weight:700">${nr.r.time}</div><div class="small">${esc(nr.r.label)}</div><div class="muted small">${nr.at.toDateString()===new Date().toDateString()?"היום":DAYN[nr.at.getDay()]+"' "+dmy(nr.at)}</div>`:`<div class="muted small">אין תזכורות פעילות</div>`}</div>
+    <div class="card"><div class="eyebrow">גלגול חוזים רבעוני</div><div style="font-size:1.4rem;font-weight:700"><span class="num">${rd<=0?"היום":rd}</span>${rd>0?` <span class="small muted">ימים</span>`:""}</div><div class="small"><span class="num">ES${rl.code}</span> → <span class="num">ES${rl.nextCode}</span> ב-${dmy(rl.roll)}</div><div class="muted small">פקיעה <span class="num">${rl.code}</span> ב-${dmy(rl.exp)}</div></div>
+  </div>
+  <div class="card">
+    <div class="row between"><h2>החודש</h2><button class="btn ghost small" data-go="journal" style="min-height:34px;padding:4px 10px">ליומן ←</button></div>
+    ${month.length?`<div class="grid3"><div class="stat"><span class="k">רווח נקי</span><span class="v num ${cls(st.total)}">${money(st.total)}</span></div><div class="stat"><span class="k">הצלחה</span><span class="v num">${Math.round(st.win*100)}%</span></div><div class="stat"><span class="k">לפי התוכנית</span><span class="v num">${Math.round(st.plan*100)}%</span></div></div>${curveSVG(st.curve,70)}`:`<div class="empty">עוד אין עסקאות החודש.</div>`}
+  </div>
+  <button class="btn primary block" data-act="new">+ רשום עסקה</button>`;
+}
+
+function curveSVG(c,h=110){
+  if(c.length<2)return"";const W=320,H=h,p=6;const mn=Math.min(0,...c),mx=Math.max(0,...c),rg=(mx-mn)||1;
+  const x=i=>p+(i/(c.length-1))*(W-2*p);
+  const y=v=>p+(1-(v-mn)/rg)*(H-2*p);
+  const pts=c.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+  const last=c[c.length-1],col=last>=0?"var(--up)":"var(--down)";
+  return`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="עקומת הון מצטברת"><line x1="${p}" x2="${W-p}" y1="${y(0)}" y2="${y(0)}" stroke="var(--line)" stroke-dasharray="3 4"/><polygon points="${x(0)},${y(0)} ${pts} ${x(c.length-1)},${y(0)}" fill="${col}" fill-opacity=".12"/><polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${x(c.length-1)}" cy="${y(last)}" r="4" fill="${col}"/></svg>`;
+}
+
+/* ---- calculator ---- */
+const calcState={sym:null,side:"L",pre:{}};
+function renderCalc(){
+  const s=S.settings;calcState.sym=calcState.sym||s.sym;
+  $("#v-calc").innerHTML=`
+  <div class="top"><div><div class="eyebrow">לפני כל כניסה</div><h1>גודל פוזיציה</h1></div></div>
+  <div class="card">
+    <label class="f">חוזה<select id="c-sym">${Object.entries(C).map(([k,v])=>`<option value="${k}" ${k===calcState.sym?"selected":""}>${k} · ${v.n}</option>`).join("")}</select></label>
+    <div class="muted small" id="c-spec"></div>
+    <div class="grid2"><label class="f">גודל חשבון ($)<input type="number" id="c-acc" inputmode="decimal" step="any" value="${s.account}"></label><label class="f">סיכון לעסקה (%)<input type="number" id="c-risk" inputmode="decimal" step="0.1" value="${s.riskPct}"></label></div>
+    <div class="grid3"><label class="f">כניסה<input type="number" id="c-entry" inputmode="decimal" step="any" placeholder="5900"></label><label class="f">סטופ<input type="number" id="c-stop" inputmode="decimal" step="any" placeholder="5895"></label><label class="f">יעד<input type="number" id="c-tgt" inputmode="decimal" step="any" placeholder="5910"></label></div>
+  </div>
+  <div class="card" id="c-out"></div>
+  <div class="card"><div class="row between"><h2>צ'קליסט לפני כניסה</h2><span class="chip" id="pre-count"></span></div>
+    <div id="pre">${PRETRADE.map((t,i)=>`<label class="check"><input type="checkbox" data-p="${i}" ${calcState.pre[i]?"checked":""}><span class="box"></span><span>${t}</span></label>`).join("")}</div>
+    <button class="btn primary block" id="c-log">רשום ביומן</button>
+  </div>`;
+  updCalc();
+}
+function readNum(id){const v=parseFloat($(id).value);return isFinite(v)?v:null}
+function updCalc(){
+  const sym=$("#c-sym").value;calcState.sym=sym;const c=C[sym],P=pv(sym);
+  $("#c-spec").innerHTML=`טיק <span class="num">${c.tick}</span> = <span class="num">${usd2.format(c.tv)}</span> · נקודה = <span class="num">${usd2.format(P)}</span>`;
+  const acc=readNum("#c-acc"),rp=readNum("#c-risk"),e=readNum("#c-entry"),st=readNum("#c-stop"),tg=readNum("#c-tgt");
+  const out=$("#c-out");const pc=PRETRADE.filter((_,i)=>calcState.pre[i]).length;
+  $("#pre-count").textContent=`${pc}/${PRETRADE.length}`;$("#pre-count").className="chip "+(pc===PRETRADE.length?"ok":"");
+  if(acc==null||rp==null||e==null||st==null||e===st){out.innerHTML=`<div class="result"><div class="eyebrow">חוזים</div><div class="big num">–</div><div class="muted small">הזן כניסה וסטופ. הכיוון נקבע לפי מיקום הסטופ.</div></div>`;return}
+  const side=st<e?"L":"S";calcState.side=side;
+  const allow=acc*rp/100,ticks=Math.abs(e-st)/c.tick,per=ticks*c.tv;
+  const fee=S.settings.commission*2;const qty=Math.floor(allow/(per+fee));const risk=qty*(per+fee);
+  let rr=null,rew=null,tTicks=null;
+  if(tg!=null&&((side==="L"&&tg>e)||(side==="S"&&tg<e))){tTicks=Math.abs(tg-e)/c.tick;rew=tTicks*c.tv*qty-fee*qty;rr=Math.abs(tg-e)/Math.abs(e-st)}
+  let note="";
+  if(qty===0){const mic=MICRO[sym];note=`<div class="warn">חוזה אחד מסכן ${moneyPlain(per+fee)}, יותר מהמותר (${moneyPlain(allow)}).${mic?` בחוזה ${mic} הסיכון לחוזה הוא ${moneyPlain(per/10+fee)}.`:" הקטן את הסטופ או וותר על העסקה."}</div>`}
+  else if(rr!=null&&rr<1.5)note=`<div class="warn">יחס סיכוי-סיכון ${rr.toFixed(2)} נמוך מ-1.5. שקול לוותר.</div>`;
+  else if(rr!=null)note=`<div class="okmsg">יחס סיכוי-סיכון ${rr.toFixed(2)}. עומד בכללים.</div>`;
+  out.innerHTML=`<div class="result"><div class="eyebrow">${side==="L"?"לונג":"שורט"} · ${sym}</div><div class="big num">${qty}</div><div class="muted small">חוזים</div></div>
+  <div class="grid3"><div class="stat"><span class="k">סיכון בפועל</span><span class="v num down">${moneyPlain(risk)}</span></div><div class="stat"><span class="k">מותר</span><span class="v num">${moneyPlain(allow)}</span></div><div class="stat"><span class="k">טיקים לסטופ</span><span class="v num">${N(ticks,0)}</span></div>
+  <div class="stat"><span class="k">רווח ביעד</span><span class="v num up">${rew!=null?moneyPlain(rew):"–"}</span></div><div class="stat"><span class="k">R:R</span><span class="v num">${rr!=null?"1:"+rr.toFixed(2):"–"}</span></div><div class="stat"><span class="k">עמלות</span><span class="v num">${usd2.format(fee*qty)}</span></div></div>${note}`;
+}
+
+/* ---- journal ---- */
+const jState={filter:"all"};
+function renderJournal(){
+  const all=sortedTrades();const f=jState.filter;
+  const ts=f==="all"?all:all.filter(t=>f==="month"?t.d.slice(0,7)===todayKey().slice(0,7):t.d>=daysAgo(6));
+  const st=stats(ts);const list=[...st.rows].reverse();
+  const hasSample=S.trades.some(t=>t.sample);
+  const bySet=groupBy(st.rows,t=>t.setup).sort((a,b)=>b.total-a.total);
+  const bySym=groupBy(st.rows,t=>t.sym).sort((a,b)=>b.total-a.total);
+  $("#v-journal").innerHTML=`
+  <div class="top"><div><div class="eyebrow">ביצועים</div><h1>יומן מסחר</h1></div><button class="btn primary" data-act="new">+ עסקה</button></div>
+  ${hasSample?`<div class="banner"><span>אלה עסקאות לדוגמה כדי שתראה איך היומן עובד.</span><button class="btn" data-act="clear-sample" style="min-height:36px;padding:6px 12px">מחק דוגמאות</button></div>`:""}
+  <div class="seg" role="group" aria-label="טווח">${[["week","7 ימים"],["month","החודש"],["all","הכל"]].map(([k,l])=>`<button data-f="${k}" aria-pressed="${f===k}">${l}</button>`).join("")}</div>
+  <div class="card">
+    <div class="row between"><div><div class="eyebrow">רווח נקי אחרי עמלות</div><div class="big num ${cls(st.total)}">${money(st.total)}</div></div><div class="muted small" style="text-align:left"><span class="num">${st.n}</span> עסקאות</div></div>
+    ${curveSVG(st.curve)}
+    <div class="grid3">
+      <div class="stat"><span class="k">אחוז הצלחה</span><span class="v num">${Math.round(st.win*100)}%</span></div>
+      <div class="stat"><span class="k">Profit factor</span><span class="v num">${st.pf===Infinity?"∞":N(st.pf)}</span></div>
+      <div class="stat"><span class="k">R ממוצע</span><span class="v num ${cls(st.avgR)}">${st.avgR==null?"–":N(st.avgR)}</span></div>
+      <div class="stat"><span class="k">תוחלת לעסקה</span><span class="v num ${cls(st.exp)}">${money(st.exp)}</span></div>
+      <div class="stat"><span class="k">ירידה מקסימלית</span><span class="v num down">${money(st.dd)}</span></div>
+      <div class="stat"><span class="k">לפי התוכנית</span><span class="v num">${Math.round(st.plan*100)}%</span></div>
+    </div>
+  </div>
+  <div class="card"><h2>מה היומן אומר עליך</h2><div>${insights(st).map(i=>`<div class="insight ${i.tone}"><b class="i"></b><span>${i.text}</span></div>`).join("")}</div></div>
+  <div class="card"><h2>עסקאות</h2><div>${list.length?list.map(r=>{const t=r.t;return`<button class="trade" data-edit="${t.id}"><span class="side ${t.side}">${t.side==="L"?"L":"S"}</span><span style="min-width:0"><b>${esc(t.sym)}</b> <span class="muted small"><span class="num">${t.qty}</span> חוזים · ${dmy(new Date(t.d+"T12:00"))}${t.time?" · <span class='num'>"+esc(t.time)+"</span>":""}</span><span class="tags">${t.setup?`<span class="tag">${esc(t.setup)}</span>`:""}${t.emo?`<span class="tag">${esc(t.emo)}</span>`:""}${t.plan?"":`<span class="tag" style="color:var(--down)">מחוץ לתוכנית</span>`}</span></span><span style="text-align:left"><span class="num ${cls(r.net)}" style="font-weight:700">${money(r.net)}</span><br><span class="muted small num">${r.r==null?"":(r.r>=0?"+":"")+r.r.toFixed(2)+"R"}</span></span></button>`}).join(""):`<div class="empty">אין עסקאות בטווח הזה. רשום את העסקה הראשונה וקבל סטטיסטיקה ותובנות.</div>`}</div></div>
+  ${bySet.length?`<div class="card"><h2>לפי סטאפ</h2><div class="tablewrap"><table><thead><tr><th>סטאפ</th><th>עסקאות</th><th>הצלחה</th><th>סה"כ</th></tr></thead><tbody>${bySet.map(g=>`<tr><td>${esc(g.k)}</td><td class="num">${g.n}</td><td class="num">${Math.round(g.win*100)}%</td><td class="num ${cls(g.total)}">${money(g.total)}</td></tr>`).join("")}</tbody></table></div>
+  <h2>לפי חוזה</h2><div class="tablewrap"><table><thead><tr><th>חוזה</th><th>עסקאות</th><th>הצלחה</th><th>סה"כ</th></tr></thead><tbody>${bySym.map(g=>`<tr><td class="num">${esc(g.k)}</td><td class="num">${g.n}</td><td class="num">${Math.round(g.win*100)}%</td><td class="num ${cls(g.total)}">${money(g.total)}</td></tr>`).join("")}</tbody></table></div></div>`:""}`;
+}
+
+/* ---- plan & reminders ---- */
+const isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+const standalone=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+function notifState(){if(!("Notification" in window))return"none";return Notification.permission}
+function renderPlan(){
+  const s=S.settings,ns=notifState();
+  $("#v-plan").innerHTML=`
+  <div class="top"><div><div class="eyebrow">משמעת</div><h1>תוכנית ותזכורות</h1></div></div>
+  ${isIOS&&!standalone?`<div class="banner"><span>באייפון: Safari ← שיתוף ← <b>הוסף למסך הבית</b>. כך האפליקציה נפתחת במסך מלא ושומרת את הנתונים שלך.</span></div>`:""}
+  <div class="card">
+    <div class="row between"><h2>תזכורות</h2><button class="btn" data-act="add-rem" style="min-height:36px;padding:6px 12px">+ הוסף</button></div>
+    <div>${S.reminders.map(r=>`<div class="rem" data-rid="${r.id}">
+      <div style="display:grid;gap:8px;min-width:0"><div class="row"><input type="time" value="${r.time}" data-k="time" style="width:auto;min-width:110px"><button class="x" data-act="del-rem" aria-label="מחק תזכורת">✕</button></div>
+      <input type="text" value="${esc(r.label)}" data-k="label" aria-label="נוסח התזכורת">
+      <div class="days">${DAYN.map((d,i)=>`<button data-day="${i}" aria-pressed="${r.days.includes(i)}" aria-label="יום ${d}">${d}</button>`).join("")}</div></div>
+      <label class="switch" aria-label="הפעל"><input type="checkbox" data-k="on" ${r.on?"checked":""}><span></span></label></div>`).join("")}</div>
+    <div class="grid2"><button class="btn primary" data-act="ics">הוסף ליומן האייפון</button><button class="btn" data-act="notif">${ns==="granted"?"התראות פעילות ✓":"הפעל התראות"}</button></div>
+    <p class="muted small" style="margin:0">הדרך האמינה ביותר באייפון: "הוסף ליומן האייפון" יוצר אירועים חוזרים עם התראה, כולל ימי גלגול החוזים. האייפון יזכיר לך גם כשהאפליקציה סגורה. ההתראות בתוך האפליקציה עובדות כשהיא פתוחה.</p>
+    <div id="ics-fallback" hidden><p class="small muted" style="margin:0">אם הקובץ לא נפתח, העתק את הטקסט, שמור כקובץ ‎.ics ופתח אותו:</p><code class="ics" id="ics-text"></code><button class="btn" data-act="copy-ics">העתק</button></div>
+  </div>
+  <div class="card">
+    <div class="row between"><h2>חוקי המסחר שלי</h2></div>
+    <div>${S.rules.map((r,i)=>`<div class="rule"><span class="n">${i+1}</span><p>${esc(r)}</p><button class="x" data-delrule="${i}" aria-label="מחק חוק">✕</button></div>`).join("")}</div>
+    <form class="row" id="rule-form" style="flex-wrap:nowrap"><input type="text" id="rule-in" placeholder="חוק חדש…" aria-label="חוק חדש"><button class="btn" type="submit">הוסף</button></form>
+  </div>
+  <div class="card">
+    <h2>גלגולי חוזים קרובים</h2>
+    <div class="tablewrap"><table><thead><tr><th>חוזה נוכחי</th><th>יום גלגול</th><th>פקיעה</th><th>עוד</th></tr></thead><tbody>${rolls(4).map(r=>`<tr><td class="num">ES${r.code} → ES${r.nextCode}</td><td>${dmy(r.roll)}</td><td>${dmy(r.exp)}</td><td class="num">${Math.max(0,dayDiff(r.roll))}d</td></tr>`).join("")}</tbody></table></div>
+    <p class="muted small" style="margin:0">חוזי המדדים (ES, NQ, YM, RTY והמיקרו) פוקעים ביום שישי השלישי של מרץ, יוני, ספטמבר ודצמבר. הנזילות עוברת לחוזה הבא כשמונה ימים לפני.</p>
+  </div>
+  <div class="card">
+    <h2>הגדרות סיכון</h2>
+    <div class="grid2">
+      <label class="f">גודל חשבון ($)<input type="number" data-s="account" inputmode="decimal" value="${s.account}"></label>
+      <label class="f">סיכון לעסקה (%)<input type="number" data-s="riskPct" inputmode="decimal" step="0.1" value="${s.riskPct}"></label>
+      <label class="f">הפסד יומי מקסימלי ($)<input type="number" data-s="maxDaily" inputmode="decimal" value="${s.maxDaily}"></label>
+      <label class="f">מקסימום עסקאות ביום<input type="number" data-s="maxTrades" inputmode="numeric" value="${s.maxTrades}"></label>
+      <label class="f">עמלה לחוזה לכל צד ($)<input type="number" data-s="commission" inputmode="decimal" step="0.01" value="${s.commission}"></label>
+      <label class="f">חוזה ברירת מחדל<select data-s="sym">${Object.keys(C).map(k=>`<option ${k===s.sym?"selected":""}>${k}</option>`).join("")}</select></label>
+    </div>
+  </div>
+  <div class="card">
+    <details><summary>גיבוי ושחזור</summary>
+      <div style="display:grid;gap:10px;margin-top:12px">
+        <p class="muted small" style="margin:0">הנתונים נשמרים רק במכשיר הזה. גבה מדי פעם: העתק את הגיבוי ושמור אותו בפתקים.</p>
+        <div class="grid2"><button class="btn" data-act="export">העתק גיבוי</button><button class="btn" data-act="import">שחזר מגיבוי</button></div>
+        <textarea id="backup" placeholder="הדבק כאן גיבוי ולחץ על שחזר" aria-label="גיבוי"></textarea>
+        <button class="btn danger" data-act="reset">${pendingReset?"לחץ שוב לאישור: מחק הכל":"מחק את כל הנתונים"}</button>
+      </div></details>
+  </div>
+  <p class="muted small" style="text-align:center;margin:4px 0 0">טיק הוא כלי לניהול משמעת ותיעוד. אינו ייעוץ השקעות. מסחר בחוזים עתידיים כרוך במינוף ובסיכון להפסד גבוה מההשקעה.</p>`;
+}
+let pendingReset=false;
+
+/* ---------- trade sheet ---------- */
+let sheetT=null,delArm=false;
+function openSheet(t){
+  delArm=false;
+  const isNew=!t;const now=new Date();
+  sheetT=t?{...t}:{id:uid(),d:todayKey(),time:now.toTimeString().slice(0,5),sym:calcState.sym||S.settings.sym,side:"L",qty:1,entry:"",exit:"",stop:"",setup:"",emo:"ממוקד",plan:true,note:""};
+  const sets=[...new Set(S.trades.map(x=>x.setup).filter(Boolean))];
+  $("#sheet").innerHTML=`<div class="grab"></div>
+  <div class="row between"><h2 style="font-size:1.3rem">${isNew?"עסקה חדשה":"עריכת עסקה"}</h2><button class="x" data-act="close" aria-label="סגור">✕</button></div>
+  <form id="tform" style="display:grid;gap:12px">
+  <div class="seg" role="group" aria-label="כיוון"><button type="button" class="L" data-side="L" aria-pressed="${sheetT.side==="L"}">לונג</button><button type="button" class="S" data-side="S" aria-pressed="${sheetT.side==="S"}">שורט</button></div>
+  <div class="grid2"><label class="f">חוזה<select id="t-sym">${Object.keys(C).map(k=>`<option ${k===sheetT.sym?"selected":""}>${k}</option>`).join("")}</select></label><label class="f">כמות<input type="number" id="t-qty" inputmode="numeric" min="1" step="1" value="${sheetT.qty}" required></label></div>
+  <div class="grid2"><label class="f">תאריך<input type="date" id="t-d" value="${sheetT.d}" required></label><label class="f">שעה<input type="time" id="t-time" value="${sheetT.time||""}"></label></div>
+  <div class="grid3"><label class="f">כניסה<input type="number" id="t-entry" inputmode="decimal" step="any" value="${sheetT.entry}" required></label><label class="f">יציאה<input type="number" id="t-exit" inputmode="decimal" step="any" value="${sheetT.exit}" required></label><label class="f">סטופ<input type="number" id="t-stop" inputmode="decimal" step="any" value="${sheetT.stop??""}"></label></div>
+  <div id="t-prev" class="stat"></div>
+  <label class="f">סטאפ<input type="text" id="t-setup" list="setups" value="${esc(sheetT.setup)}" placeholder="למשל: פריצת טווח פתיחה"><datalist id="setups">${sets.map(x=>`<option value="${esc(x)}">`).join("")}</datalist></label>
+  <label class="f">מצב רגשי<select id="t-emo">${EMO.map(e=>`<option ${e===sheetT.emo?"selected":""}>${e}</option>`).join("")}</select></label>
+  <label class="check" style="border:0"><input type="checkbox" id="t-plan" ${sheetT.plan?"checked":""}><span class="box"></span><span>העסקה הייתה לפי התוכנית</span></label>
+  <label class="f">מה למדתי<textarea id="t-note" placeholder="משפט אחד שיעזור לך מחר">${esc(sheetT.note)}</textarea></label>
+  <button class="btn primary block" type="submit">שמור</button>
+  ${isNew?"":`<button class="btn danger block" type="button" data-act="del-trade">מחק עסקה</button>`}
+  </form>`;
+  $("#sheetBg").hidden=false;document.body.style.overflow="hidden";sheetPrev();
+}
+function sheetRead(){const g=id=>$(id).value;return{...sheetT,sym:g("#t-sym"),qty:Math.max(1,parseInt(g("#t-qty"))||1),time:g("#t-time"),d:g("#t-d"),entry:parseFloat(g("#t-entry")),exit:parseFloat(g("#t-exit")),stop:g("#t-stop")===""?null:parseFloat(g("#t-stop")),setup:g("#t-setup").trim(),emo:g("#t-emo"),plan:$("#t-plan").checked,note:g("#t-note").trim()}}
+function sheetPrev(){const t=sheetRead();const el=$("#t-prev");if(!isFinite(t.entry)||!isFinite(t.exit)){el.innerHTML=`<span class="k">תוצאה</span><span class="v muted">הזן כניסה ויציאה</span>`;return}t.fee=S.settings.commission*2*t.qty;const r=calcT(t);el.innerHTML=`<span class="k">תוצאה נטו (עמלות <span class="num">${usd2.format(t.fee)}</span>)</span><span class="v num ${cls(r.net)}">${money(r.net,1)}${r.r!=null?` · ${(r.r>=0?"+":"")+r.r.toFixed(2)}R`:""}</span>`}
+function closeSheet(){$("#sheetBg").hidden=true;document.body.style.overflow="";sheetT=null}
+
+/* ---------- reminders engine ---------- */
+const fired={};
+function toast(msg,ms=6000){const t=$("#toast");t.innerHTML=`<span><b>טיק</b> · ${esc(msg)}</span><button class="x" aria-label="סגור">✕</button>`;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>t.hidden=true,ms)}
+async function notify(msg){
+  toast(msg,15000);
+  try{if(notifState()==="granted"){const reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();if(reg)reg.showNotification("טיק",{body:msg,icon:"icon-192.png",tag:"tick"});else new Notification("טיק",{body:msg})}}catch(e){}
+}
+function tickReminders(){const now=new Date(),hm=now.toTimeString().slice(0,5),d=now.getDay(),k=todayKey();S.reminders.forEach(r=>{if(!r.on||!r.days.includes(d)||r.time!==hm)return;const key=r.id+k+hm;if(fired[key])return;fired[key]=1;notify(r.label)})}
+
+function buildICS(){
+  const p=n=>String(n).padStart(2,"0");const BY=["SU","MO","TU","WE","TH","FR","SA"];
+  const stamp=new Date().toISOString().replace(/[-:]/g,"").slice(0,15)+"Z";
+  const escI=s=>String(s).replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,").replace(/\n/g,"\\n");
+  const L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Tick//Futures Journal//HE","CALSCALE:GREGORIAN","METHOD:PUBLISH","X-WR-CALNAME:טיק מסחר"];
+  S.reminders.filter(r=>r.on&&r.days.length).forEach(r=>{
+    const d=new Date();for(let i=0;i<7;i++){if(r.days.includes(d.getDay()))break;d.setDate(d.getDate()+1)}
+    const[h,m]=r.time.split(":");
+    L.push("BEGIN:VEVENT","UID:"+r.id+"@tick","DTSTAMP:"+stamp,`DTSTART:${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}T${p(h)}${p(m)}00`,"DURATION:PT10M","RRULE:FREQ=WEEKLY;BYDAY="+r.days.map(x=>BY[x]).join(","),"SUMMARY:"+escI("טיק: "+r.label),"BEGIN:VALARM","ACTION:DISPLAY","TRIGGER:PT0M","DESCRIPTION:"+escI(r.label),"END:VALARM","END:VEVENT");
+  });
+  rolls(4).forEach(r=>{const d=r.roll;const ds=`${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}`;const e=new Date(d);e.setDate(d.getDate()+1);
+    L.push("BEGIN:VEVENT","UID:roll-"+ds+"@tick","DTSTAMP:"+stamp,"DTSTART;VALUE=DATE:"+ds,`DTEND;VALUE=DATE:${e.getFullYear()}${p(e.getMonth()+1)}${p(e.getDate())}`,"SUMMARY:"+escI(`גלגול חוזים: ES${r.code} → ES${r.nextCode}`),"DESCRIPTION:"+escI("עבור לחוזה הבא בכל חוזי המדדים. פקיעה ב-"+dmy(r.exp)),"BEGIN:VALARM","ACTION:DISPLAY","TRIGGER:-PT15H","DESCRIPTION:"+escI("מחר גלגול חוזים"),"END:VALARM","END:VEVENT")});
+  L.push("END:VCALENDAR");return L.join("\r\n");
+}
+
+/* ---------- routing & events ---------- */
+const VIEWS=["today","calc","journal","plan"];
+function show(v){if(!VIEWS.includes(v))v="today";$$(".view").forEach(s=>s.hidden=s.dataset.view!==v);$$(".tab").forEach(b=>b.dataset.go===v?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current"));
+  ({today:renderToday,calc:renderCalc,journal:renderJournal,plan:renderPlan})[v]();try{if(location.hash.slice(1)!==v)history.replaceState(null,"","#"+v)}catch(e){}window.scrollTo(0,0);cur=v}
+let cur="today";
+function rerender(){show(cur)}
+
+document.addEventListener("click",async e=>{
+  const go=e.target.closest("[data-go]");if(go){show(go.dataset.go);return}
+  if(e.target.closest("#toast .x")){$("#toast").hidden=true;return}
+  const a=e.target.closest("[data-act]");const act=a&&a.dataset.act;
+  if(e.target===$("#sheetBg")){closeSheet();return}
+  if(act==="new"){openSheet();return}
+  if(act==="close"){closeSheet();return}
+  if(act==="del-trade"){if(!delArm){delArm=true;a.textContent="לחץ שוב כדי למחוק";return}S.trades=S.trades.filter(t=>t.id!==sheetT.id);save();closeSheet();rerender();toast("העסקה נמחקה",2500);return}
+  if(act==="clear-sample"){S.trades=S.trades.filter(t=>!t.sample);save();rerender();toast("הדוגמאות נמחקו. היומן שלך מוכן.",3000);return}
+  const ed=e.target.closest("[data-edit]");if(ed){openSheet(S.trades.find(t=>t.id===ed.dataset.edit));return}
+  const fb=e.target.closest("[data-f]");if(fb){jState.filter=fb.dataset.f;renderJournal();return}
+  const sd=e.target.closest("[data-side]");if(sd){$$("[data-side]").forEach(b=>b.setAttribute("aria-pressed",b===sd));sheetT.side=sd.dataset.side;sheetPrev();return}
+  const day=e.target.closest("[data-day]");if(day){const r=S.reminders.find(x=>x.id===day.closest("[data-rid]").dataset.rid);const i=+day.dataset.day;r.days=r.days.includes(i)?r.days.filter(x=>x!==i):[...r.days,i].sort();day.setAttribute("aria-pressed",r.days.includes(i));save();return}
+  if(act==="del-rem"){S.reminders=S.reminders.filter(x=>x.id!==a.closest("[data-rid]").dataset.rid);save();renderPlan();return}
+  if(act==="add-rem"){S.reminders.push({id:uid(),time:"09:00",days:[1,2,3,4,5],label:"תזכורת חדשה",on:true});save();renderPlan();return}
+  const dr=e.target.closest("[data-delrule]");if(dr){S.rules.splice(+dr.dataset.delrule,1);save();renderPlan();return}
+  if(act==="ics"){const ics=buildICS();$("#ics-text").textContent=ics;$("#ics-fallback").hidden=false;
+    try{const url="data:text/calendar;charset=utf-8,"+encodeURIComponent(ics);const l=document.createElement("a");l.href=isIOS?url:URL.createObjectURL(new Blob([ics],{type:"text/calendar"}));if(!isIOS)l.download="tick-reminders.ics";document.body.appendChild(l);l.click();l.remove()}catch(err){}return}
+  if(act==="copy-ics"){copy($("#ics-text").textContent);return}
+  if(act==="notif"){if(notifState()==="none"){toast(isIOS?"באייפון התראות זמינות רק אחרי 'הוסף למסך הבית'. בינתיים השתמש בהוספה ליומן.":"הדפדפן הזה לא תומך בהתראות.",8000);return}
+    try{const p=await Notification.requestPermission();if(p==="granted")notify("התראות פעילות. כך תיראה תזכורת.");else toast("ההתראות חסומות. אפשר להפעיל אותן בהגדרות המכשיר.")}catch(err){toast("לא ניתן להפעיל התראות כאן. השתמש בהוספה ליומן.")}renderPlan();return}
+  if(act==="export"){copy(JSON.stringify(S));$("#backup").value=JSON.stringify(S);return}
+  if(act==="import"){try{const s=JSON.parse($("#backup").value);if(s.v!==1||!Array.isArray(s.trades))throw 0;S=s;save();toast("הגיבוי שוחזר",2500);rerender()}catch(err){toast("הטקסט שהודבק אינו גיבוי תקין של טיק.")}return}
+  if(act==="reset"){if(!pendingReset){pendingReset=true;renderPlan();$("details").open=true;return}pendingReset=false;try{localStorage.removeItem(LS)}catch(err){}S=defaults();S.trades=[];save();toast("כל הנתונים נמחקו",2500);show("today");return}
+});
+async function copy(text){try{await navigator.clipboard.writeText(text);toast("הועתק",2000)}catch(e){toast("סמן את הטקסט והעתק ידנית",3000)}}
+
+document.addEventListener("change",e=>{
+  const t=e.target;
+  if(t.dataset.r){S.routine.done[t.dataset.r]=t.checked;const all=ROUTINE.every(r=>S.routine.done[r.id]);S.days[todayKey()]=all||undefined;if(!all)delete S.days[todayKey()];save();renderToday();if(all)toast("שגרת ההכנה הושלמה. עכשיו רק הסטאפים שלך.",3500);return}
+  if(t.dataset.p!=null){calcState.pre[t.dataset.p]=t.checked;updCalc();return}
+  if(t.dataset.s){const k=t.dataset.s;S.settings[k]=k==="sym"?t.value:(parseFloat(t.value)||0);save();return}
+  const rem=t.closest("[data-rid]");if(rem&&t.dataset.k){const r=S.reminders.find(x=>x.id===rem.dataset.rid);r[t.dataset.k]=t.type==="checkbox"?t.checked:t.value;save();return}
+  if(t.id==="c-sym"){updCalc();return}
+  if(t.closest("#tform"))sheetPrev();
+});
+document.addEventListener("input",e=>{const t=e.target;if(t.closest("#v-calc")&&t.id&&t.id.startsWith("c-"))updCalc();else if(t.closest("#tform"))sheetPrev()});
+document.addEventListener("submit",e=>{
+  e.preventDefault();
+  if(e.target.id==="rule-form"){const v=$("#rule-in").value.trim();if(v){S.rules.push(v);save();renderPlan()}return}
+  if(e.target.id==="tform"){const t=sheetRead();if(!isFinite(t.entry)||!isFinite(t.exit)){toast("חסר מחיר כניסה או יציאה.",3000);return}t.fee=+(S.settings.commission*2*t.qty).toFixed(2);delete t.sample;
+    const i=S.trades.findIndex(x=>x.id===t.id);if(i>=0)S.trades[i]=t;else S.trades.push(t);save();closeSheet();
+    const tt=todayTrades(),pnl=sum(tt.map(x=>calcT(x).net));
+    if(t.d===todayKey()&&pnl<=-S.settings.maxDaily)toast("הגעת להפסד היומי. סגור את הפלטפורמה להיום.",10000);
+    else if(t.d===todayKey()&&tt.length>=S.settings.maxTrades)toast("זו העסקה האחרונה שלך היום לפי הכללים.",6000);
+    else toast(calcT(t).net>=0?"נשמר. עסקה טובה.":"נשמר. הפסד לפי התוכנית הוא חלק מהעבודה.",3000);
+    rerender()}
+});
+// log from calculator
+document.addEventListener("click",e=>{if(e.target.id!=="c-log")return;const e1=readNum("#c-entry"),s1=readNum("#c-stop");openSheet();if(e1!=null)$("#t-entry").value=e1;if(s1!=null)$("#t-stop").value=s1;$("#t-sym").value=calcState.sym;const q=parseInt($("#c-out .big")?.textContent);if(q>0)$("#t-qty").value=q;$$("[data-side]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.side===calcState.side));sheetT.side=calcState.side;$("#t-plan").checked=PRETRADE.every((_,i)=>calcState.pre[i]);sheetPrev()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#sheetBg").hidden)closeSheet()});
+addEventListener("hashchange",()=>{const v=location.hash.slice(1);if(v&&v!==cur)show(v)});
+
+show(location.hash.slice(1)||"today");
+setInterval(()=>{if(S.routine.date!==todayKey()){S.routine={date:todayKey(),done:{}};save()}tickReminders();if(cur==="today"&&$("#sheetBg").hidden&&!document.activeElement.closest?.("#v-today"))renderToday()},20000);
+tickReminders();
+try{if("serviceWorker" in navigator&&document.querySelector('link[rel="manifest"]'))navigator.serviceWorker.register("sw.js")}catch(e){}
+})();
+</script>
