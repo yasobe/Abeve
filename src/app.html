@@ -290,7 +290,14 @@ function migrate(){
   S.mig2=1;try{localStorage.setItem("tick_v1",JSON.stringify(S))}catch(e){}
 }
 migrate();
-function save(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}}
+const PROFILE_KEYS=["settings","rules","reminders","watch","days","routine"];
+const profileOf=st=>JSON.stringify(PROFILE_KEYS.map(k=>st[k]??null));
+let lastPH=profileOf(S);
+function save(){
+  const ph=profileOf(S);if(ph!==lastPH){lastPH=ph;S.pu=Date.now()}
+  try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}
+  if(typeof scheduleSync==="function")scheduleSync();
+}
 if(S.routine.date!==todayKey())S.routine={date:todayKey(),done:{}};
 
 /* ---------- helpers ---------- */
@@ -430,6 +437,7 @@ const INFO={
   holidays:["חגים בבורסה",["בחגים האמריקאיים הבורסה סגורה או פועלת חלקית, גם אם אצלך זה יום רגיל.","<b>סגור לגמרי:</b> אין מסחר בכלל, גם לא בגלובקס.","<b>אין מסחר רגיל:</b> גלובקס פתוח רק עד הצהריים בשיקגו, עם מעט מאוד מחזור. עדיף לא לסחור.","<b>סגירה מוקדמת:</b> ניו יורק נסגרת ב-12:15 שעון שיקגו (20:15 בישראל ברוב השנה).","החגים מחושבים אוטומטית לפי הכללים של CME. כדאי לוודא באתר של CME לפני חגים חריגים (למשל יום אבל לאומי)."]],
   quotes:["מחירים חיים",["המחירים מגיעים מ-TradingView ומתעדכנים בזמן אמת או בעיכוב קצר.","<b>חשוב:</b> אלה מחירי המדד עצמו (למשל S&P 500), לא של החוזה העתידי. ההפרש בין חוזה למדד נקרא בסיס, והוא בדרך כלל כמה נקודות.","ראסל, VIX, אג\"ח והדולר מוצגים דרך קרנות סל שעוקבות אחריהם (IWM, VIXY, IEF, UUP), כי TradingView לא מאפשר להציג את המדדים עצמם מחוץ לאתר שלו. הכיוון זהה, אבל המספר שונה. קרן האג\"ח IEF עולה כשהתשואה יורדת.","לחיצה על חוזה ברשימה למטה פותחת את הגרף של החוזה העתידי האמיתי ב-TradingView."]],
   econ:["לוח כלכלי",["פרסומים כלכליים בארה\"ב שמזיזים את השוק: אינפלציה (CPI), משרות (NFP), החלטות ריבית (FOMC) ועוד.","השעות מוצגות לפי השעון שלך. מומלץ לא להחזיק עסקה חדשה בדקות של פרסום חשוב, כי המחיר יכול לקפוץ ולדלג על הסטופ."]],
+  cloud:["סנכרון בענן",["כשמתחברים, כל עסקה, הגדרה וצילום גרף נשמרים אוטומטית בענן (Supabase). אם הטלפון אובד, מתחברים במכשיר חדש וכל היומן חוזר.","אפשר להתחבר מכמה מכשירים, למשל אייפון ואייפד, והם יסתנכרנו ביניהם.","כל משתמש רואה רק את הנתונים שלו. הסיסמה לא נשמרת באפליקציה.","בלי חיבור לאינטרנט הכל ממשיך לעבוד, והשינויים יעלו לענן כשהחיבור יחזור."]],
   stock:["מחשבון למניות",["כמו בחוזים: מזינים כניסה וסטופ, והמחשבון אומר כמה מניות לקנות כך שאם הסטופ ייפגע תפסיד רק את אחוז הסיכון שבחרת.","<span class='ex'>חשבון $25,000, סיכון 1% = $250. כניסה $25, סטופ $24 → סיכון $1 למניה → 248 מניות (אחרי עמלות).</span>","אם החשבון לא מספיק לקנות את כל הכמות, המחשבון מגביל לפי הכסף שיש לך, בלי מרגין."]],
   stockfee:["עמלה במניות",["כמה הברוקר גובה על כל פקודה במניות, בקנייה ושוב במכירה. האפליקציה מכפילה ב-2 לכל עסקה.","בהרבה ברוקרים זה $0 עד $2 לפקודה. אם אצלך העמלה היא לפי מניה, הכנס סכום משוער לפקודה."]],
   watch:["הרשימה שלי",["מוסיפים כל מניה, קרן או מטבע לפי הסימול שלה בבורסה, למשל BMNR, NVDA, SPY או BTCUSD. המחירים מתעדכנים לבד.","לחיצה על סימול מציגה אותו בגרף למטה. ✕ מסיר אותו מהרשימה.","אם סימול לא נמצא, הוסף לפניו את שם הבורסה: NASDAQ:AAPL, NYSE:F, AMEX:BMNR.","שים לב: היומן והמחשבון בנויים לחוזים עתידיים, לא למניות."]],
@@ -509,7 +517,7 @@ function renderToday(){
 }
 
 function backupNudge(){
-  const real=S.trades.filter(t=>!t.sample).length;if(!real)return"";
+  const real=S.trades.filter(t=>!t.sample).length;if(!real||cloud.user)return"";
   const days=S.lastBackup?Math.round((new Date(todayKey())-new Date(S.lastBackup))/864e5):null;
   if(days!=null&&days<7)return"";
   return`<div class="banner"><span>${days==null?"עוד לא גיבית את היומן.":`עברו ${days} ימים מהגיבוי האחרון.`} הנתונים שמורים רק בטלפון.</span><button class="btn" data-act="backup-file" style="min-height:36px;padding:6px 12px">גבה עכשיו</button></div>`;
@@ -702,6 +710,7 @@ function renderPlan(){
   $("#v-plan").innerHTML=`
   <div class="top"><div><div class="eyebrow">משמעת</div><h1>תוכנית ותזכורות</h1></div></div>
   ${isIOS&&!standalone?`<div class="banner"><span>באייפון: Safari ← שיתוף ← <b>הוסף למסך הבית</b>. כך האפליקציה נפתחת במסך מלא ושומרת את הנתונים שלך.</span></div>`:""}
+  ${cloudCard()}
   <div class="card">
     <div class="row between"><h2>תזכורות ${I("reminders")}</h2><button class="btn" data-act="add-rem" style="min-height:36px;padding:6px 12px">+ הוסף</button></div>
     <div>${S.reminders.map(r=>`<div class="rem" data-rid="${r.id}">
@@ -743,7 +752,7 @@ function renderPlan(){
   <div class="card">
     <details><summary>גיבוי ושחזור</summary>
       <div style="display:grid;gap:10px;margin-top:12px">
-        <p class="muted small" style="margin:0">הנתונים נשמרים רק במכשיר הזה. גבה פעם בשבוע.</p>
+        <p class="muted small" style="margin:0">${cloud.user?"הנתונים מסונכרנים לענן. קובץ גיבוי הוא שכבת הגנה נוספת.":"הנתונים נשמרים רק במכשיר הזה. גבה פעם בשבוע, או התחבר לסנכרון בענן."}</p>
         <div class="grid2"><button class="btn primary" data-act="backup-file">שמור קובץ גיבוי מלא</button><label class="btn filebtn">שחזר מקובץ<input type="file" id="restore-file" accept=".json,application/json"></label></div>
         <p class="muted small" style="margin:0">הקובץ כולל גם את צילומי הגרפים. באייפון בחר "שמור בקבצים" ← iCloud Drive, וכך הגיבוי נשמר בענן שלך. גיבוי אחרון: <b>${S.lastBackup?dmy(new Date(S.lastBackup+"T12:00")):"עוד לא"}</b></p>
         <div class="grid2"><button class="btn" data-act="export">העתק גיבוי כטקסט</button><button class="btn" data-act="import">שחזר מטקסט</button></div>
@@ -839,7 +848,7 @@ function buildICS(){
 /* ---------- routing & events ---------- */
 const VIEWS=["today","market","calc","journal","plan"];
 function show(v){if(!VIEWS.includes(v))v="today";$$(".view").forEach(s=>s.hidden=s.dataset.view!==v);$$(".tab").forEach(b=>b.dataset.go===v?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current"));
-  ({today:renderToday,market:renderMarket,calc:renderCalc,journal:renderJournal,plan:renderPlan})[v]();try{if(location.hash.slice(1)!==v)history.replaceState(null,"","#"+v)}catch(e){}window.scrollTo(0,0);cur=v}
+  ({today:renderToday,market:renderMarket,calc:renderCalc,journal:renderJournal,plan:renderPlan})[v]();try{if(location.hash.slice(1)!==v&&!location.hash.includes("="))history.replaceState(null,"","#"+v)}catch(e){}window.scrollTo(0,0);cur=v}
 let cur="today";
 function rerender(){show(cur)}
 
@@ -859,7 +868,7 @@ document.addEventListener("click",async e=>{
   const uw=e.target.closest("[data-unwatch]");if(uw){S.watch=watchList().filter(x=>x!==uw.dataset.unwatch);save();$("#watch-chips").innerHTML=watchChips();buildWatchWidget();return}
   const cb=e.target.closest("[data-cal]");if(cb){jState.cal=Math.min(0,jState.cal+ +cb.dataset.cal);renderJournal();return}
   if(act==="close"){closeSheet();return}
-  if(act==="del-trade"){if(!delArm){delArm=true;a.textContent="לחץ שוב כדי למחוק";return}S.trades=S.trades.filter(t=>t.id!==sheetT.id);DB.del(sheetT.id).catch(()=>{});save();closeSheet();rerender();toast("העסקה נמחקה",2500);return}
+  if(act==="del-trade"){if(!delArm){delArm=true;a.textContent="לחץ שוב כדי למחוק";return}S.trades=S.trades.filter(t=>t.id!==sheetT.id);DB.del(sheetT.id).catch(()=>{});if(!sheetT.sample){S.tomb??={};S.tomb[sheetT.id]=Date.now()}save();closeSheet();rerender();toast("העסקה נמחקה",2500);return}
   if(act==="clear-sample"){S.trades=S.trades.filter(t=>!t.sample);save();rerender();toast("הדוגמאות נמחקו. היומן שלך מוכן.",3000);return}
   const ed=e.target.closest("[data-edit]");if(ed){openSheet(S.trades.find(t=>t.id===ed.dataset.edit));return}
   const fb=e.target.closest("[data-f]");if(fb){jState.filter=fb.dataset.f;renderJournal();return}
@@ -877,8 +886,12 @@ document.addEventListener("click",async e=>{
     try{const p=await Notification.requestPermission();if(p==="granted")notify("התראות פעילות. כך תיראה תזכורת.");else toast("ההתראות חסומות. אפשר להפעיל אותן בהגדרות המכשיר.")}catch(err){toast("לא ניתן להפעיל התראות כאן. השתמש בהוספה ליומן.")}renderPlan();return}
   if(act==="export"){S.lastBackup=todayKey();save();copy(JSON.stringify(S),"הגיבוי הועתק (בלי צילומי גרפים). הדבק אותו בפתק.");$("#backup").value=JSON.stringify(S);return}
   if(act==="backup-file"){backupFile();return}
-  if(act==="import"){try{const s=JSON.parse($("#backup").value);if(s.v!==1||!Array.isArray(s.trades))throw 0;S=s;migrate();save();toast("הגיבוי שוחזר",2500);rerender()}catch(err){toast("הטקסט שהודבק אינו גיבוי תקין של טיק.")}return}
-  if(act==="reset"){if(!pendingReset){pendingReset=true;renderPlan();$("details").open=true;return}pendingReset=false;try{localStorage.removeItem(LS)}catch(err){}S=defaults();S.trades=[];save();toast("כל הנתונים נמחקו",2500);show("today");return}
+  if(act==="cloud-in"||act==="cloud-up"){cloudAuth(act==="cloud-up");return}
+  if(act==="cloud-out"){cloudSignOut(false);return}
+  if(act==="cloud-sync"){syncNow(true);return}
+  if(act==="cloud-reset"){cloudReset();return}
+  if(act==="import"){try{const s=JSON.parse($("#backup").value);if(s.v!==1||!Array.isArray(s.trades))throw 0;S=s;migrate();markAllDirty();save();toast("הגיבוי שוחזר",2500);rerender()}catch(err){toast("הטקסט שהודבק אינו גיבוי תקין של טיק.")}return}
+  if(act==="reset"){if(!pendingReset){pendingReset=true;renderPlan();$("details").open=true;return}pendingReset=false;cloudSignOut(true);try{localStorage.removeItem(LS)}catch(err){}S=defaults();S.trades=[];migrate();lastPH=profileOf(S);save();toast("כל הנתונים נמחקו",2500);show("today");return}
 });
 function blobToDataURL(b){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(b)})}
 function dataURLToBlob(u){const[h,d]=u.split(",");const bin=atob(d);const a=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);return new Blob([a],{type:(h.match(/data:([^;]+)/)||[])[1]||"image/jpeg"})}
@@ -895,7 +908,7 @@ async function backupFile(){
 async function restoreFile(f){
   try{const s=JSON.parse(await f.text());if(s.v!==1||!Array.isArray(s.trades))throw 0;const shots=s.shots||{};delete s.shots;
     for(const[id,u]of Object.entries(shots)){try{await DB.put(id,dataURLToBlob(u))}catch(e){}}
-    S=s;migrate();save();toast(`הגיבוי שוחזר: ${S.trades.length} עסקאות${Object.keys(shots).length?`, ${Object.keys(shots).length} צילומים`:""}`,4000);rerender()}
+    S=s;migrate();markAllDirty();save();toast(`הגיבוי שוחזר: ${S.trades.length} עסקאות${Object.keys(shots).length?`, ${Object.keys(shots).length} צילומים`:""}`,4000);rerender()}
   catch(e){toast("הקובץ הזה אינו גיבוי תקין של טיק.")}
 }
 async function copy(text,msg){try{await navigator.clipboard.writeText(text);toast(msg||"הועתק",msg?5000:2000)}catch(e){toast("סמן את הטקסט והעתק ידנית",3000)}}
@@ -919,7 +932,9 @@ document.addEventListener("submit",e=>{
   if(e.target.id==="tform"){const t=sheetRead();
     if(t.exits.length){const q=sum(t.exits.map(x=>x.q));if(q!==t.qty){toast(`סך הכמויות ביציאות (${q}) שונה מהכמות (${t.qty}).`,4000);return}t.exit=+(sum(t.exits.map(x=>x.p*x.q))/q).toFixed(6)}else delete t.exits;
     if(!isFinite(t.entry)||!isFinite(t.exit)){toast("חסר מחיר כניסה או יציאה.",3000);return}
-    if(shotState.blob){t.shot=true;DB.put(t.id,shotState.blob).catch(()=>toast("לא הצלחתי לשמור את הצילום. ייתכן שאין מקום במכשיר."))}else if(shotState.remove){t.shot=false;DB.del(t.id).catch(()=>{})}if(t.sym==="?"){toast("חסר סימול של המניה.",3000);return}t.fee=+feeFor(t.sym,t.qty).toFixed(2);delete t.sample;
+    if(t.sym==="?"){toast("חסר סימול של המניה.",3000);return}
+    t.u=Date.now();S.sync??={};S.sync.up??={};
+    if(shotState.blob){t.shot=true;delete S.sync.up[t.id];DB.put(t.id,shotState.blob).then(()=>scheduleSync()).catch(()=>toast("לא הצלחתי לשמור את הצילום. ייתכן שאין מקום במכשיר."))}else if(shotState.remove){t.shot=false;DB.del(t.id).catch(()=>{})}t.fee=+feeFor(t.sym,t.qty).toFixed(2);delete t.sample;
     const i=S.trades.findIndex(x=>x.id===t.id);if(i>=0)S.trades[i]=t;else S.trades.push(t);save();closeSheet();
     const tt=todayTrades(),pnl=sum(tt.map(x=>calcT(x).net));
     if(t.d===todayKey()&&pnl<=-S.settings.maxDaily)toast("הגעת להפסד היומי. סגור את הפלטפורמה להיום.",10000);
@@ -930,9 +945,124 @@ document.addEventListener("submit",e=>{
 // log from calculator
 document.addEventListener("click",e=>{if(e.target.id!=="c-log")return;const e1=readNum("#c-entry"),s1=readNum("#c-stop");openSheet();if(e1!=null)$("#t-entry").value=e1;if(s1!=null)$("#t-stop").value=s1;if(calcState.mode==="stock"){setSheetKind("stock",calcState.stock)}else $("#t-sym").value=calcState.sym;const q=parseInt($("#c-out .big")?.textContent);if(q>0)$("#t-qty").value=q;$$("[data-side]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.side===calcState.side));sheetT.side=calcState.side;$("#t-plan").checked=PRETRADE.every((_,i)=>calcState.pre[i]);sheetPrev()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#sheetBg").hidden)closeSheet()});
-addEventListener("hashchange",()=>{const v=location.hash.slice(1);if(v&&v!==cur)show(v)});
+addEventListener("hashchange",()=>{const v=location.hash.slice(1);if(v&&v!==cur&&!v.includes("="))show(v)});
 
-show(location.hash.slice(1)||"today");
+
+/* ---------- cloud sync (Supabase) ---------- */
+const SB_URL="https://albvjenyvyanzzlmvmqa.supabase.co",SB_KEY="sb_publishable_lpFIlyWsy-yU1cucxaP-wQ_M00a_n6h";
+const cloud={sb:null,user:null,status:"idle",err:"",loading:false,timer:null,pending:false,last:null};
+function loadSB(){return new Promise((res,rej)=>{if(window.supabase&&window.supabase.createClient)return res(window.supabase);const sc=document.createElement("script");sc.src="vendor/supabase.js";sc.onload=()=>res(window.supabase);sc.onerror=()=>rej(new Error("load"));document.head.appendChild(sc)})}
+function heErr(e){const m=String((e&&(e.message||e.error_description||e.code))||e||"");
+  if(/Invalid login credentials/i.test(m))return"המייל או הסיסמה לא נכונים.";
+  if(/Email not confirmed/i.test(m))return"צריך לאשר את המייל קודם. בדוק את תיבת הדואר (וגם את הספאם).";
+  if(/already registered|already been registered|User already/i.test(m))return"כבר יש חשבון עם המייל הזה. לחץ \"התחבר\".";
+  if(/Password should be|at least 6/i.test(m))return"הסיסמה קצרה מדי. צריך לפחות 6 תווים.";
+  if(/valid email|invalid format|Unable to validate email/i.test(m))return"כתובת המייל לא תקינה.";
+  if(/rate limit|too many/i.test(m))return"יותר מדי ניסיונות. נסה שוב בעוד כמה דקות.";
+  if(/PGRST205|does not exist|schema cache|relation/i.test(m))return"הטבלאות עוד לא נוצרו ב-Supabase. צריך להריץ את קוד ה-SQL.";
+  if(/Bucket not found/i.test(m))return"אחסון הצילומים לא הוגדר ב-Supabase. צריך להריץ את קוד ה-SQL.";
+  if(/Failed to fetch|NetworkError|network|Load failed/i.test(m))return"אין חיבור לאינטרנט. ננסה שוב אוטומטית.";
+  if(/load/.test(m))return"לא הצלחתי לטעון את רכיב הסנכרון.";
+  return"שגיאה: "+m.slice(0,120)}
+async function cloudInit(){
+  if(!embeddable||cloud.sb||cloud.loading)return;cloud.loading=true;
+  try{const lib=await loadSB();cloud.sb=lib.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:"tick-auth"}});
+    const{data}=await cloud.sb.auth.getSession();cloud.user=data.session?data.session.user:null;
+    cloud.sb.auth.onAuthStateChange((ev,session)=>{const was=cloud.user&&cloud.user.id;cloud.user=session?session.user:null;if(cur==="plan")renderPlan();if(ev==="SIGNED_IN"&&was!==(cloud.user&&cloud.user.id))syncNow()});
+    if(/access_token|error_description/.test(location.hash)){try{history.replaceState(null,"",location.pathname+"#today")}catch(e){}toast(/error/.test(location.hash)?"הקישור מהמייל לא תקין או שפג תוקפו.":"המייל אושר. אפשר להתחבר.",5000)}
+    if(cloud.user)syncNow();
+  }catch(e){cloud.status="error";cloud.err=heErr(e)}
+  cloud.loading=false;if(cur==="plan")renderPlan();
+}
+function cloudMsg(){const m=$("#cl-msg");if(m)m.innerHTML=`${cloud.err?`<div class="warn">${esc(cloud.err)}</div>`:""}${cloud.msg?`<div class="okmsg">${esc(cloud.msg)}</div>`:""}`;else if(cur==="plan")renderPlan()}
+function cloudCard(){
+  const cc=`<h2>סנכרון וגיבוי בענן ${I("cloud")}</h2>`;
+  if(!embeddable)return`<div class="card">${cc}<p class="muted small" style="margin:0">הסנכרון לענן זמין בגרסה שמותקנת מ-GitHub.</p></div>`;
+  if(!cloud.sb)return`<div class="card">${cc}<p class="muted small" style="margin:0">${cloud.status==="error"?esc(cloud.err):"מתחבר…"}</p></div>`;
+  if(!cloud.user)return`<div class="card">${cc}
+    <p class="small muted" style="margin:0">התחבר כדי שהיומן יישמר בענן ויסתנכרן בין מכשירים. בלי חשבון הכל נשאר רק בטלפון.</p>
+    <form id="cloud-form" style="display:grid;gap:10px" onsubmit="return false">
+      <label class="f">מייל<input type="email" id="cl-email" value="${esc(cloud.email||"")}" autocomplete="email" inputmode="email" style="direction:ltr;text-align:right" required></label>
+      <label class="f">סיסמה (לפחות 6 תווים)<input type="password" id="cl-pass" autocomplete="current-password" minlength="6" style="direction:ltr;text-align:right" required></label>
+      <div class="grid2"><button type="button" class="btn primary" data-act="cloud-in">התחבר</button><button type="button" class="btn" data-act="cloud-up">צור חשבון</button></div>
+      <button type="button" class="btn ghost small" data-act="cloud-reset" style="min-height:34px">שכחתי סיסמה</button>
+    </form>
+    <div id="cl-msg">${cloud.err?`<div class="warn">${esc(cloud.err)}</div>`:""}${cloud.msg?`<div class="okmsg">${esc(cloud.msg)}</div>`:""}</div></div>`;
+  const st=cloud.status==="syncing"?`<span class="chip acc pulse"><span class="dot"></span>מסנכרן…</span>`:cloud.status==="error"?`<span class="chip bad">לא מסונכרן</span>`:`<span class="chip ok">מסונכרן</span>`;
+  return`<div class="card">${cc}
+    <div class="row between"><span class="small" style="direction:ltr;unicode-bidi:isolate">${esc(cloud.user.email||"")}</span>${st}</div>
+    <div class="muted small">${S.sync&&S.sync.lastOk?"סנכרון אחרון: "+new Date(S.sync.lastOk).toLocaleString("he-IL",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"עוד לא סונכרן"}</div>
+    ${cloud.status==="error"&&cloud.err?`<div class="warn">${esc(cloud.err)}</div>`:""}
+    <div class="grid2"><button class="btn" data-act="cloud-sync">סנכרן עכשיו</button><button class="btn ghost" data-act="cloud-out">התנתק</button></div></div>`;
+}
+async function cloudAuth(signup){
+  const email=($("#cl-email").value||"").trim(),password=$("#cl-pass").value||"";cloud.err="";cloud.msg="";cloud.email=email;
+  if(!email||password.length<6){cloud.err=!email?"חסר מייל.":"הסיסמה צריכה להיות לפחות 6 תווים.";cloudMsg();return}
+  cloud.msg=signup?"יוצר חשבון…":"מתחבר…";cloudMsg();cloud.msg="";
+  try{
+    if(signup){const{data,error}=await cloud.sb.auth.signUp({email,password,options:{emailRedirectTo:location.origin+location.pathname}});if(error)throw error;
+      if(data.user&&Array.isArray(data.user.identities)&&data.user.identities.length===0)throw new Error("User already registered");
+      if(!data.session)cloud.msg="נשלח אליך מייל אישור. לחץ על הקישור במייל, ואז חזור לכאן ולחץ \"התחבר\".";}
+    else{const{error}=await cloud.sb.auth.signInWithPassword({email,password});if(error)throw error;toast("מחובר. מסנכרן את היומן…",3000)}
+  }catch(e){cloud.err=heErr(e)}
+  if(cloud.user){cloud.err="";cloud.msg="";if(cur==="plan")renderPlan()}else cloudMsg();
+}
+async function cloudReset(){const email=($("#cl-email").value||"").trim();cloud.err="";cloud.msg="";cloud.email=email;if(!email){cloud.err="כתוב את המייל שלך למעלה ואז לחץ שוב.";cloudMsg();return}
+  try{const{error}=await cloud.sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});if(error)throw error;cloud.msg="נשלח מייל לאיפוס הסיסמה."}catch(e){cloud.err=heErr(e)}cloudMsg()}
+async function cloudSignOut(silent){if(!cloud.sb||!cloud.user)return;try{await cloud.sb.auth.signOut()}catch(e){}cloud.user=null;S.sync={};try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}if(!silent){toast("התנתקת. הנתונים נשארו בטלפון.",3000);renderPlan()}}
+function markAllDirty(){const n=Date.now();S.trades.forEach(t=>{if(!t.sample)t.u=n});S.pu=n;lastPH=profileOf(S);S.sync=S.sync||{};S.sync.up={}}
+function isDirty(){const sy=S.sync||{},p=sy.pushed||0;return S.trades.some(t=>!t.sample&&(t.u||0)>p)||Object.values(S.tomb||{}).some(x=>x>p)||(S.pu||0)>(sy.puSynced||0)}
+function scheduleSync(){if(!cloud.user)return;clearTimeout(cloud.timer);cloud.timer=setTimeout(()=>syncNow(),1500)}
+async function syncNow(manual){
+  if(!cloud.sb||!cloud.user)return;if(cloud.status==="syncing"){cloud.pending=true;return}
+  cloud.status="syncing";cloud.err="";if(cur==="plan")renderPlan();
+  const sb=cloud.sb,uid=cloud.user.id;S.sync=S.sync||{};const sy=S.sync;sy.up=sy.up||{};S.tomb=S.tomb||{};let changed=false;
+  try{
+    const startedAt=Date.now();
+    S.trades.forEach(t=>{if(!t.sample&&!t.u)t.u=startedAt});
+    // 1) pull trades changed since last pull
+    let q=sb.from("trades").select("id,data,deleted,updated_at").order("updated_at",{ascending:true}).limit(5000);
+    if(sy.lastPull)q=q.gt("updated_at",sy.lastPull);
+    const{data:rows,error:e1}=await q;if(e1)throw e1;
+    for(const r of rows||[]){const ts=Date.parse(r.updated_at),i=S.trades.findIndex(t=>t.id===r.id),loc=i>=0?S.trades[i]:null;
+      if(r.deleted){if(loc&&(loc.u||0)<=ts){S.trades.splice(i,1);DB.del(r.id).catch(()=>{});changed=true}if(!S.tomb[r.id]||S.tomb[r.id]<ts)S.tomb[r.id]=ts}
+      else if(!loc||(loc.u||0)<ts){if(S.tomb[r.id]&&S.tomb[r.id]>=ts)continue;const t={...r.data,u:ts};delete t.sample;if(loc)S.trades[i]=t;else S.trades.push(t);if(t.shot)delete sy.up[t.id];changed=true}
+      sy.lastPull=r.updated_at}
+    if((rows||[]).some(r=>!r.deleted)&&S.trades.some(t=>t.sample)){S.trades=S.trades.filter(t=>!t.sample);changed=true}
+    // 2) push local trade changes and deletions
+    const p=sy.pushed||0;
+    const up=S.trades.filter(t=>!t.sample&&(t.u||0)>p).map(t=>{const{u,...data}=t;return{user_id:uid,id:t.id,data,deleted:false,updated_at:new Date(t.u).toISOString()}});
+    const del=Object.entries(S.tomb).filter(([,x])=>x>p).map(([id,x])=>({user_id:uid,id,data:{},deleted:true,updated_at:new Date(x).toISOString()}));
+    const all=[...up,...del];
+    for(let k=0;k<all.length;k+=200){const{error}=await sb.from("trades").upsert(all.slice(k,k+200),{onConflict:"user_id,id"});if(error)throw error}
+    sy.pushed=Math.max(p,...S.trades.map(t=>t.u||0),...Object.values(S.tomb));
+    // 3) profile (settings, rules, reminders, watchlist, routine)
+    const{data:pr,error:e3}=await sb.from("profiles").select("data,updated_at").maybeSingle();if(e3)throw e3;
+    const rts=pr?Date.parse(pr.updated_at):0;
+    if(pr&&rts>(S.pu||0)){PROFILE_KEYS.forEach(k=>{if(pr.data&&k in pr.data)S[k]=pr.data[k]});if(S.routine&&S.routine.date!==todayKey())S.routine={date:todayKey(),done:{}};S.pu=rts;sy.puSynced=rts;lastPH=profileOf(S);changed=true}
+    else if((S.pu||0)>(sy.puSynced||0)||!pr){const ts=S.pu||Date.now();const data={};PROFILE_KEYS.forEach(k=>data[k]=S[k]??null);
+      const{error}=await sb.from("profiles").upsert({user_id:uid,data,updated_at:new Date(ts).toISOString()},{onConflict:"user_id"});if(error)throw error;S.pu=ts;sy.puSynced=ts}
+    // 4) screenshots
+    const st=sb.storage.from("shots");
+    for(const t of S.trades){if(t.sample)continue;const path=`${uid}/${t.id}.jpg`;
+      if(t.shot&&!sy.up[t.id]){const blob=await DB.get(t.id).catch(()=>null);
+        if(blob){const{error}=await st.upload(path,blob,{upsert:true,contentType:"image/jpeg"});if(error)throw error;sy.up[t.id]=1}
+        else{const{data:b,error}=await st.download(path);if(!error&&b){await DB.put(t.id,b);sy.up[t.id]=1}}}
+      else if(!t.shot&&sy.up[t.id]){await st.remove([path]);delete sy.up[t.id]}}
+    for(const id of Object.keys(sy.up)){if(!S.trades.some(t=>t.id===id)){await st.remove([`${uid}/${id}.jpg`]);delete sy.up[id]}}
+    sy.lastOk=Date.now();cloud.status="idle";
+    try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}
+    if(manual)toast("היומן מסונכרן עם הענן",2500);
+  }catch(e){cloud.status="error";cloud.err=heErr(e);try{localStorage.setItem(LS,JSON.stringify(S))}catch(x){}if(manual)toast(cloud.err,5000)}
+  if(changed&&$("#sheetBg").hidden)rerender();else if(cur==="plan")renderPlan();
+  if(cloud.pending||(cloud.status==="idle"&&isDirty())){cloud.pending=false;if(cloud.status==="idle")scheduleSync()}
+}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&cloud.user&&(!S.sync||!S.sync.lastOk||Date.now()-S.sync.lastOk>60000))syncNow()});
+addEventListener("online",()=>{if(cloud.user)syncNow()});
+setInterval(()=>{if(cloud.user&&document.visibilityState==="visible")syncNow()},5*60000);
+
+show(location.hash.includes("=")?"today":(location.hash.slice(1)||"today"));
+cloudInit();
 setInterval(()=>{if(S.routine.date!==todayKey()){S.routine={date:todayKey(),done:{}};save()}tickReminders();if(cur==="today"&&$("#sheetBg").hidden&&!document.activeElement.closest?.("#v-today"))renderToday()},20000);
 tickReminders();
 try{if("serviceWorker" in navigator&&document.querySelector('link[rel="manifest"]'))navigator.serviceWorker.register("sw.js")}catch(e){}
