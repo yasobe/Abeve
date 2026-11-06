@@ -57,3 +57,14 @@ language sql security definer set search_path = public, vault as $$
 $$;
 revoke execute on function public.tick_push_config() from public, anon, authenticated;
 grant execute on function public.tick_push_config() to service_role;
+
+-- Every-minute timer: calls the send-reminders function with the cron secret from Vault
+select cron.unschedule(jobid) from cron.job where jobname = 'tick-reminders';
+select cron.schedule('tick-reminders', '* * * * *', $job$
+  select net.http_post(
+    url := 'https://albvjenyvyanzzlmvmqa.supabase.co/functions/v1/send-reminders',
+    headers := jsonb_build_object('Content-Type', 'application/json',
+      'x-cron-secret', (select decrypted_secret from vault.decrypted_secrets where name = 'tick_cron_secret')),
+    body := '{}'::jsonb,
+    timeout_milliseconds := 25000);
+$job$);
