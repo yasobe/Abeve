@@ -1,0 +1,922 @@
+
+(function(){
+"use strict";
+/* ---------- contracts (CME specs: tick size, $ per tick) ---------- */
+const C={
+  ES:{n:"E-mini S&P 500",tick:.25,tv:12.5,q:1},
+  MES:{n:"Micro S&P 500",tick:.25,tv:1.25,q:1,big:"ES"},
+  NQ:{n:"E-mini Nasdaq-100",tick:.25,tv:5,q:1},
+  MNQ:{n:"Micro Nasdaq-100",tick:.25,tv:.5,q:1,big:"NQ"},
+  YM:{n:"E-mini Dow",tick:1,tv:5,q:1},
+  MYM:{n:"Micro Dow",tick:1,tv:.5,q:1,big:"YM"},
+  RTY:{n:"E-mini Russell 2000",tick:.1,tv:5,q:1},
+  M2K:{n:"Micro Russell 2000",tick:.1,tv:.5,q:1,big:"RTY"},
+  CL:{n:"Crude Oil",tick:.01,tv:10},
+  MCL:{n:"Micro Crude Oil",tick:.01,tv:1,big:"CL"},
+  NG:{n:"Natural Gas",tick:.001,tv:10},
+  GC:{n:"Gold",tick:.1,tv:10},
+  MGC:{n:"Micro Gold",tick:.1,tv:1,big:"GC"},
+  SI:{n:"Silver",tick:.005,tv:25},
+  ZN:{n:"10-Year T-Note",tick:.015625,tv:15.625},
+  ZB:{n:"30-Year T-Bond",tick:.03125,tv:31.25},
+  "6E":{n:"Euro FX",tick:.00005,tv:6.25},
+  MBT:{n:"Micro Bitcoin",tick:5,tv:.5}
+};
+const MICRO={ES:"MES",NQ:"MNQ",YM:"MYM",RTY:"M2K",CL:"MCL",GC:"MGC"};
+const STOCK={n:"מניה",tick:.01,tv:.01,stock:true};
+const spec=s=>C[s]||STOCK;
+const isStock=s=>!C[s];
+const pv=s=>spec(s).tv/spec(s).tick;
+const unitName=(s,q)=>isStock(s)?(q===1?"מניה":"מניות"):(q===1?"חוזה":"חוזים");
+function feeFor(sym,qty){return isStock(sym)?(S.settings.stockFee||0)*2:(S.settings.commission||0)*2*qty}
+
+const EMO=["רגוע","ממוקד","בטוח מדי","פוחד","חמדן","נקמה","משועמם","עייף"];
+const DAYN=["א","ב","ג","ד","ה","ו","ש"];
+const ROUTINE=[
+  {id:"cal",t:"בדקתי את הלוח הכלכלי להיום (CPI, NFP, FOMC, נאומים)"},
+  {id:"lvl",t:"סימנתי רמות: שיא ושפל של אתמול, טווח הלילה, VWAP"},
+  {id:"bias",t:"כתבתי תרחיש ללונג ותרחיש לשורט, ומה מבטל כל אחד"},
+  {id:"risk",t:"קבעתי הפסד יומי מקסימלי ומספר עסקאות מקסימלי"},
+  {id:"mind",t:"אני ישן, רגוע, ולא צריך להחזיר הפסד של אתמול"}
+];
+const PRETRADE=[
+  "העסקה היא אחד הסטאפים בתוכנית שלי",
+  "הסטופ מוגדר על רמה, לא על סכום שנוח לי",
+  "יחס סיכוי-סיכון לפחות 1:1.5",
+  "אין פרסום נתונים ב-5 הדקות הקרובות",
+  "לא עברתי את ההפסד היומי ולא את מכסת העסקאות"
+];
+
+/* ---------- storage ---------- */
+const LS="tick_v1";
+const todayKey=(d=new Date())=>d.toLocaleDateString("en-CA");
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+function daysAgo(n){const d=new Date();d.setDate(d.getDate()-n);return todayKey(d)}
+function sampleTrades(){
+  const raw=[
+    [9,"MES","L",2,5868.25,5874.5,5865,"פריצת טווח פתיחה","ממוקד",1,"10:05"],
+    [8,"MES","S",2,5881,5884,5878.5,"דחייה מ-VWAP","רגוע",1,"09:48"],
+    [8,"MES","L",3,5872,5866.5,5869,"נקמה אחרי סטופ","נקמה",0,"10:20"],
+    [7,"MNQ","L",3,20765,20812,20748,"פריצת טווח פתיחה","ממוקד",1,"09:40"],
+    [6,"MES","S",2,5899.5,5890.25,5903,"דחייה מ-VWAP","רגוע",1,"11:15"],
+    [5,"MCL","L",2,68.42,68.18,68.25,"ללא סטאפ","משועמם",0,"13:30"],
+    [3,"MES","L",2,5904,5911.75,5900.5,"פולבק במגמה","ממוקד",1,"10:02"],
+    [2,"MNQ","S",2,20930,20951,20920,"דחייה מ-VWAP","בטוח מדי",1,"10:40"],
+    [1,"MES","L",2,5918.25,5926,5914.5,"פולבק במגמה","רגוע",1,"09:55"]
+  ];
+  return raw.map(r=>({id:uid(),sample:true,d:daysAgo(r[0]),time:r[10],sym:r[1],side:r[2],qty:r[3],entry:r[4],exit:r[5],stop:r[6],setup:r[7],emo:r[8],plan:!!r[9],fee:+(0.62*2*r[3]).toFixed(2),note:""}));
+}
+function defaults(){
+  return {v:1,
+    settings:{account:25000,riskPct:1,maxDaily:500,maxTrades:4,commission:1.24,sym:"MES"},
+    trades:sampleTrades(),
+    reminders:[
+      {id:uid(),time:"15:30",days:[1,2,3,4,5],label:"הכנה לפני הפתיחה: לוח כלכלי, רמות ותרחישים",on:true},
+      {id:uid(),time:"16:25",days:[1,2,3,4,5],label:"5 דקות לפתיחת ניו יורק. צ'קליסט לפני כל כניסה",on:true},
+      {id:uid(),time:"23:05",days:[1,2,3,4,5],label:"סגירת יום: עדכן את היומן וכתוב שיעור אחד",on:true},
+      {id:uid(),time:"20:00",anchor:"",off:0,days:[0],label:"סקירה שבועית: מה עבד, מה לא, וחוק אחד לשבוע הבא",on:true}
+    ],
+    rules:[
+      "סיכון של עד 1% מהחשבון בעסקה אחת",
+      "סטופ נקבע לפני הכניסה ולא זז נגדי",
+      "אחרי 2 הפסדים ברצף: הפסקה של 30 דקות",
+      "מגעתי להפסד היומי? סוגר את הפלטפורמה עד מחר",
+      "לא נכנס 5 דקות לפני ואחרי פרסום נתונים",
+      "בגלגול החוזה עובר לחוזה החדש ביום הגלגול"
+    ],
+    routine:{date:todayKey(),done:{}},
+    days:{}
+  };
+}
+/* ---------- input hardening: everything loaded, imported or synced passes through here ---------- */
+const ID_RE=/^[a-z0-9]{4,40}$/,D_RE=/^\d{4}-\d{2}-\d{2}$/,T_RE=/^\d{2}:\d{2}$/;
+const cNum=(v,d=null)=>{if(typeof v==="string"&&v.trim()!=="")v=Number(v);return typeof v==="number"&&isFinite(v)?v:d};
+const cStr=(v,n)=>typeof v==="string"?v.slice(0,n):"";
+const cSym=v=>String(v||"").toUpperCase().replace(/[^A-Z0-9:.!_-]/g,"").slice(0,24);
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+function cleanTrade(t){
+  if(!t||typeof t!=="object")return null;const id=String(t.id||"");if(!ID_RE.test(id))return null;
+  const o={id,d:D_RE.test(t.d)?t.d:todayKey(),time:T_RE.test(t.time)?t.time:"",sym:C[t.sym]?t.sym:(cSym(t.sym)||"?"),side:t.side==="S"?"S":"L",
+    qty:clamp(Math.round(cNum(t.qty,1)),1,1e7),entry:cNum(t.entry),exit:cNum(t.exit),stop:cNum(t.stop),setup:cStr(t.setup,80),emo:EMO.includes(t.emo)?t.emo:"",
+    plan:!!t.plan,note:cStr(t.note,2000),fee:clamp(cNum(t.fee,0),0,1e6)};
+  if(o.entry==null||o.exit==null)return null;
+  if(Array.isArray(t.exits)&&t.exits.length)o.exits=t.exits.slice(0,50).map(e=>({q:clamp(Math.round(cNum(e&&e.q,1)),1,1e7),p:cNum(e&&e.p)})).filter(e=>e.p!=null);
+  if(t.shot)o.shot=true;if(t.sample)o.sample=true;const u=cNum(t.u);if(u)o.u=u;return o;
+}
+function cleanProfile(src){
+  const d=defaults(),s=src&&typeof src==="object"?src:{},st=s.settings&&typeof s.settings==="object"?s.settings:{},o={};
+  o.settings={account:clamp(cNum(st.account,d.settings.account),0,1e10),riskPct:clamp(cNum(st.riskPct,1),0,100),maxDaily:clamp(cNum(st.maxDaily,500),0,1e9),
+    maxTrades:clamp(Math.round(cNum(st.maxTrades,4)),0,1000),commission:clamp(cNum(st.commission,1.24),0,1000),stockFee:clamp(cNum(st.stockFee,1),0,1000),
+    sym:C[st.sym]?st.sym:"MES",stockSym:cSym(st.stockSym)||"BMNR"};
+  o.rules=Array.isArray(s.rules)?s.rules.filter(x=>typeof x==="string").slice(0,50).map(x=>x.slice(0,200)):d.rules;
+  o.reminders=Array.isArray(s.reminders)?s.reminders.slice(0,30).filter(r=>r&&typeof r==="object").map(r=>({id:ID_RE.test(String(r.id))?String(r.id):uid(),
+    time:T_RE.test(r.time)?r.time:"09:00",anchor:["open","close"].includes(r.anchor)?r.anchor:"",off:clamp(Math.round(cNum(r.off,0)),-720,720),
+    days:[...new Set((Array.isArray(r.days)?r.days:[]).map(x=>Math.round(cNum(x,-1))).filter(x=>x>=0&&x<=6))].sort(),label:cStr(r.label,120),on:!!r.on})):d.reminders;
+  if(Array.isArray(s.watch))o.watch=[...new Set(s.watch.map(cSym).filter(Boolean))].slice(0,50);
+  o.days={};if(s.days&&typeof s.days==="object")Object.keys(s.days).slice(0,5000).forEach(k=>{if(D_RE.test(k)&&s.days[k])o.days[k]=true});
+  const rt=s.routine&&typeof s.routine==="object"?s.routine:{};o.routine={date:D_RE.test(rt.date)?rt.date:todayKey(),done:{}};
+  ROUTINE.forEach(r=>{if(rt.done&&rt.done[r.id])o.routine.done[r.id]=true});
+  return o;
+}
+function cleanState(s,keepSync){
+  if(!s||typeof s!=="object"||s.v!==1||!Array.isArray(s.trades))return null;
+  const o={v:1,...cleanProfile(s),trades:s.trades.slice(0,50000).map(cleanTrade).filter(Boolean),tomb:{}};
+  if(s.tomb&&typeof s.tomb==="object")Object.entries(s.tomb).forEach(([k,v])=>{if(ID_RE.test(k)&&cNum(v))o.tomb[k]=cNum(v)});
+  if(D_RE.test(s.lastBackup))o.lastBackup=s.lastBackup;if(s.mig2)o.mig2=1;const pu=cNum(s.pu);if(pu)o.pu=pu;
+  if(keepSync&&s.sync&&typeof s.sync==="object")o.sync=s.sync;
+  return o;
+}
+function load(){try{const s=cleanState(JSON.parse(localStorage.getItem(LS)),true);if(s)return s}catch(e){}return defaults()}
+let S=load();
+function migrate(){
+  if(S.mig2)return;
+  S.settings.stockFee??=1;S.settings.stockSym??="BMNR";
+  const map={"15:30":["open",-60],"16:25":["open",-5],"23:05":["close",5]};
+  S.reminders.forEach(r=>{if(r.anchor!==undefined)return;const m=map[r.time];if(m&&r.days.join()==="1,2,3,4,5"){r.anchor=m[0];r.off=m[1]}else{r.anchor="";r.off=0}});
+  S.mig2=1;try{localStorage.setItem("tick_v1",JSON.stringify(S))}catch(e){}
+}
+migrate();
+const PROFILE_KEYS=["settings","rules","reminders","watch","days","routine"];
+const profileOf=st=>JSON.stringify(PROFILE_KEYS.map(k=>st[k]??null));
+let lastPH=profileOf(S);
+function save(){
+  const ph=profileOf(S);if(ph!==lastPH){lastPH=ph;S.pu=Date.now()}
+  try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}
+  if(typeof scheduleSync==="function")scheduleSync();
+}
+if(S.routine.date!==todayKey())S.routine={date:todayKey(),done:{}};
+
+/* ---------- helpers ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const usd0=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0});
+const usd2=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",minimumFractionDigits:2,maximumFractionDigits:2});
+function money(v,dec){if(v==null||!isFinite(v))return "–";const f=(dec?usd2:usd0).format(Math.abs(v));return (v<0?"−":v>0?"+":"")+f}
+function moneyPlain(v){return usd0.format(v||0)}
+const cls=v=>v>0?"up":v<0?"down":"";
+const N=(v,d=2)=>(v==null||!isFinite(v))?"–":(+v).toFixed(d);
+function priceDec(sym){const t=spec(sym).tick;const s=String(t);return s.includes(".")?Math.min(s.split(".")[1].length,6):0}
+function calcT(t){const dir=t.side==="L"?1:-1;const gross=(t.exits&&t.exits.length)?sum(t.exits.map(e=>(e.p-t.entry)*dir*pv(t.sym)*e.q)):(t.exit-t.entry)*dir*pv(t.sym)*t.qty;const net=gross-(t.fee||0);let r=null;if(t.stop){const risk=Math.abs(t.entry-t.stop)*pv(t.sym)*t.qty;if(risk>0)r=gross/risk}return{gross,net,r}}
+function sortedTrades(){return [...S.trades].sort((a,b)=>(a.d+(a.time||"")).localeCompare(b.d+(b.time||"")))}
+const sum=a=>a.reduce((x,y)=>x+y,0);
+function fmtDur(m){m=Math.max(0,Math.round(m));const d=Math.floor(m/1440),h=Math.floor(m%1440/60),mm=m%60;return (d?d+" ימ' ":"")+(h?h+" ש' ":"")+(d?"":mm+" ד'")}
+const localHM=ms=>new Date(Date.now()+ms*60000).toLocaleTimeString("he-IL",{hour:"2-digit",minute:"2-digit"});
+
+/* ---------- market clock (CME Globex, Chicago time) ---------- */
+function ctNow(){
+  const o={};new Intl.DateTimeFormat("en-US",{timeZone:"America/Chicago",year:"numeric",month:"2-digit",day:"2-digit",weekday:"short",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).formatToParts(new Date()).forEach(p=>o[p.type]=p.value);
+  return{wd:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].indexOf(o.weekday),min:(+o.hour%24)*60+ +o.minute,y:+o.year,mo:+o.month,d:+o.day};
+}
+/* ---------- US exchange holidays (CME equity futures) ---------- */
+// closed = no trading at all; holiday = no regular session, Globex halts 12:00 CT; early = regular session ends 12:15 CT
+function easter(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=(h+l-7*m+114)%31+1;return new Date(y,mo-1,da)}
+function nthWd(y,m,wd,n){const d=new Date(y,m,1);d.setDate(1+(wd-d.getDay()+7)%7+(n-1)*7);return d}
+function lastWd(y,m,wd){const d=new Date(y,m+1,0);d.setDate(d.getDate()-(d.getDay()-wd+7)%7);return d}
+function observed(y,m,d){const x=new Date(y,m,d);if(x.getDay()===6)x.setDate(d-1);else if(x.getDay()===0)x.setDate(d+1);return x}
+const HOLC={};
+function holidaysOf(y){
+  if(HOLC[y])return HOLC[y];const L=[];const add=(dt,n,type)=>L.push({key:todayKey(dt),date:dt,n,type});
+  const ny=new Date(y,0,1);if(ny.getDay()!==6)add(observed(y,0,1),"ראש השנה האזרחית","closed");
+  add(nthWd(y,0,1,3),"יום מרטין לותר קינג","holiday");
+  add(nthWd(y,1,1,3),"יום הנשיאים","holiday");
+  const gf=easter(y);gf.setDate(gf.getDate()-2);add(gf,"יום שישי הטוב","closed");
+  add(lastWd(y,4,1),"יום הזיכרון האמריקאי","holiday");
+  add(observed(y,5,19),"ג'ונטינת'","holiday");
+  const j4=observed(y,6,4);add(j4,"יום העצמאות האמריקאי","holiday");
+  const j3=new Date(y,6,3);if(j3.getDay()>=1&&j3.getDay()<=5&&todayKey(j3)!==todayKey(j4))add(j3,"ערב יום העצמאות","early");
+  add(nthWd(y,8,1,1),"יום העבודה","holiday");
+  const tg=nthWd(y,10,4,4);add(tg,"חג ההודיה","holiday");const bf=new Date(tg);bf.setDate(tg.getDate()+1);add(bf,"יום אחרי חג ההודיה","early");
+  const xm=observed(y,11,25);add(xm,"חג המולד","closed");
+  const xe=new Date(y,11,24);if(xe.getDay()>=1&&xe.getDay()<=5&&todayKey(xe)!==todayKey(xm))add(xe,"ערב חג המולד","early");
+  return HOLC[y]=L.sort((a,b)=>a.date-b.date);
+}
+function holOn(key){const y=+key.slice(0,4);return holidaysOf(y).find(h=>h.key===key)||null}
+function upcomingHolidays(n=6){const t=todayKey(),y=new Date().getFullYear();return[...holidaysOf(y),...holidaysOf(y+1)].filter(h=>h.key>=t).slice(0,n)}
+const HOLTYPE={closed:"סגור לגמרי",holiday:"אין מסחר רגיל",early:"סגירה מוקדמת"};
+function market(){
+  const{wd,min,y,mo,d}=ctNow();
+  const keyAt=o=>new Date(Date.UTC(y,mo-1,d+o)).toISOString().slice(0,10);
+  const hAt=o=>holOn(keyAt(o));const hol=hAt(0);
+  const closeAt=h=>h&&h.type==="early"?735:900;
+  const gClose=h=>h&&h.type==="early"?735:960;
+  let globex;if(wd===6)globex=false;else if(wd===0)globex=min>=1020;else if(wd===5)globex=min<gClose(hol)&&!(hol&&hol.type!=="early");else globex=!(min>=gClose(hol)&&min<1020);
+  if(hol&&hol.type==="closed")globex=false;
+  if(hol&&hol.type==="holiday")globex=min<720||(min>=1020&&wd<=4);
+  if(min>=1020&&wd>=0&&wd<=4){const nx=hAt(1);if(nx&&nx.type==="closed")globex=false}
+  const rthDay=o=>{const w=(wd+o)%7;const h=hAt(o);return w>=1&&w<=5&&!(h&&h.type!=="early")};
+  const rth=rthDay(0)&&min>=510&&min<closeAt(hol);
+  let toOpen=null,toClose=null;
+  if(rth)toClose=closeAt(hol)-min;else for(let o=0;o<12;o++){if(!rthDay(o))continue;const diff=o*1440+510-min;if(diff>0){toOpen=diff;break}}
+  let toGlobex=null;if(!globex){for(let o=0;o<12;o++){const w=(wd+o)%7;if(!(w===0||(w>=1&&w<=4)))continue;const h=hAt(o),nx=hAt(o+1);if((h&&h.type==="closed")||(nx&&nx.type==="closed"))continue;const diff=o*1440+1020-min;if(diff>0){toGlobex=diff;break}}}
+  return{globex,rth,toOpen,toClose,toGlobex,hol,halt:!hol&&wd>=1&&wd<=4&&min>=900+60&&min<1020};
+}
+
+/* ---------- quarterly roll (equity index: H M U Z, expiry 3rd Friday, roll 8 days before) ---------- */
+function thirdFriday(y,m){const d=new Date(y,m,1);const add=(5-d.getDay()+7)%7;return new Date(y,m,1+add+14)}
+function rolls(count=4){
+  const out=[];const now=new Date();now.setHours(0,0,0,0);
+  for(let y=now.getFullYear();out.length<count;y++)for(const m of[2,5,8,11]){
+    const exp=thirdFriday(y,m);if(exp<now)continue;const roll=new Date(exp);roll.setDate(exp.getDate()-8);
+    const code={2:"H",5:"M",8:"U",11:"Z"}[m]+String(y).slice(-1);
+    const nm=m===11?2:m+3, ny=m===11?y+1:y;
+    const nextCode={2:"H",5:"M",8:"U",11:"Z"}[nm]+String(ny).slice(-1);
+    out.push({exp,roll,code,nextCode});if(out.length>=count)break;
+  }
+  return out;
+}
+const dmy=d=>d.toLocaleDateString("he-IL",{day:"numeric",month:"short"});
+const dayDiff=d=>{const n=new Date();n.setHours(0,0,0,0);return Math.round((d-n)/864e5)};
+
+/* ---------- stats ---------- */
+function stats(ts){
+  const rows=ts.map(t=>({t,...calcT(t)}));const nets=rows.map(r=>r.net);
+  const w=nets.filter(x=>x>0),l=nets.filter(x=>x<0);
+  const gw=sum(w),gl=Math.abs(sum(l));
+  let eq=0,peak=0,dd=0;const curve=[0];nets.forEach(x=>{eq+=x;curve.push(eq);peak=Math.max(peak,eq);dd=Math.min(dd,eq-peak)});
+  const rs=rows.filter(r=>r.r!=null).map(r=>r.r);
+  return{n:ts.length,total:sum(nets),win:ts.length?w.length/ts.length:0,pf:gl?gw/gl:(gw?Infinity:0),avgW:w.length?gw/w.length:0,avgL:l.length?gl/l.length:0,
+    exp:ts.length?sum(nets)/ts.length:0,avgR:rs.length?sum(rs)/rs.length:null,dd,curve,rows,plan:ts.length?ts.filter(t=>t.plan).length/ts.length:0};
+}
+function groupBy(rows,key){const m={};rows.forEach(r=>{const k=key(r.t)||"—";(m[k]??=[]).push(r.net)});return Object.entries(m).map(([k,v])=>({k,n:v.length,total:sum(v),win:v.filter(x=>x>0).length/v.length}))}
+const M=v=>`<span class="num">${money(v)}</span>`,MP=v=>`<span class="num">${moneyPlain(v)}</span>`;
+function insights(st){
+  const out=[];if(st.n<3)return[{tone:"",text:"אחרי 3 עסקאות ביומן יופיעו כאן תובנות על ההרגלים שלך."}];
+  const off=st.rows.filter(r=>!r.t.plan),on=st.rows.filter(r=>r.t.plan);
+  if(off.length){const s=sum(off.map(r=>r.net));out.push({tone:s<0?"down":"up",text:`${off.length} עסקאות מחוץ לתוכנית הניבו ${M(s)}. עסקאות לפי התוכנית: ${M(sum(on.map(r=>r.net)))}.`})}
+  const emo=groupBy(st.rows,t=>t.emo).filter(g=>g.n>=1).sort((a,b)=>a.total-b.total);
+  if(emo.length>1&&emo[0].total<0)out.push({tone:"down",text:`המצב הרגשי היקר ביותר: "${esc(emo[0].k)}" (${M(emo[0].total)} ב-${emo[0].n} עסקאות). כשזה מופיע, הפסקה.`});
+  const set=groupBy(st.rows,t=>t.setup).sort((a,b)=>b.total-a.total);
+  if(set.length&&set[0].total>0)out.push({tone:"up",text:`הסטאפ החזק שלך: "${esc(set[0].k)}" עם ${M(set[0].total)} ו-${Math.round(set[0].win*100)}% הצלחה. תן לו עדיפות.`});
+  if(st.avgW&&st.avgL){const ratio=st.avgW/st.avgL;out.push({tone:ratio>=1?"up":"acc",text:`רווח ממוצע ${MP(st.avgW)} מול הפסד ממוצע ${MP(st.avgL)} (יחס ${ratio.toFixed(2)}). ${ratio<1?"ההפסדים גדולים מהרווחים: בדוק אם אתה מזיז סטופים או סוגר רווחים מוקדם.":"אתה נותן לרווחים לרוץ. המשך כך."}`})}
+  const byDay={};st.rows.forEach(r=>(byDay[r.t.d]??=[]).push(r.net));
+  const busy=Object.values(byDay).filter(v=>v.length>S.settings.maxTrades);
+  if(busy.length)out.push({tone:"down",text:`ב-${busy.length} ימים עברת את מכסת ${S.settings.maxTrades} העסקאות. סה"כ באותם ימים: ${M(sum(busy.flat()))}.`});
+  return out;
+}
+
+
+/* ---------- explanations behind the "!" buttons ---------- */
+const INFO={
+  market:["מצב השוק",["<b>גלובקס</b> הוא המסחר האלקטרוני של CME. הוא פתוח כמעט 24 שעות, מראשון בערב עד שישי בערב, עם הפסקה של שעה בכל יום.","<b>ניו יורק פתוחה</b> הם שעות המסחר הרגילות (8:30–15:00 שעון שיקגו). אז יש הכי הרבה מחזור ותנועה.","השעות בסוגריים כבר מתורגמות לשעון שלך. חגים אמריקאיים לא מחושבים."]],
+  daily:["הפסד יומי מקסימלי",["הסכום שאחריו מפסיקים לסחור עד מחר, לא משנה מה. זה הבלם שמונע מיום רע להפוך לחודש רע.","הפס מתמלא ככל שמתקרבים לגבול: ירוק, אחר כך כתום, ואז אדום.","<span class='ex'>נהוג להגדיר 2–3 פעמים הסיכון לעסקה. סיכון $250 לעסקה → הפסד יומי $500–750.</span>"]],
+  routine:["שגרת הכנה",["5 צעדים לפני פתיחת השוק. סוחרים שמתכוננים מראש מקבלים פחות החלטות אימפולסיביות.","השגרה מתאפסת כל יום. כשמסמנים את כל 5 הצעדים, היום נספר ברצף."]],
+  streak:["ימי שגרה ברצף",["כמה ימי מסחר ברצף השלמת את כל שגרת ההכנה. שבת וראשון לא שוברים את הרצף.","המטרה היא הרגל: לא לסחור הרבה, אלא להתכונן כל יום."]],
+  roll:["גלגול חוזים",["לחוזה עתידי יש תאריך פקיעה. חוזי המדדים (ES, NQ, YM, RTY והמיקרו) פוקעים ביום שישי השלישי של מרץ, יוני, ספטמבר ודצמבר.","כשמונה ימים לפני הפקיעה רוב הסוחרים עוברים לחוזה הבא. זה <b>יום הגלגול</b>. אחריו הנזילות בחוזה הישן יורדת.","<span class='ex'>האותיות הן קודי חודשים: H=מרץ, M=יוני, U=ספטמבר, Z=דצמבר. הספרה היא השנה: ESZ6 = דצמבר 2026.</span>","ביום הגלגול צריך לפתוח את הגרף והפקודות על החוזה החדש."]],
+  pretrade:["צ'קליסט לפני כניסה",["5 שאלות לפני כל עסקה. אם אחת מהן לא מסומנת, כנראה שעדיף לוותר.","כשלוחצים \"רשום ביומן\", העסקה מסומנת \"לפי התוכנית\" רק אם כל הצ'קליסט מסומן."]],
+  insights:["מה היומן אומר עליך",["תובנות שמחושבות אוטומטית מהעסקאות שרשמת: איזה סטאפ הכי רווחי, איזה מצב רגשי עולה לך כסף, ואם אתה חורג מהכללים.","ככל שתרשום יותר עסקאות בכנות, התובנות יהיו מדויקות יותר."]],
+  reminders:["תזכורות",["<b>הוסף ליומן האייפון</b> יוצר אירועים חוזרים עם התראה ביומן של הטלפון. זו הדרך היחידה לקבל תזכורת כשהאפליקציה סגורה.","<b>הפעל התראות</b> עובד רק כשהאפליקציה פתוחה ונוספה למסך הבית.","<b>ביחס לפתיחת ניו יורק</b>: התזכורת זזה לבד עם שעון הקיץ והחורף בארה\"ב, ומדלגת על חגים בבורסה. כך \"5 דקות לפתיחה\" תמיד מדויק.","אחרי שינוי בתזכורות, צריך להוסיף ליומן שוב (ולמחוק את הישנות ביומן)."]],
+  pf:["Profit factor",["סך כל הרווחים חלקי סך כל ההפסדים.","<span class='ex'>רווחת $1,500 והפסדת $1,000 → Profit factor = 1.5</span>","מעל 1 אתה ברווח. מעל 1.5 זה טוב. מתחת ל-1 השיטה מפסידה כרגע."]],
+  avgr:["R ממוצע",["<b>R</b> הוא הסיכון שלקחת בעסקה: המרחק מהכניסה לסטופ.","<span class='ex'>סיכנת $100 והרווחת $200 → ‎+2R. נעצרת בסטופ → ‎−1R.</span>","R ממוצע חיובי אומר שבממוצע אתה מרוויח יותר ממה שאתה מסכן. כדי לחשב R צריך לרשום סטופ בעסקה."]],
+  exp:["תוחלת לעסקה",["כמה אתה מרוויח או מפסיד בממוצע על כל עסקה, אחרי עמלות.","זה המספר הכי חשוב: אם הוא חיובי לאורך הרבה עסקאות, יש לך יתרון."]],
+  dd:["ירידה מקסימלית",["הירידה הגדולה ביותר מהשיא של החשבון ועד לשפל שאחריו.","היא מראה כמה כאב היית צריך לסבול בדרך. אם היא גדולה מדי בשבילך, הקטן את הסיכון לעסקה."]],
+  plan:["לפי התוכנית",["כמה מהעסקאות סימנת כ\"לפי התוכנית\": סטאפ מוכר, סטופ מוגדר, ובלי לשבור חוקים.","המטרה היא 100%. משמעת היא דבר שאתה שולט בו, בניגוד לתוצאה של עסקה בודדת."]],
+  rr:["יחס סיכוי-סיכון (R:R)",["כמה אתה יכול להרוויח ביעד לעומת כמה אתה מסכן עד הסטופ.","<span class='ex'>סטופ 5 נקודות ויעד 10 נקודות → 1:2</span>","ביחס 1:2 מספיק לצדוק ב-34% מהעסקאות כדי לא להפסיד. מתחת ל-1:1.5 כדאי לחשוב פעמיים."]],
+  ticks:["טיקים לסטופ",["<b>טיק</b> הוא התזוזה הקטנה ביותר האפשרית במחיר של החוזה.","זה מספר הטיקים בין מחיר הכניסה לסטופ. כפול שווי הטיק, זה ההפסד לחוזה אחד אם נעצרת."]],
+  allowed:["סיכון מותר",["גודל החשבון כפול אחוז הסיכון לעסקה.","<span class='ex'>חשבון $25,000 × 1% = מותר לך להפסיד $250 בעסקה הזו</span>","המחשבון בוחר את מספר החוזים הגדול ביותר שלא עובר את הסכום הזה."]],
+  risk:["סיכון בפועל",["כמה תפסיד אם המחיר יגיע לסטופ, עם מספר החוזים שהמחשבון המליץ, כולל עמלות.","הוא תמיד קטן או שווה לסיכון המותר, כי אי אפשר לקנות חצי חוזה."]],
+  riskpct:["סיכון לעסקה (%)",["איזה אחוז מהחשבון אתה מוכן להפסיד בעסקה אחת.","רוב הסוחרים המקצועיים מסכנים 0.5%–1%. כך גם 10 הפסדים ברצף לא מוחקים את החשבון."]],
+  commission:["עמלה לחוזה לכל צד",["העמלה שהברוקר גובה על חוזה אחד בכניסה, ושוב ביציאה. האפליקציה מכפילה אותה ב-2 לכל עסקה.","אפשר למצוא אותה באתר של הברוקר. בחוזי מיקרו היא לרוב בין $0.25 ל-$1.50 לצד, כולל עמלות הבורסה."]],
+  contract:["איזה חוזה לבחור",["חוזי <b>מיקרו</b> (שמתחילים ב-M, כמו MES ו-MNQ) הם עשירית מגודל החוזה הרגיל. הם מתאימים לחשבון קטן או למי שמתחיל.","<span class='ex'>תזוזה של נקודה אחת ב-S&P: ‏ES = $50, ‏MES = $5</span>"]],
+  tick:["טיק ונקודה",["<b>טיק</b> הוא התזוזה הקטנה ביותר במחיר. <b>נקודה</b> היא תזוזה של 1.00 במחיר.","<span class='ex'>ב-MES טיק הוא 0.25 ושווה $1.25. נקודה = 4 טיקים = $5.</span>"]],
+  setup:["סטאפ",["שם קבוע לסוג העסקה, למשל \"פריצת טווח פתיחה\" או \"פולבק במגמה\".","כדאי להשתמש באותם שמות כל פעם. כך היומן יוכל להראות איזה סטאפ באמת מרוויח."]],
+  holidays:["חגים בבורסה",["בחגים האמריקאיים הבורסה סגורה או פועלת חלקית, גם אם אצלך זה יום רגיל.","<b>סגור לגמרי:</b> אין מסחר בכלל, גם לא בגלובקס.","<b>אין מסחר רגיל:</b> גלובקס פתוח רק עד הצהריים בשיקגו, עם מעט מאוד מחזור. עדיף לא לסחור.","<b>סגירה מוקדמת:</b> ניו יורק נסגרת ב-12:15 שעון שיקגו (20:15 בישראל ברוב השנה).","החגים מחושבים אוטומטית לפי הכללים של CME. כדאי לוודא באתר של CME לפני חגים חריגים (למשל יום אבל לאומי)."]],
+  quotes:["מחירים חיים",["המחירים מגיעים מ-TradingView ומתעדכנים בזמן אמת או בעיכוב קצר.","<b>חשוב:</b> אלה מחירי המדד עצמו (למשל S&P 500), לא של החוזה העתידי. ההפרש בין חוזה למדד נקרא בסיס, והוא בדרך כלל כמה נקודות.","ראסל, VIX, אג\"ח והדולר מוצגים דרך קרנות סל שעוקבות אחריהם (IWM, VIXY, IEF, UUP), כי TradingView לא מאפשר להציג את המדדים עצמם מחוץ לאתר שלו. הכיוון זהה, אבל המספר שונה. קרן האג\"ח IEF עולה כשהתשואה יורדת.","לחיצה על חוזה ברשימה למטה פותחת את הגרף של החוזה העתידי האמיתי ב-TradingView."]],
+  econ:["לוח כלכלי",["פרסומים כלכליים בארה\"ב שמזיזים את השוק: אינפלציה (CPI), משרות (NFP), החלטות ריבית (FOMC) ועוד.","השעות מוצגות לפי השעון שלך. מומלץ לא להחזיק עסקה חדשה בדקות של פרסום חשוב, כי המחיר יכול לקפוץ ולדלג על הסטופ."]],
+  cloud:["סנכרון בענן",["כשמתחברים, כל עסקה, הגדרה וצילום גרף נשמרים אוטומטית בענן (Supabase). אם הטלפון אובד, מתחברים במכשיר חדש וכל היומן חוזר.","אפשר להתחבר מכמה מכשירים, למשל אייפון ואייפד, והם יסתנכרנו ביניהם.","כל משתמש רואה רק את הנתונים שלו. הסיסמה לא נשמרת באפליקציה.","בלי חיבור לאינטרנט הכל ממשיך לעבוד, והשינויים יעלו לענן כשהחיבור יחזור."]],
+  stock:["מחשבון למניות",["כמו בחוזים: מזינים כניסה וסטופ, והמחשבון אומר כמה מניות לקנות כך שאם הסטופ ייפגע תפסיד רק את אחוז הסיכון שבחרת.","<span class='ex'>חשבון $25,000, סיכון 1% = $250. כניסה $25, סטופ $24 → סיכון $1 למניה → 248 מניות (אחרי עמלות).</span>","אם החשבון לא מספיק לקנות את כל הכמות, המחשבון מגביל לפי הכסף שיש לך, בלי מרגין."]],
+  stockfee:["עמלה במניות",["כמה הברוקר גובה על כל פקודה במניות, בקנייה ושוב במכירה. האפליקציה מכפילה ב-2 לכל עסקה.","בהרבה ברוקרים זה $0 עד $2 לפקודה. אם אצלך העמלה היא לפי מניה, הכנס סכום משוער לפקודה."]],
+  watch:["הרשימה שלי",["מוסיפים כל מניה, קרן או מטבע לפי הסימול שלה בבורסה, למשל BMNR, NVDA, SPY או BTCUSD. המחירים מתעדכנים לבד.","לחיצה על סימול מציגה אותו בגרף למטה. ✕ מסיר אותו מהרשימה.","אם סימול לא נמצא, הוסף לפניו את שם הבורסה: NASDAQ:AAPL, NYSE:F, AMEX:BMNR.","שים לב: היומן והמחשבון בנויים לחוזים עתידיים, לא למניות."]],
+  chart:["גרף עם חיפוש",["גרף מלא של TradingView. לחיצה על שם הסימול בפינת הגרף פותחת חיפוש, ומשם אפשר להגיע כמעט לכל מניה, קרן, מטבע או קריפטו בעולם.","את טווח הזמן (יום, שעה, 5 דקות) משנים בכפתור שליד הסימול."]],
+  partial:["יציאה חלקית",["כשסוגרים את העסקה בכמה שלבים, למשל חצי ביעד הראשון וחצי ביעד השני.","<span class='ex'>3 חוזים: 2 נסגרו ב-5910 ו-1 ב-5920</span>","סכום הכמויות ביציאות חייב להיות שווה לכמות שנכנסת איתה. מחיר היציאה מחושב כממוצע משוקלל."]],
+  cal:["לוח חודשי",["כל משבצת היא יום. ירוק = יום רווחי, אדום = יום מפסיד, וככל שהצבע חזק יותר הסכום גדול יותר.","ימים מקווקווים הם חגים בבורסה. כך רואים במבט אחד אם יש ימים בשבוע שקשים לך."]],
+  emo:["מצב רגשי",["איך הרגשת כשנכנסת לעסקה. זה נשמע מוזר, אבל זה אחד הנתונים הכי מועילים ביומן.","אחרי כמה שבועות תראה למשל שעסקאות מתוך \"נקמה\" או \"שעמום\" מפסידות, ותדע מתי לעצור."]]
+};
+const I=k=>`<button type="button" class="info" data-info="${k}" aria-label="הסבר: ${INFO[k][0]}">!</button>`;
+function openInfo(k){const[t,ps]=INFO[k];$("#sheet").innerHTML=`<div class="grab"></div><div class="row between"><h2 style="font-size:1.3rem">${t}</h2><button class="x" data-act="close" aria-label="סגור">✕</button></div><div class="infobody">${ps.map(p=>`<p>${p}</p>`).join("")}</div><button class="btn primary block" data-act="close">הבנתי</button>`;$("#sheetBg").hidden=false;document.body.style.overflow="hidden"}
+
+/* ---------- views ---------- */
+function todayTrades(){const k=todayKey();return S.trades.filter(t=>t.d===k)}
+function streak(){
+  let n=0;const d=new Date();const k=todayKey(d);
+  if(!S.days[k])d.setDate(d.getDate()-1);
+  for(let i=0;i<400;i++){const w=d.getDay();const hh=holOn(todayKey(d));if(w===0||w===6||(hh&&hh.type!=="early"&&!S.days[todayKey(d)])){d.setDate(d.getDate()-1);continue}if(S.days[todayKey(d)]){n++;d.setDate(d.getDate()-1)}else break}
+  return n;
+}
+function tzOff(tz,t){const o={};new Intl.DateTimeFormat("en-US",{timeZone:tz,hourCycle:"h23",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit"}).formatToParts(new Date(t)).forEach(p=>o[p.type]=p.value);return Date.UTC(+o.year,o.month-1,+o.day,+o.hour%24,+o.minute,+o.second)-t}
+function nyAt(d,hh,mm){const g=Date.UTC(d.getFullYear(),d.getMonth(),d.getDate(),hh,mm);let t=g-tzOff("America/New_York",g);t=g-tzOff("America/New_York",t);return new Date(t)}
+// local Date when reminder r fires on local date d (null = skipped, e.g. US holiday)
+function remAt(r,d){
+  if(!r.anchor){const[h,m]=r.time.split(":");const x=new Date(d);x.setHours(+h,+m,0,0);return x}
+  const h=holOn(todayKey(d));if(h&&h.type!=="early")return null;
+  const base=r.anchor==="open"?[9,30]:(h&&h.type==="early"?[13,0]:[16,0]);
+  return new Date(nyAt(d,base[0],base[1]).getTime()+(+r.off||0)*60000);
+}
+const hm=d=>d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
+function remLabelTime(r){if(!r.anchor)return r.time;const d=new Date();for(let i=0;i<10;i++){const x=new Date();x.setDate(d.getDate()+i);if(r.days.includes(x.getDay())){const a=remAt(r,x);if(a)return hm(a)}}return"–"}
+function nextReminder(){
+  const now=new Date();let best=null;
+  S.reminders.filter(r=>r.on&&r.days.length).forEach(r=>{for(let i=0;i<10;i++){const d=new Date(now);d.setDate(now.getDate()+i);if(!r.days.includes(d.getDay()))continue;const at=remAt(r,d);if(at&&at>now){if(!best||at<best.at)best={r,at};break}}});
+  return best;
+}
+
+function renderToday(){
+  const m=market(),tt=todayTrades(),pnl=sum(tt.map(t=>calcT(t).net)),lim=S.settings.maxDaily;
+  const used=pnl<0?Math.min(1,-pnl/lim):0,stop=pnl<=-lim||tt.length>=S.settings.maxTrades;
+  const done=ROUTINE.filter(r=>S.routine.done[r.id]).length;
+  const nr=nextReminder(),rl=rolls(1)[0],rd=dayDiff(rl.roll);
+  const month=S.trades.filter(t=>t.d.slice(0,7)===todayKey().slice(0,7));
+  const st=stats(sortedTrades().filter(t=>t.d.slice(0,7)===todayKey().slice(0,7)));
+  const hello=(()=>{const h=new Date().getHours();return h<12?"בוקר טוב":h<17?"צהריים טובים":h<21?"ערב טוב":"לילה טוב"})();
+  const sk=streak();
+  let mkt;
+  if(m.rth)mkt=`<span class="chip ok pulse"><span class="dot"></span>ניו יורק פתוחה</span><span class="muted small">נסגרת בעוד ${fmtDur(m.toClose)} (${localHM(m.toClose)})</span>`;
+  else if(m.globex)mkt=`<span class="chip acc pulse"><span class="dot"></span>גלובקס פתוח</span><span class="muted small">פתיחת ניו יורק בעוד ${fmtDur(m.toOpen)} (${localHM(m.toOpen)})</span>`;
+  else mkt=`<span class="chip bad"><span class="dot"></span>${m.halt?"הפסקה יומית":"השוק סגור"}</span><span class="muted small">נפתח בעוד ${fmtDur(m.toGlobex)} (${localHM(m.toGlobex)})</span>`;
+  const soon=upcomingHolidays(3).find(h=>h.key!==todayKey()&&dayDiff(h.date)<=7);
+  const holLine=(m.hol?`<div class="banner"><span><b>${m.hol.n}</b> בארה"ב: ${HOLTYPE[m.hol.type]}${m.hol.type==="early"?" (ניו יורק נסגרת ב-12:15 שעון שיקגו)":""}.</span></div>`:"")+(soon?`<div class="muted small">בקרוב: ${soon.n}, ${DAYN[soon.date.getDay()]}' ${dmy(soon.date)} · ${HOLTYPE[soon.type]}</div>`:"");
+  $("#v-today").innerHTML=`
+  <div class="top"><div><div class="eyebrow">${new Date().toLocaleDateString("he-IL",{weekday:"long",day:"numeric",month:"long"})}</div><h1>${hello}</h1></div>
+    <span class="row" style="gap:6px;flex-wrap:nowrap"><span class="chip ${sk?"acc":""}" title="ימי מסחר רצופים עם שגרת הכנה מלאה"><span class="num">${sk}</span> ימי שגרה ברצף</span>${I("streak")}</span></div>
+  <div class="card"><div class="row between"><h2>מצב השוק ${I("market")}</h2><span class="muted small">חוזי CME</span></div><div class="row">${mkt}</div>${holLine}</div>
+  <div class="card">
+    <div class="row between"><h2>הסיכון של היום ${I("daily")}</h2><span class="chip ${stop?"bad":"ok"}">${stop?"עצור להיום":"אפשר לסחור"}</span></div>
+    <div class="row between"><div><div class="big num ${cls(pnl)}">${money(pnl)}</div><div class="muted small"><span class="num">${tt.length}</span> מתוך <span class="num">${S.settings.maxTrades}</span> עסקאות</div></div>
+      <div class="muted small" style="text-align:left">הפסד מקסימלי<br><span class="num">${moneyPlain(lim)}</span></div></div>
+    <div class="bar" role="img" aria-label="ניצול ההפסד היומי ${Math.round(used*100)}%"><i style="width:${Math.max(used*100,2)}%;background:${used>.75?"var(--down)":used>.4?"var(--accent)":"var(--up)"}"></i></div>
+    ${stop?`<div class="warn">${pnl<=-lim?"הגעת להפסד היומי. סוגרים את הפלטפורמה. מחר יום חדש.":"הגעת למכסת העסקאות להיום. מספיק."}</div>`:""}
+  </div>
+  <div class="card">
+    <div class="row between"><h2>שגרת הכנה ${I("routine")}</h2><span class="chip ${done===ROUTINE.length?"ok":""}"><span class="num">${done}/${ROUTINE.length}</span></span></div>
+    <div id="routine">${ROUTINE.map(r=>`<label class="check"><input type="checkbox" data-r="${r.id}" ${S.routine.done[r.id]?"checked":""}><span class="box"></span><span>${r.t}</span></label>`).join("")}</div>
+  </div>
+  <div class="grid2">
+    <div class="card"><div class="eyebrow">התזכורת הבאה</div>${nr?`<div class="num" style="font-size:1.4rem;font-weight:700">${hm(nr.at)}</div><div class="small">${esc(nr.r.label)}</div><div class="muted small">${nr.at.toDateString()===new Date().toDateString()?"היום":DAYN[nr.at.getDay()]+"' "+dmy(nr.at)}</div>`:`<div class="muted small">אין תזכורות פעילות</div>`}</div>
+    <div class="card"><div class="eyebrow">גלגול חוזים רבעוני ${I("roll")}</div><div style="font-size:1.4rem;font-weight:700"><span class="num">${rd<=0?"היום":rd}</span>${rd>0?` <span class="small muted">ימים</span>`:""}</div><div class="small"><span class="num">ES${rl.code}</span> → <span class="num">ES${rl.nextCode}</span> ב-${dmy(rl.roll)}</div><div class="muted small">פקיעה <span class="num">${rl.code}</span> ב-${dmy(rl.exp)}</div></div>
+  </div>
+  <div class="card">
+    <div class="row between"><h2>החודש</h2><button class="btn ghost small" data-go="journal" style="min-height:34px;padding:4px 10px">ליומן ←</button></div>
+    ${month.length?`<div class="grid3"><div class="stat"><span class="k">רווח נקי</span><span class="v num ${cls(st.total)}">${money(st.total)}</span></div><div class="stat"><span class="k">הצלחה</span><span class="v num">${Math.round(st.win*100)}%</span></div><div class="stat"><span class="k">לפי התוכנית ${I("plan")}</span><span class="v num">${Math.round(st.plan*100)}%</span></div></div>${curveSVG(st.curve,70)}`:`<div class="empty">עוד אין עסקאות החודש.</div>`}
+  </div>
+  ${backupNudge()}
+  <button class="btn primary block" data-act="new">+ רשום עסקה</button>`;
+}
+
+function backupNudge(){
+  const real=S.trades.filter(t=>!t.sample).length;if(!real||cloud.user)return"";
+  const days=S.lastBackup?Math.round((new Date(todayKey())-new Date(S.lastBackup))/864e5):null;
+  if(days!=null&&days<7)return"";
+  return`<div class="banner"><span>${days==null?"עוד לא גיבית את היומן.":`עברו ${days} ימים מהגיבוי האחרון.`} הנתונים שמורים רק בטלפון.</span><button class="btn" data-act="backup-file" style="min-height:36px;padding:6px 12px">גבה עכשיו</button></div>`;
+}
+function curveSVG(c,h=110){
+  if(c.length<2)return"";const W=320,H=h,p=6;const mn=Math.min(0,...c),mx=Math.max(0,...c),rg=(mx-mn)||1;
+  const x=i=>p+(i/(c.length-1))*(W-2*p);
+  const y=v=>p+(1-(v-mn)/rg)*(H-2*p);
+  const pts=c.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+  const last=c[c.length-1],col=last>=0?"var(--up)":"var(--down)";
+  return`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="עקומת הון מצטברת"><line x1="${p}" x2="${W-p}" y1="${y(0)}" y2="${y(0)}" stroke="var(--line)" stroke-dasharray="3 4"/><polygon points="${x(0)},${y(0)} ${pts} ${x(c.length-1)},${y(0)}" fill="${col}" fill-opacity=".12"/><polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${x(c.length-1)}" cy="${y(last)}" r="4" fill="${col}"/></svg>`;
+}
+
+/* ---- market ---- */
+const FUT=[["ES","CME_MINI:ES1!","S&P 500"],["NQ","CME_MINI:NQ1!","Nasdaq-100"],["YM","CBOT_MINI:YM1!","Dow"],["RTY","CME_MINI:RTY1!","Russell 2000"],["CL","NYMEX:CL1!","נפט"],["GC","COMEX:GC1!","זהב"],["SI","COMEX:SI1!","כסף"],["NG","NYMEX:NG1!","גז טבעי"],["ZN","CBOT:ZN1!","אג\"ח 10 שנים"],["6E","CME:6E1!","יורו"]];
+const embeddable=(()=>{try{return window.self===window.top}catch(e){return false}})();
+let tvBuilt=false;
+function tvWidget(el,name,cfg){
+  const th=cfg.colorTheme||cfg.theme||"dark",h=cfg.height||400;
+  const doc=`<!doctype html><html><head><meta charset="utf-8"><meta name="color-scheme" content="${th}"><style>:root{color-scheme:${th}}html,body{margin:0;background:transparent}</style></head><body><div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div><script src="https://s3.tradingview.com/external-embedding/embed-widget-${name}.js" async>${JSON.stringify(cfg).replace(/</g,"\\u003c")}<\/script></div></body></html>`;
+  const f=document.createElement("iframe");f.setAttribute("sandbox","allow-scripts allow-popups allow-popups-to-escape-sandbox");f.setAttribute("title","נתונים מ-TradingView");f.setAttribute("referrerpolicy","no-referrer");
+  f.srcdoc=doc;f.style.cssText=`width:100%;height:${h}px;border:0;display:block;background:transparent;color-scheme:${th}`;el.innerHTML="";el.appendChild(f);
+}
+const theme=()=>(getComputedStyle(document.documentElement).colorScheme||"").includes("dark")?"dark":"light";
+const normSym=v=>String(v||"").toUpperCase().replace(/[^A-Z0-9:.!_-]/g,"").slice(0,24);
+function watchList(){if(!Array.isArray(S.watch))S.watch=["BMNR","NVDA","TSLA","AAPL"];return S.watch}
+let chartSym=null;
+function buildWatchWidget(){const el=$("#tv-watch");if(!el)return;const w=watchList();
+  if(!w.length){el.innerHTML=`<div class="empty">הרשימה ריקה. הוסף סימול למעלה.</div>`;return}
+  tvWidget(el,"market-quotes",{width:"100%",height:70+w.length*56,symbolsGroups:[{name:"הרשימה שלי",symbols:w.map(x=>({name:x,displayName:x.split(":").pop()}))}],showSymbolLogo:true,isTransparent:true,colorTheme:theme(),locale:"he_IL"})}
+function buildChartWidget(){const el=$("#tv-chart");if(!el)return;
+  tvWidget(el,"advanced-chart",{width:"100%",height:460,symbol:chartSym||watchList()[0]||"AMEX:SPY",interval:"D",timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||"Etc/UTC",theme:theme(),style:"1",locale:"he_IL",allow_symbol_change:true,hide_side_toolbar:true,calendar:false,save_image:false,support_host:"https://www.tradingview.com"})}
+function watchChips(){return watchList().map(x=>embeddable
+  ?`<span class="chip" style="padding-inline-end:4px"><button class="x" data-chart="${esc(x)}" style="padding:0 4px;min-height:24px;color:var(--fg);font-weight:700" aria-label="הצג גרף של ${esc(x)}">${esc(x)}</button><button class="x" data-unwatch="${esc(x)}" style="padding:0 4px;min-height:24px" aria-label="הסר ${esc(x)}">✕</button></span>`
+  :`<span class="chip" style="padding-inline-end:4px"><a href="https://www.tradingview.com/symbols/${encodeURIComponent(x.replace(":","-"))}/" target="_blank" rel="noopener" style="color:var(--fg);font-weight:700;text-decoration:none">${esc(x)}</a><button class="x" data-unwatch="${esc(x)}" style="padding:0 4px;min-height:24px" aria-label="הסר ${esc(x)}">✕</button></span>`).join("")}
+function renderMarket(){
+  const v=$("#v-market");if(tvBuilt&&embeddable){$("#watch-chips").innerHTML=watchChips();return}
+  v.innerHTML=`
+  <div class="top"><div><div class="eyebrow">נתונים חיים</div><h1>שוק</h1></div></div>
+  ${embeddable?"":`<div class="banner"><span>המחירים החיים, הגרפים והלוח הכלכלי מופיעים רק בגרסה שמותקנת מ-GitHub. בינתיים כל סימול נפתח בלחיצה.</span></div>`}
+  <div class="card"><h2>הרשימה שלי ${I("watch")}</h2>
+    <form class="row" id="watch-form" style="flex-wrap:nowrap"><input type="text" id="watch-in" placeholder="סימול, למשל BMNR" aria-label="הוסף סימול" autocapitalize="characters" autocomplete="off" spellcheck="false" style="direction:ltr;text-align:right"><button class="btn primary" type="submit">הוסף</button></form>
+    <div class="row" id="watch-chips" style="gap:6px">${watchChips()}</div>
+    ${embeddable?`<div class="tvbox" id="tv-watch"></div>`:""}
+  </div>
+  ${embeddable?`<div class="card"><h2>גרף עם חיפוש ${I("chart")}</h2><div class="tvbox" id="tv-chart"></div></div>
+  <div class="card"><h2>מחירים עכשיו ${I("quotes")}</h2><div class="tvbox" id="tv-quotes"></div></div>
+  <div class="card"><h2>לוח כלכלי ארה"ב ${I("econ")}</h2><div class="tvbox" id="tv-econ"></div></div>`:""}
+  <div class="card"><h2>גרף החוזה העתידי</h2><div class="links">${FUT.map(([k,sym,n])=>`<a href="https://www.tradingview.com/chart/?symbol=${encodeURIComponent(sym)}" target="_blank" rel="noopener"><b>${k}</b><span>${n}</span></a>`).join("")}</div></div>
+  <div class="card"><h2>קישורים שימושיים</h2><div class="links">
+    <a href="https://www.investing.com/economic-calendar/" target="_blank" rel="noopener"><b>Calendar</b><span>לוח כלכלי מלא</span></a>
+    <a href="https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html" target="_blank" rel="noopener"><b>FedWatch</b><span>סיכויי שינוי ריבית</span></a>
+    <a href="https://www.cmegroup.com/tools-information/holiday-calendar.html" target="_blank" rel="noopener"><b>CME</b><span>לוח חגים רשמי</span></a>
+    <a href="https://www.tradingview.com/symbols/CBOE-VIX/" target="_blank" rel="noopener"><b>VIX</b><span>מדד הפחד</span></a>
+  </div></div>`;
+  if(!embeddable)return;
+  try{
+    buildWatchWidget();buildChartWidget();
+    tvWidget($("#tv-quotes"),"market-quotes",{width:"100%",height:560,symbolsGroups:[
+      {name:"מדדים",symbols:[{name:"FOREXCOM:SPXUSD",displayName:"S&P 500"},{name:"FOREXCOM:NSXUSD",displayName:"Nasdaq 100"},{name:"FOREXCOM:DJI",displayName:"Dow 30"},{name:"AMEX:IWM",displayName:"Russell 2000 (קרן IWM)"},{name:"AMEX:VIXY",displayName:"תנודתיות VIX (קרן VIXY)"}]},
+      {name:"סחורות",symbols:[{name:"TVC:USOIL",displayName:"נפט WTI"},{name:"TVC:GOLD",displayName:"זהב"},{name:"TVC:SILVER",displayName:"כסף"}]},
+      {name:"ריבית ומט\"ח",symbols:[{name:"NASDAQ:IEF",displayName:"אג\"ח 7-10 שנים (קרן IEF)"},{name:"AMEX:UUP",displayName:"מדד הדולר (קרן UUP)"},{name:"FX:EURUSD",displayName:"EUR/USD"},{name:"BITSTAMP:BTCUSD",displayName:"ביטקוין"}]}],
+      showSymbolLogo:false,isTransparent:true,colorTheme:theme(),locale:"he_IL"});
+    tvWidget($("#tv-econ"),"events",{width:"100%",height:560,isTransparent:true,colorTheme:theme(),locale:"he_IL",importanceFilter:"0,1",countryFilter:"us"});
+    tvBuilt=true;
+  }catch(e){}
+}
+
+/* ---- calculator ---- */
+const calcState={sym:null,stock:null,mode:"fut",side:"L",pre:{}};
+function renderCalc(){
+  const s=S.settings;calcState.sym=calcState.sym||s.sym;calcState.stock=calcState.stock||s.stockSym||"BMNR";const st=calcState.mode==="stock";
+  $("#v-calc").innerHTML=`
+  <div class="top"><div><div class="eyebrow">לפני כל כניסה</div><h1>גודל פוזיציה</h1></div></div>
+  <div class="seg" role="group" aria-label="סוג נכס"><button data-cmode="fut" aria-pressed="${!st}">חוזים עתידיים</button><button data-cmode="stock" aria-pressed="${st}">מניות</button></div>
+  <div class="card">
+    ${st?`<label class="f"><span>סימול המניה ${I("stock")}</span><input type="text" id="c-stock" list="c-watch" value="${esc(calcState.stock)}" autocapitalize="characters" autocomplete="off" spellcheck="false" style="direction:ltr;text-align:right"><datalist id="c-watch">${watchList().map(x=>`<option value="${esc(x)}">`).join("")}</datalist></label>`
+    :`<label class="f"><span>חוזה ${I("contract")}</span><select id="c-sym">${Object.entries(C).map(([k,v])=>`<option value="${k}" ${k===calcState.sym?"selected":""}>${k} · ${v.n}</option>`).join("")}</select></label>`}
+    <div class="muted small" id="c-spec"></div>
+    <div class="grid2"><label class="f">גודל חשבון ($)<input type="number" id="c-acc" inputmode="decimal" step="any" value="${s.account}"></label><label class="f"><span>סיכון לעסקה (%) ${I("riskpct")}</span><input type="number" id="c-risk" inputmode="decimal" step="0.1" value="${s.riskPct}"></label></div>
+    <div class="grid3"><label class="f">כניסה<input type="number" id="c-entry" inputmode="decimal" step="any" placeholder="${st?"25.00":"5900"}"></label><label class="f">סטופ<input type="number" id="c-stop" inputmode="decimal" step="any" placeholder="${st?"24.20":"5895"}"></label><label class="f">יעד<input type="number" id="c-tgt" inputmode="decimal" step="any" placeholder="${st?"27.00":"5910"}"></label></div>
+  </div>
+  <div class="card" id="c-out"></div>
+  <div class="card"><div class="row between"><h2>צ'קליסט לפני כניסה ${I("pretrade")}</h2><span class="chip" id="pre-count"></span></div>
+    <div id="pre">${PRETRADE.map((t,i)=>`<label class="check"><input type="checkbox" data-p="${i}" ${calcState.pre[i]?"checked":""}><span class="box"></span><span>${t}</span></label>`).join("")}</div>
+    <button class="btn primary block" id="c-log">רשום ביומן</button>
+  </div>`;
+  updCalc();
+}
+function updStock(){
+  const sym=normSym($("#c-stock").value);calcState.stock=sym;
+  const fee=(S.settings.stockFee||0)*2;
+  $("#c-spec").innerHTML=`רווח או הפסד = מספר מניות × שינוי במחיר · עמלה <span class="num">${usd2.format(S.settings.stockFee||0)}</span> לכל פקודה`;
+  const acc=readNum("#c-acc"),rp=readNum("#c-risk"),e=readNum("#c-entry"),st=readNum("#c-stop"),tg=readNum("#c-tgt"),out=$("#c-out");
+  if(!sym||acc==null||rp==null||e==null||st==null||e===st||e<=0){out.innerHTML=`<div class="result"><div class="eyebrow">מניות</div><div class="big num">–</div><div class="muted small">הזן סימול, כניסה וסטופ. הכיוון נקבע לפי מיקום הסטופ.</div></div>`;return}
+  const side=st<e?"L":"S";calcState.side=side;
+  const allow=acc*rp/100,rps=Math.abs(e-st);let qty=Math.max(0,Math.floor((allow-fee)/rps));const bp=Math.floor(acc/e);let capped=false;if(qty>bp){qty=bp;capped=true}
+  const risk=qty*rps+fee,val=qty*e;
+  let rr=null,rew=null;if(tg!=null&&((side==="L"&&tg>e)||(side==="S"&&tg<e))){rr=Math.abs(tg-e)/rps;rew=qty*Math.abs(tg-e)-fee}
+  const stopPct=rps/e*100;let note="";
+  if(qty===0)note=`<div class="warn">הסיכון המותר (${moneyPlain(allow)}) קטן מדי לעסקה הזו. הקטן את הסטופ או וותר.</div>`;
+  else if(capped)note=`<div class="warn">מוגבל לפי גודל החשבון: ${bp} מניות בשווי ${moneyPlain(bp*e)}. בלי מרגין אי אפשר לקנות יותר.</div>`;
+  else if(rr!=null&&rr<1.5)note=`<div class="warn">יחס סיכוי-סיכון ${rr.toFixed(2)} נמוך מ-1.5. שקול לוותר.</div>`;
+  else if(rr!=null)note=`<div class="okmsg">יחס סיכוי-סיכון ${rr.toFixed(2)}. עומד בכללים.</div>`;
+  if(stopPct>15&&qty>0)note+=`<div class="warn">הסטופ רחוק ${stopPct.toFixed(1)}% מהכניסה. במניות תנודתיות זה נפוץ, אבל ודא שזה מכוון.</div>`;
+  out.innerHTML=`<div class="result"><div class="eyebrow">${side==="L"?"לונג":"שורט"} · ${esc(sym)}</div><div class="big num">${qty}</div><div class="muted small">מניות</div></div>
+  <div class="grid3"><div class="stat"><span class="k">סיכון בפועל ${I("risk")}</span><span class="v num down">${moneyPlain(risk)}</span></div><div class="stat"><span class="k">מותר ${I("allowed")}</span><span class="v num">${moneyPlain(allow)}</span></div><div class="stat"><span class="k">שווי פוזיציה</span><span class="v num">${moneyPlain(val)}</span></div>
+  <div class="stat"><span class="k">רווח ביעד</span><span class="v num up">${rew!=null?moneyPlain(rew):"–"}</span></div><div class="stat"><span class="k">R:R ${I("rr")}</span><span class="v num">${rr!=null?"1:"+rr.toFixed(2):"–"}</span></div><div class="stat"><span class="k">מהחשבון</span><span class="v num">${Math.round(val/acc*100)}%</span></div></div>${note}`;
+}
+function readNum(id){const v=parseFloat($(id).value);return isFinite(v)?v:null}
+function updCalc(){
+  const pc0=PRETRADE.filter((_,i)=>calcState.pre[i]).length;$("#pre-count").textContent=`${pc0}/${PRETRADE.length}`;$("#pre-count").className="chip "+(pc0===PRETRADE.length?"ok":"");
+  if(calcState.mode==="stock")return updStock();
+  const sym=$("#c-sym").value;calcState.sym=sym;const c=C[sym],P=pv(sym);
+  $("#c-spec").innerHTML=`${I("tick")} טיק <span class="num">${c.tick}</span> = <span class="num">${usd2.format(c.tv)}</span> · נקודה = <span class="num">${usd2.format(P)}</span>`;
+  const acc=readNum("#c-acc"),rp=readNum("#c-risk"),e=readNum("#c-entry"),st=readNum("#c-stop"),tg=readNum("#c-tgt");
+  const out=$("#c-out");const pc=PRETRADE.filter((_,i)=>calcState.pre[i]).length;
+  $("#pre-count").textContent=`${pc}/${PRETRADE.length}`;$("#pre-count").className="chip "+(pc===PRETRADE.length?"ok":"");
+  if(acc==null||rp==null||e==null||st==null||e===st){out.innerHTML=`<div class="result"><div class="eyebrow">חוזים</div><div class="big num">–</div><div class="muted small">הזן כניסה וסטופ. הכיוון נקבע לפי מיקום הסטופ.</div></div>`;return}
+  const side=st<e?"L":"S";calcState.side=side;
+  const allow=acc*rp/100,ticks=Math.abs(e-st)/c.tick,per=ticks*c.tv;
+  const fee=S.settings.commission*2;const qty=Math.floor(allow/(per+fee));const risk=qty*(per+fee);
+  let rr=null,rew=null,tTicks=null;
+  if(tg!=null&&((side==="L"&&tg>e)||(side==="S"&&tg<e))){tTicks=Math.abs(tg-e)/c.tick;rew=tTicks*c.tv*qty-fee*qty;rr=Math.abs(tg-e)/Math.abs(e-st)}
+  let note="";
+  if(qty===0){const mic=MICRO[sym];note=`<div class="warn">חוזה אחד מסכן ${moneyPlain(per+fee)}, יותר מהמותר (${moneyPlain(allow)}).${mic?` בחוזה ${mic} הסיכון לחוזה הוא ${moneyPlain(per/10+fee)}.`:" הקטן את הסטופ או וותר על העסקה."}</div>`}
+  else if(rr!=null&&rr<1.5)note=`<div class="warn">יחס סיכוי-סיכון ${rr.toFixed(2)} נמוך מ-1.5. שקול לוותר.</div>`;
+  else if(rr!=null)note=`<div class="okmsg">יחס סיכוי-סיכון ${rr.toFixed(2)}. עומד בכללים.</div>`;
+  out.innerHTML=`<div class="result"><div class="eyebrow">${side==="L"?"לונג":"שורט"} · ${sym}</div><div class="big num">${qty}</div><div class="muted small">חוזים</div></div>
+  <div class="grid3"><div class="stat"><span class="k">סיכון בפועל ${I("risk")}</span><span class="v num down">${moneyPlain(risk)}</span></div><div class="stat"><span class="k">מותר ${I("allowed")}</span><span class="v num">${moneyPlain(allow)}</span></div><div class="stat"><span class="k">טיקים לסטופ ${I("ticks")}</span><span class="v num">${N(ticks,0)}</span></div>
+  <div class="stat"><span class="k">רווח ביעד</span><span class="v num up">${rew!=null?moneyPlain(rew):"–"}</span></div><div class="stat"><span class="k">R:R ${I("rr")}</span><span class="v num">${rr!=null?"1:"+rr.toFixed(2):"–"}</span></div><div class="stat"><span class="k">עמלות</span><span class="v num">${usd2.format(fee*qty)}</span></div></div>${note}`;
+}
+
+/* ---- journal ---- */
+const jState={filter:"all",cal:0};
+const fmtK=v=>{const a=Math.abs(v);return(v<0?"−":"+")+(a>=1000?(a/1000).toFixed(1)+"k":Math.round(a))};
+function calHTML(){
+  const b=new Date();b.setDate(1);b.setMonth(b.getMonth()+jState.cal);const y=b.getFullYear(),m=b.getMonth(),pre=`${y}-${String(m+1).padStart(2,"0")}`;
+  const by={};S.trades.forEach(t=>{if(t.d.startsWith(pre))by[t.d]=(by[t.d]||0)+calcT(t).net});
+  const vals=Object.values(by),mx=Math.max(1,...vals.map(Math.abs)),tot=sum(vals),days=new Date(y,m+1,0).getDate(),tk=todayKey();
+  let cells=DAYN.map(d=>`<div class="h">${d}</div>`).join("")+"<div></div>".repeat(b.getDay());
+  for(let d=1;d<=days;d++){const k=`${pre}-${String(d).padStart(2,"0")}`,v=by[k],h=holOn(k);
+    const st=v==null?"":`background:color-mix(in srgb,var(${v>=0?"--up":"--down"}) ${Math.round(18+55*Math.abs(v)/mx)}%,var(--surface2))`;
+    cells+=`<div class="d${k===tk?" today":""}${h&&v==null&&h.type!=="early"?" hol":""}" style="${st}" title="${h?h.n:""}"><span>${d}</span>${v!=null?`<span class="a">${fmtK(v)}</span>`:""}</div>`}
+  return`<div class="row between"><button class="x" data-cal="-1" aria-label="חודש קודם">→</button><span><b>${b.toLocaleDateString("he-IL",{month:"long",year:"numeric"})}</b> · <span class="num ${cls(tot)}">${money(tot)}</span></span><button class="x" data-cal="1" aria-label="חודש הבא" ${jState.cal>=0?"disabled":""}>←</button></div><div class="cal">${cells}</div>`;
+}
+function journalCSV(sep){
+  const q=v=>{v=v==null?"":String(v);return sep===","&&/[",\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v.replace(/[\t\n]/g," ")};
+  const head=["תאריך","שעה","נכס","כיוון","כמות","כניסה","יציאה","יציאות חלקיות","סטופ","רווח ברוטו","עמלות","רווח נטו","R","סטאפ","מצב רגשי","לפי התוכנית","מה למדתי"];
+  const tx=v=>{v=v==null?"":String(v);return/^[=+\-@\t\r]/.test(v)?"'"+v:v};
+  const rows=sortedTrades().map(t=>{const r=calcT(t);return[t.d,t.time,tx(t.sym),t.side==="L"?"לונג":"שורט",t.qty,t.entry,t.exit,(t.exits||[]).map(e=>e.q+"@"+e.p).join(" "),t.stop??"",r.gross.toFixed(2),(t.fee||0).toFixed(2),r.net.toFixed(2),r.r==null?"":r.r.toFixed(2),tx(t.setup),tx(t.emo),t.plan?"כן":"לא",tx(t.note)]});
+  return[head,...rows].map(r=>r.map(q).join(sep)).join("\r\n");
+}
+async function exportCSV(){
+  if(!embeddable){copy(journalCSV("\t"),"הטבלה הועתקה. הדבק אותה באקסל, Numbers או Google Sheets.");return}
+  const file=new File(["\ufeff"+journalCSV(",")],`tick-journal-${todayKey()}.csv`,{type:"text/csv"});
+  try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"יומן טיק"});return}}catch(e){if(e&&e.name==="AbortError")return}
+  try{const a=document.createElement("a");a.href=URL.createObjectURL(file);a.download=file.name;document.body.appendChild(a);a.click();a.remove();toast("הקובץ נשמר בהורדות",3000)}catch(e){copy(journalCSV("\t"),"הטבלה הועתקה. הדבק אותה באקסל.")}
+}
+function renderJournal(){
+  const all=sortedTrades();const f=jState.filter;
+  const ts=f==="all"?all:all.filter(t=>f==="month"?t.d.slice(0,7)===todayKey().slice(0,7):t.d>=daysAgo(6));
+  const st=stats(ts);const list=[...st.rows].reverse();
+  const hasSample=S.trades.some(t=>t.sample);
+  const bySet=groupBy(st.rows,t=>t.setup).sort((a,b)=>b.total-a.total);
+  const bySym=groupBy(st.rows,t=>t.sym).sort((a,b)=>b.total-a.total);
+  $("#v-journal").innerHTML=`
+  <div class="top"><div><div class="eyebrow">ביצועים</div><h1>יומן מסחר</h1></div><button class="btn primary" data-act="new">+ עסקה</button></div>
+  ${hasSample?`<div class="banner"><span>אלה עסקאות לדוגמה כדי שתראה איך היומן עובד.</span><button class="btn" data-act="clear-sample" style="min-height:36px;padding:6px 12px">מחק דוגמאות</button></div>`:""}
+  <div class="seg" role="group" aria-label="טווח">${[["week","7 ימים"],["month","החודש"],["all","הכל"]].map(([k,l])=>`<button data-f="${k}" aria-pressed="${f===k}">${l}</button>`).join("")}</div>
+  <div class="card">
+    <div class="row between"><div><div class="eyebrow">רווח נקי אחרי עמלות</div><div class="big num ${cls(st.total)}">${money(st.total)}</div></div><div class="muted small" style="text-align:left"><span class="num">${st.n}</span> עסקאות</div></div>
+    ${curveSVG(st.curve)}
+    <div class="grid3">
+      <div class="stat"><span class="k">אחוז הצלחה</span><span class="v num">${Math.round(st.win*100)}%</span></div>
+      <div class="stat"><span class="k">Profit factor ${I("pf")}</span><span class="v num">${st.pf===Infinity?"∞":N(st.pf)}</span></div>
+      <div class="stat"><span class="k">R ממוצע ${I("avgr")}</span><span class="v num ${cls(st.avgR)}">${st.avgR==null?"–":N(st.avgR)}</span></div>
+      <div class="stat"><span class="k">תוחלת לעסקה ${I("exp")}</span><span class="v num ${cls(st.exp)}">${money(st.exp)}</span></div>
+      <div class="stat"><span class="k">ירידה מקסימלית ${I("dd")}</span><span class="v num down">${money(st.dd)}</span></div>
+      <div class="stat"><span class="k">לפי התוכנית ${I("plan")}</span><span class="v num">${Math.round(st.plan*100)}%</span></div>
+    </div>
+  </div>
+  <div class="card"><h2>לוח חודשי ${I("cal")}</h2>${calHTML()}</div>
+  <div class="card"><h2>מה היומן אומר עליך ${I("insights")}</h2><div>${insights(st).map(i=>`<div class="insight ${i.tone}"><b class="i"></b><span>${i.text}</span></div>`).join("")}</div></div>
+  <div class="card"><div class="row between"><h2>עסקאות</h2><button class="btn" data-act="csv" style="min-height:36px;padding:6px 12px">ייצוא לאקסל</button></div><div>${list.length?list.map(r=>{const t=r.t;return`<button class="trade" data-edit="${t.id}"><span class="side ${t.side}">${t.side==="L"?"L":"S"}</span><span style="min-width:0"><b>${esc(t.sym)}</b> <span class="muted small"><span class="num">${t.qty}</span> ${unitName(t.sym,t.qty)} · ${dmy(new Date(t.d+"T12:00"))}${t.time?" · <span class='num'>"+esc(t.time)+"</span>":""}</span><span class="tags">${t.setup?`<span class="tag">${esc(t.setup)}</span>`:""}${t.emo?`<span class="tag">${esc(t.emo)}</span>`:""}${t.exits&&t.exits.length?`<span class="tag">${t.exits.length} יציאות</span>`:""}${t.shot?`<span class="tag">צילום</span>`:""}${t.plan?"":`<span class="tag" style="color:var(--down)">מחוץ לתוכנית</span>`}</span></span><span style="text-align:left"><span class="num ${cls(r.net)}" style="font-weight:700">${money(r.net)}</span><br><span class="muted small num">${r.r==null?"":(r.r>=0?"+":"")+r.r.toFixed(2)+"R"}</span></span></button>`}).join(""):`<div class="empty">אין עסקאות בטווח הזה. רשום את העסקה הראשונה וקבל סטטיסטיקה ותובנות.</div>`}</div></div>
+  ${bySet.length?`<div class="card"><h2>לפי סטאפ</h2><div class="tablewrap"><table><thead><tr><th>סטאפ</th><th>עסקאות</th><th>הצלחה</th><th>סה"כ</th></tr></thead><tbody>${bySet.map(g=>`<tr><td>${esc(g.k)}</td><td class="num">${g.n}</td><td class="num">${Math.round(g.win*100)}%</td><td class="num ${cls(g.total)}">${money(g.total)}</td></tr>`).join("")}</tbody></table></div>
+  <h2>לפי נכס</h2><div class="tablewrap"><table><thead><tr><th>נכס</th><th>עסקאות</th><th>הצלחה</th><th>סה"כ</th></tr></thead><tbody>${bySym.map(g=>`<tr><td class="num">${esc(g.k)}</td><td class="num">${g.n}</td><td class="num">${Math.round(g.win*100)}%</td><td class="num ${cls(g.total)}">${money(g.total)}</td></tr>`).join("")}</tbody></table></div></div>`:""}`;
+}
+
+/* ---- plan & reminders ---- */
+const isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+const standalone=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+function notifState(){if(!("Notification" in window))return"none";return Notification.permission}
+function renderPlan(){
+  const s=S.settings,ns=notifState();
+  $("#v-plan").innerHTML=`
+  <div class="top"><div><div class="eyebrow">משמעת</div><h1>תוכנית ותזכורות</h1></div></div>
+  ${isIOS&&!standalone?`<div class="banner"><span>באייפון: Safari ← שיתוף ← <b>הוסף למסך הבית</b>. כך האפליקציה נפתחת במסך מלא ושומרת את הנתונים שלך.</span></div>`:""}
+  ${cloudCard()}
+  <div class="card">
+    <div class="row between"><h2>תזכורות ${I("reminders")}</h2><button class="btn" data-act="add-rem" style="min-height:36px;padding:6px 12px">+ הוסף</button></div>
+    <div>${S.reminders.map(r=>`<div class="rem" data-rid="${r.id}">
+      <div style="display:grid;gap:8px;min-width:0"><div class="row" style="gap:8px"><select data-k="anchor" aria-label="סוג זמן" style="width:auto;flex:1;min-width:140px"><option value="" ${!r.anchor?"selected":""}>שעה קבועה</option><option value="open" ${r.anchor==="open"?"selected":""}>ביחס לפתיחת ניו יורק</option><option value="close" ${r.anchor==="close"?"selected":""}>ביחס לסגירת ניו יורק</option></select><button class="x" data-act="del-rem" aria-label="מחק תזכורת">✕</button></div>
+      ${r.anchor?`<div class="row" style="gap:8px"><input type="number" inputmode="numeric" data-k="off" value="${+r.off||0}" step="5" aria-label="דקות לפני או אחרי" style="width:90px"><span class="small muted">דקות (מינוס = לפני) · אצלך <b class="num" style="color:var(--fg)">${remLabelTime(r)}</b></span></div>`:`<input type="time" value="${r.time}" data-k="time" style="width:auto;min-width:110px" aria-label="שעה">`}
+      <input type="text" value="${esc(r.label)}" data-k="label" aria-label="נוסח התזכורת">
+      <div class="days">${DAYN.map((d,i)=>`<button data-day="${i}" aria-pressed="${r.days.includes(i)}" aria-label="יום ${d}">${d}</button>`).join("")}</div></div>
+      <label class="switch" aria-label="הפעל"><input type="checkbox" data-k="on" ${r.on?"checked":""}><span></span></label></div>`).join("")}</div>
+    <div class="grid2"><button class="btn primary" data-act="ics">הוסף ליומן האייפון</button><button class="btn" data-act="notif">${ns==="granted"?"התראות פעילות ✓":"הפעל התראות"}</button></div>
+    <p class="muted small" style="margin:0">הדרך האמינה ביותר באייפון: "הוסף ליומן האייפון" יוצר אירועים חוזרים עם התראה, כולל ימי גלגול החוזים. האייפון יזכיר לך גם כשהאפליקציה סגורה. ההתראות בתוך האפליקציה עובדות כשהיא פתוחה.</p>
+    <div id="ics-fallback" hidden><p class="small muted" style="margin:0">אם הקובץ לא נפתח, העתק את הטקסט, שמור כקובץ ‎.ics ופתח אותו:</p><code class="ics" id="ics-text"></code><button class="btn" data-act="copy-ics">העתק</button></div>
+  </div>
+  <div class="card">
+    <div class="row between"><h2>חוקי המסחר שלי</h2></div>
+    <div>${S.rules.map((r,i)=>`<div class="rule"><span class="n">${i+1}</span><p>${esc(r)}</p><button class="x" data-delrule="${i}" aria-label="מחק חוק">✕</button></div>`).join("")}</div>
+    <form class="row" id="rule-form" style="flex-wrap:nowrap"><input type="text" id="rule-in" placeholder="חוק חדש…" aria-label="חוק חדש"><button class="btn" type="submit">הוסף</button></form>
+  </div>
+  <div class="card">
+    <h2>גלגולי חוזים קרובים ${I("roll")}</h2>
+    <div class="tablewrap"><table><thead><tr><th>חוזה נוכחי</th><th>יום גלגול</th><th>פקיעה</th><th>עוד</th></tr></thead><tbody>${rolls(4).map(r=>`<tr><td class="num">ES${r.code} → ES${r.nextCode}</td><td>${dmy(r.roll)}</td><td>${dmy(r.exp)}</td><td class="num">${Math.max(0,dayDiff(r.roll))}d</td></tr>`).join("")}</tbody></table></div>
+    <p class="muted small" style="margin:0">חוזי המדדים (ES, NQ, YM, RTY והמיקרו) פוקעים ביום שישי השלישי של מרץ, יוני, ספטמבר ודצמבר. הנזילות עוברת לחוזה הבא כשמונה ימים לפני.</p>
+  </div>
+  <div class="card">
+    <h2>חגים בבורסה האמריקאית ${I("holidays")}</h2>
+    <div class="tablewrap"><table><thead><tr><th>חג</th><th>תאריך</th><th>מה קורה</th></tr></thead><tbody>${upcomingHolidays(8).map(h=>`<tr><td>${h.n}</td><td>${DAYN[h.date.getDay()]}' ${dmy(h.date)}</td><td><span class="chip ${h.type==="early"?"acc":"bad"}">${HOLTYPE[h.type]}</span></td></tr>`).join("")}</tbody></table></div>
+  </div>
+  <div class="card">
+    <h2>הגדרות סיכון</h2>
+    <div class="grid2">
+      <label class="f">גודל חשבון ($)<input type="number" data-s="account" inputmode="decimal" value="${s.account}"></label>
+      <label class="f"><span>סיכון לעסקה (%) ${I("riskpct")}</span><input type="number" data-s="riskPct" inputmode="decimal" step="0.1" value="${s.riskPct}"></label>
+      <label class="f"><span>הפסד יומי מקסימלי ($) ${I("daily")}</span><input type="number" data-s="maxDaily" inputmode="decimal" value="${s.maxDaily}"></label>
+      <label class="f">מקסימום עסקאות ביום<input type="number" data-s="maxTrades" inputmode="numeric" value="${s.maxTrades}"></label>
+      <label class="f"><span>עמלה לחוזה לכל צד ($) ${I("commission")}</span><input type="number" data-s="commission" inputmode="decimal" step="0.01" value="${s.commission}"></label>
+      <label class="f"><span>עמלה לפקודה במניות ($) ${I("stockfee")}</span><input type="number" data-s="stockFee" inputmode="decimal" step="0.01" value="${s.stockFee??1}"></label>
+      <label class="f">חוזה ברירת מחדל<select data-s="sym">${Object.keys(C).map(k=>`<option ${k===s.sym?"selected":""}>${k}</option>`).join("")}</select></label>
+    </div>
+  </div>
+  <div class="card">
+    <details><summary>גיבוי ושחזור</summary>
+      <div style="display:grid;gap:10px;margin-top:12px">
+        <p class="muted small" style="margin:0">${cloud.user?"הנתונים מסונכרנים לענן. קובץ גיבוי הוא שכבת הגנה נוספת.":"הנתונים נשמרים רק במכשיר הזה. גבה פעם בשבוע, או התחבר לסנכרון בענן."}</p>
+        <div class="grid2"><button class="btn primary" data-act="backup-file">שמור קובץ גיבוי מלא</button><label class="btn filebtn">שחזר מקובץ<input type="file" id="restore-file" accept=".json,application/json"></label></div>
+        <p class="muted small" style="margin:0">הקובץ כולל גם את צילומי הגרפים. באייפון בחר "שמור בקבצים" ← iCloud Drive, וכך הגיבוי נשמר בענן שלך. גיבוי אחרון: <b>${S.lastBackup?dmy(new Date(S.lastBackup+"T12:00")):"עוד לא"}</b></p>
+        <div class="grid2"><button class="btn" data-act="export">העתק גיבוי כטקסט</button><button class="btn" data-act="import">שחזר מטקסט</button></div>
+        <textarea id="backup" placeholder="הדבק כאן גיבוי ולחץ על שחזר" aria-label="גיבוי"></textarea>
+        <button class="btn danger" data-act="reset">${pendingReset?"לחץ שוב לאישור: מחק הכל":"מחק את כל הנתונים"}</button>
+      </div></details>
+  </div>
+  <p class="muted small" style="text-align:center;margin:4px 0 0">טיק הוא כלי לניהול משמעת ותיעוד. אינו ייעוץ השקעות. מסחר בחוזים עתידיים ובמניות כרוך בסיכון, ובחוזים גם במינוף ובהפסד שיכול לעלות על ההשקעה.</p>`;
+}
+let pendingReset=false;
+
+/* ---------- trade sheet ---------- */
+let sheetT=null,delArm=false;
+function openSheet(t){
+  delArm=false;
+  const isNew=!t;const now=new Date();
+  sheetT=t?{...t}:{id:uid(),d:todayKey(),time:now.toTimeString().slice(0,5),sym:calcState.sym||S.settings.sym,side:"L",qty:1,entry:"",exit:"",stop:"",setup:"",emo:"ממוקד",plan:true,note:""};
+  const sets=[...new Set(S.trades.map(x=>x.setup).filter(Boolean))];
+  $("#sheet").innerHTML=`<div class="grab"></div>
+  <div class="row between"><h2 style="font-size:1.3rem">${isNew?"עסקה חדשה":"עריכת עסקה"}</h2><button class="x" data-act="close" aria-label="סגור">✕</button></div>
+  <form id="tform" style="display:grid;gap:12px">
+  <div class="seg" role="group" aria-label="כיוון"><button type="button" class="L" data-side="L" aria-pressed="${sheetT.side==="L"}">לונג</button><button type="button" class="S" data-side="S" aria-pressed="${sheetT.side==="S"}">שורט</button></div>
+  <div class="seg" role="group" aria-label="סוג נכס"><button type="button" data-kind="fut" aria-pressed="${!isStock(sheetT.sym)}">חוזה עתידי</button><button type="button" data-kind="stock" aria-pressed="${isStock(sheetT.sym)}">מניה</button></div>
+  <div class="grid2"><div id="t-symbox">${symField(sheetT.sym)}</div><label class="f">כמות<input type="number" id="t-qty" inputmode="numeric" min="1" step="1" value="${sheetT.qty}" required></label></div>
+  <div class="grid2"><label class="f">תאריך<input type="date" id="t-d" value="${sheetT.d}" required></label><label class="f">שעה<input type="time" id="t-time" value="${sheetT.time||""}"></label></div>
+  <div class="grid3"><label class="f">כניסה<input type="number" id="t-entry" inputmode="decimal" step="any" value="${sheetT.entry}" required></label><label class="f">יציאה<input type="number" id="t-exit" inputmode="decimal" step="any" value="${sheetT.exit}" required></label><label class="f">סטופ<input type="number" id="t-stop" inputmode="decimal" step="any" value="${sheetT.stop??""}"></label></div>
+  <div id="t-exits" style="display:grid;gap:8px">${(sheetT.exits||[]).map(e=>exitRow(e.q,e.p)).join("")}</div>
+  <div class="row"><button type="button" class="btn" data-act="add-exit" style="min-height:36px;padding:6px 12px">+ יציאה חלקית</button>${I("partial")}</div>
+  <div id="t-prev" class="stat"></div>
+  <label class="f"><span>סטאפ ${I("setup")}</span><input type="text" id="t-setup" list="setups" value="${esc(sheetT.setup)}" placeholder="למשל: פריצת טווח פתיחה"><datalist id="setups">${sets.map(x=>`<option value="${esc(x)}">`).join("")}</datalist></label>
+  <label class="f"><span>מצב רגשי ${I("emo")}</span><select id="t-emo">${EMO.map(e=>`<option ${e===sheetT.emo?"selected":""}>${e}</option>`).join("")}</select></label>
+  <label class="check" style="border:0"><input type="checkbox" id="t-plan" ${sheetT.plan?"checked":""}><span class="box"></span><span>העסקה הייתה לפי התוכנית</span></label>
+  <div style="display:grid;gap:8px"><div id="t-shotbox" style="display:grid;gap:8px"></div><label class="btn filebtn"><span id="t-shotlbl">צרף צילום של הגרף</span><input type="file" id="t-shot" accept="image/*" aria-label="צרף צילום של הגרף"></label></div>
+  <label class="f">מה למדתי<textarea id="t-note" placeholder="משפט אחד שיעזור לך מחר">${esc(sheetT.note)}</textarea></label>
+  <button class="btn primary block" type="submit">שמור</button>
+  ${isNew?"":`<button class="btn danger block" type="button" data-act="del-trade">מחק עסקה</button>`}
+  </form>`;
+  $("#sheetBg").hidden=false;document.body.style.overflow="hidden";
+  shotState={blob:null,remove:false};if(sheetT.exits&&sheetT.exits.length)$("#t-exit").readOnly=true;sheetPrev();
+  if(t&&t.shot){const id=t.id;DB.get(id).then(b=>{if(b&&sheetT&&sheetT.id===id)showShot(b)}).catch(()=>{})}
+}
+function symField(sym){return isStock(sym)
+  ?`<label class="f">סימול<input type="text" id="t-sym" list="t-watch" value="${esc(sym)}" required autocapitalize="characters" autocomplete="off" spellcheck="false" style="direction:ltr;text-align:right"><datalist id="t-watch">${[...new Set([...watchList(),...S.trades.filter(x=>isStock(x.sym)).map(x=>x.sym)])].map(x=>`<option value="${esc(x)}">`).join("")}</datalist></label>`
+  :`<label class="f">חוזה<select id="t-sym">${Object.keys(C).map(k=>`<option ${k===sym?"selected":""}>${k}</option>`).join("")}</select></label>`}
+function setSheetKind(kind,sym){$$("[data-kind]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.kind===kind));$("#t-symbox").innerHTML=symField(kind==="stock"?(sym||S.settings.stockSym||"BMNR"):(sym&&C[sym]?sym:S.settings.sym));sheetPrev()}
+const exitRow=(q="",p="")=>`<div class="exrow"><input type="number" class="ex-q" inputmode="numeric" min="1" step="1" value="${q}" placeholder="כמות" aria-label="כמות ביציאה"><input type="number" class="ex-p" inputmode="decimal" step="any" value="${p}" placeholder="מחיר יציאה" aria-label="מחיר יציאה"><button type="button" class="x" data-act="del-exit" aria-label="מחק יציאה">✕</button></div>`;
+function readExits(){return $$("#t-exits .exrow").map(r=>({q:parseInt(r.querySelector(".ex-q").value)||0,p:parseFloat(r.querySelector(".ex-p").value)})).filter(e=>e.q>0&&isFinite(e.p))}
+let shotState={blob:null,remove:false};
+function showShot(b){const u=URL.createObjectURL(b);$("#t-shotbox").innerHTML=`<img class="shot" src="${u}" alt="צילום הגרף של העסקה"><button type="button" class="btn danger" data-act="del-shot" style="min-height:36px">הסר צילום</button>`;$("#t-shotlbl").textContent="החלף צילום"}
+function shrink(file){return new Promise((res,rej)=>{const img=new Image(),u=URL.createObjectURL(file);img.onload=()=>{const sc=Math.min(1,1400/Math.max(img.width,img.height)),c=document.createElement("canvas");c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext("2d").drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(b=>b?res(b):rej(new Error("blob")),"image/jpeg",.82)};img.onerror=rej;img.src=u})}
+/* screenshots live in IndexedDB (too big for localStorage) */
+const DB=(()=>{let p;const open=()=>p??=new Promise((res,rej)=>{const r=indexedDB.open("tick",1);r.onupgradeneeded=()=>r.result.createObjectStore("shots");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+  const tx=(mode,fn)=>open().then(db=>new Promise((res,rej)=>{const t=db.transaction("shots",mode),q=fn(t.objectStore("shots"));t.oncomplete=()=>res(q&&q.result);t.onerror=()=>rej(t.error)}));
+  return{get:k=>tx("readonly",s=>s.get(k)),put:(k,v)=>tx("readwrite",s=>s.put(v,k)),del:k=>tx("readwrite",s=>s.delete(k))}})();
+function sheetRead(){const g=id=>$(id).value;return{...sheetT,sym:$("#t-sym").tagName==="SELECT"?g("#t-sym"):(normSym(g("#t-sym"))||"?"),qty:Math.max(1,parseInt(g("#t-qty"))||1),time:g("#t-time"),d:g("#t-d"),entry:parseFloat(g("#t-entry")),exit:parseFloat(g("#t-exit")),exits:readExits(),stop:g("#t-stop")===""?null:parseFloat(g("#t-stop")),setup:g("#t-setup").trim(),emo:g("#t-emo"),plan:$("#t-plan").checked,note:g("#t-note").trim()}}
+function sheetPrev(){const t=sheetRead();const el=$("#t-prev");
+  if(t.exits.length){const q=sum(t.exits.map(e=>e.q));t.exit=+(sum(t.exits.map(e=>e.p*e.q))/q).toFixed(6);$("#t-exit").value=+t.exit.toFixed(priceDec(t.sym)+2);$("#t-exit").readOnly=true;
+    if(q!==t.qty){el.innerHTML=`<span class="k">תוצאה</span><span class="v down small">ביציאות יש ${q} חוזים, אבל הכמות היא ${t.qty}. תקן אחד מהם.</span>`;return}}
+  else $("#t-exit").readOnly=false;if(!isFinite(t.entry)||!isFinite(t.exit)){el.innerHTML=`<span class="k">תוצאה</span><span class="v muted">הזן כניסה ויציאה</span>`;return}t.fee=feeFor(t.sym,t.qty);const r=calcT(t);el.innerHTML=`<span class="k">תוצאה נטו (עמלות <span class="num">${usd2.format(t.fee)}</span>)</span><span class="v num ${cls(r.net)}">${money(r.net,1)}${r.r!=null?` · ${(r.r>=0?"+":"")+r.r.toFixed(2)}R`:""}</span>`}
+function closeSheet(){$("#sheetBg").hidden=true;document.body.style.overflow="";sheetT=null}
+
+/* ---------- reminders engine ---------- */
+const fired={};
+function toast(msg,ms=6000){const t=$("#toast");t.innerHTML=`<span><b>טיק</b> · ${esc(msg)}</span><button class="x" aria-label="סגור">✕</button>`;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>t.hidden=true,ms)}
+async function notify(msg){
+  toast(msg,15000);
+  try{if(notifState()==="granted"){const reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();if(reg)reg.showNotification("טיק",{body:msg,icon:"icon-192.png",tag:"tick"});else new Notification("טיק",{body:msg})}}catch(e){}
+}
+function tickReminders(){const now=new Date(),cur=hm(now),d=now.getDay(),k=todayKey();S.reminders.forEach(r=>{if(!r.on||!r.days.includes(d))return;const at=remAt(r,now);if(!at||hm(at)!==cur)return;const key=r.id+k+cur;if(fired[key])return;fired[key]=1;notify(r.label)})}
+
+function buildICS(){
+  const p=n=>String(n).padStart(2,"0");const BY=["SU","MO","TU","WE","TH","FR","SA"];
+  const stamp=new Date().toISOString().replace(/[-:]/g,"").slice(0,15)+"Z";
+  const escI=s=>String(s).replace(/\r/g,"").replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,").replace(/\n/g,"\\n");
+  const L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Tick//Futures Journal//HE","CALSCALE:GREGORIAN","METHOD:PUBLISH","X-WR-CALNAME:טיק מסחר",
+    "BEGIN:VTIMEZONE","TZID:America/New_York","BEGIN:DAYLIGHT","TZOFFSETFROM:-0500","TZOFFSETTO:-0400","TZNAME:EDT","DTSTART:19700308T020000","RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=2SU","END:DAYLIGHT","BEGIN:STANDARD","TZOFFSETFROM:-0400","TZOFFSETTO:-0500","TZNAME:EST","DTSTART:19701101T020000","RRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=1SU","END:STANDARD","END:VTIMEZONE"];
+  const ymd=d=>`${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}`;
+  S.reminders.filter(r=>r.on&&r.days.length).forEach(r=>{
+    const d=new Date();for(let i=0;i<7;i++){if(r.days.includes(d.getDay()))break;d.setDate(d.getDate()+1)}
+    let h,m,start,ex=[];
+    if(r.anchor){const tot=Math.min(1439,Math.max(0,(r.anchor==="open"?570:960)+(+r.off||0)));h=Math.floor(tot/60);m=tot%60;start=`DTSTART;TZID=America/New_York:${ymd(d)}T${p(h)}${p(m)}00`;
+      ex=upcomingHolidays(12).filter(x=>x.type!=="early"&&r.days.includes(x.date.getDay())).map(x=>`EXDATE;TZID=America/New_York:${ymd(x.date)}T${p(h)}${p(m)}00`)}
+    else{[h,m]=r.time.split(":");start=`DTSTART:${ymd(d)}T${p(h)}${p(m)}00`}
+    L.push("BEGIN:VEVENT","UID:"+r.id+"@tick","DTSTAMP:"+stamp,start,...ex,"DURATION:PT10M","RRULE:FREQ=WEEKLY;BYDAY="+r.days.map(x=>BY[x]).join(","),"SUMMARY:"+escI("טיק: "+r.label),"BEGIN:VALARM","ACTION:DISPLAY","TRIGGER:PT0M","DESCRIPTION:"+escI(r.label),"END:VALARM","END:VEVENT");
+  });
+  rolls(4).forEach(r=>{const d=r.roll;const ds=`${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}`;const e=new Date(d);e.setDate(d.getDate()+1);
+    L.push("BEGIN:VEVENT","UID:roll-"+ds+"@tick","DTSTAMP:"+stamp,"DTSTART;VALUE=DATE:"+ds,`DTEND;VALUE=DATE:${e.getFullYear()}${p(e.getMonth()+1)}${p(e.getDate())}`,"SUMMARY:"+escI(`גלגול חוזים: ES${r.code} → ES${r.nextCode}`),"DESCRIPTION:"+escI("עבור לחוזה הבא בכל חוזי המדדים. פקיעה ב-"+dmy(r.exp)),"BEGIN:VALARM","ACTION:DISPLAY","TRIGGER:-PT15H","DESCRIPTION:"+escI("מחר גלגול חוזים"),"END:VALARM","END:VEVENT")});
+  upcomingHolidays(10).forEach(h=>{const d=h.date,ds=`${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}`,e=new Date(d);e.setDate(d.getDate()+1);
+    L.push("BEGIN:VEVENT","UID:hol-"+ds+"@tick","DTSTAMP:"+stamp,"DTSTART;VALUE=DATE:"+ds,`DTEND;VALUE=DATE:${e.getFullYear()}${p(e.getMonth()+1)}${p(e.getDate())}`,"SUMMARY:"+escI(`חג בבורסה: ${h.n} (${HOLTYPE[h.type]})`),"TRANSP:TRANSPARENT","END:VEVENT")});
+  L.push("END:VCALENDAR");return L.join("\r\n");
+}
+
+/* ---------- routing & events ---------- */
+const VIEWS=["today","market","calc","journal","plan"];
+function show(v){if(!VIEWS.includes(v))v="today";$$(".view").forEach(s=>s.hidden=s.dataset.view!==v);$$(".tab").forEach(b=>b.dataset.go===v?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current"));
+  ({today:renderToday,market:renderMarket,calc:renderCalc,journal:renderJournal,plan:renderPlan})[v]();try{if(location.hash.slice(1)!==v&&!location.hash.includes("="))history.replaceState(null,"","#"+v)}catch(e){}window.scrollTo(0,0);cur=v}
+let cur="today";
+function rerender(){show(cur)}
+
+document.addEventListener("click",async e=>{
+  const inf=e.target.closest("[data-info]");if(inf){e.preventDefault();openInfo(inf.dataset.info);return}
+  const go=e.target.closest("[data-go]");if(go){show(go.dataset.go);return}
+  if(e.target.closest("#toast .x")){$("#toast").hidden=true;return}
+  const a=e.target.closest("[data-act]");const act=a&&a.dataset.act;
+  if(e.target===$("#sheetBg")){closeSheet();return}
+  if(act==="new"){openSheet();return}
+  if(act==="csv"){exportCSV();return}
+  if(act==="add-exit"){const box=$("#t-exits");if(!box.children.length){const q=parseInt($("#t-qty").value)||1,ex=$("#t-exit").value;box.insertAdjacentHTML("beforeend",exitRow(q>1?Math.ceil(q/2):q,ex));if(q>1)box.insertAdjacentHTML("beforeend",exitRow(q-Math.ceil(q/2),""))}else box.insertAdjacentHTML("beforeend",exitRow());sheetPrev();return}
+  if(act==="del-exit"){a.closest(".exrow").remove();sheetPrev();return}
+  if(act==="del-shot"){shotState={blob:null,remove:true};$("#t-shotbox").innerHTML="";$("#t-shotlbl").textContent="צרף צילום של הגרף";return}
+  if(e.target.matches("img.shot")){e.target.classList.toggle("zoom");return}
+  const ch=e.target.closest("[data-chart]");if(ch){chartSym=ch.dataset.chart;buildChartWidget();$("#tv-chart").closest(".card").scrollIntoView({behavior:"smooth",block:"start"});return}
+  const uw=e.target.closest("[data-unwatch]");if(uw){S.watch=watchList().filter(x=>x!==uw.dataset.unwatch);save();$("#watch-chips").innerHTML=watchChips();buildWatchWidget();return}
+  const cb=e.target.closest("[data-cal]");if(cb){jState.cal=Math.min(0,jState.cal+ +cb.dataset.cal);renderJournal();return}
+  if(act==="close"){closeSheet();return}
+  if(act==="del-trade"){if(!delArm){delArm=true;a.textContent="לחץ שוב כדי למחוק";return}S.trades=S.trades.filter(t=>t.id!==sheetT.id);DB.del(sheetT.id).catch(()=>{});if(!sheetT.sample){S.tomb??={};S.tomb[sheetT.id]=Date.now()}save();closeSheet();rerender();toast("העסקה נמחקה",2500);return}
+  if(act==="clear-sample"){S.trades=S.trades.filter(t=>!t.sample);save();rerender();toast("הדוגמאות נמחקו. היומן שלך מוכן.",3000);return}
+  const ed=e.target.closest("[data-edit]");if(ed){openSheet(S.trades.find(t=>t.id===ed.dataset.edit));return}
+  const fb=e.target.closest("[data-f]");if(fb){jState.filter=fb.dataset.f;renderJournal();return}
+  const kd=e.target.closest("[data-kind]");if(kd){setSheetKind(kd.dataset.kind);return}
+  const cm=e.target.closest("[data-cmode]");if(cm){calcState.mode=cm.dataset.cmode;renderCalc();return}
+  const sd=e.target.closest("[data-side]");if(sd){$$("[data-side]").forEach(b=>b.setAttribute("aria-pressed",b===sd));sheetT.side=sd.dataset.side;sheetPrev();return}
+  const day=e.target.closest("[data-day]");if(day){const r=S.reminders.find(x=>x.id===day.closest("[data-rid]").dataset.rid);const i=+day.dataset.day;r.days=r.days.includes(i)?r.days.filter(x=>x!==i):[...r.days,i].sort();day.setAttribute("aria-pressed",r.days.includes(i));save();return}
+  if(act==="del-rem"){S.reminders=S.reminders.filter(x=>x.id!==a.closest("[data-rid]").dataset.rid);save();renderPlan();return}
+  if(act==="add-rem"){S.reminders.push({id:uid(),time:"09:00",anchor:"",off:0,days:[1,2,3,4,5],label:"תזכורת חדשה",on:true});save();renderPlan();return}
+  const dr=e.target.closest("[data-delrule]");if(dr){S.rules.splice(+dr.dataset.delrule,1);save();renderPlan();return}
+  if(act==="ics"){const ics=buildICS();$("#ics-text").textContent=ics;$("#ics-fallback").hidden=false;
+    try{const url="data:text/calendar;charset=utf-8,"+encodeURIComponent(ics);const l=document.createElement("a");l.href=isIOS?url:URL.createObjectURL(new Blob([ics],{type:"text/calendar"}));if(!isIOS)l.download="tick-reminders.ics";document.body.appendChild(l);l.click();l.remove()}catch(err){}return}
+  if(act==="copy-ics"){copy($("#ics-text").textContent);return}
+  if(act==="notif"){if(notifState()==="none"){toast(isIOS?"באייפון התראות זמינות רק אחרי 'הוסף למסך הבית'. בינתיים השתמש בהוספה ליומן.":"הדפדפן הזה לא תומך בהתראות.",8000);return}
+    try{const p=await Notification.requestPermission();if(p==="granted")notify("התראות פעילות. כך תיראה תזכורת.");else toast("ההתראות חסומות. אפשר להפעיל אותן בהגדרות המכשיר.")}catch(err){toast("לא ניתן להפעיל התראות כאן. השתמש בהוספה ליומן.")}renderPlan();return}
+  if(act==="export"){S.lastBackup=todayKey();save();copy(JSON.stringify(S),"הגיבוי הועתק (בלי צילומי גרפים). הדבק אותו בפתק.");$("#backup").value=JSON.stringify(S);return}
+  if(act==="backup-file"){backupFile();return}
+  if(act==="cloud-in"||act==="cloud-up"){cloudAuth(act==="cloud-up");return}
+  if(act==="cloud-out"){cloudSignOut(false);return}
+  if(act==="cloud-sync"){syncNow(true);return}
+  if(act==="cloud-reset"){cloudReset();return}
+  if(act==="import"){try{const s=cleanState(JSON.parse($("#backup").value),false);if(!s)throw 0;S=s;migrate();markAllDirty();save();toast("הגיבוי שוחזר",2500);rerender()}catch(err){toast("הטקסט שהודבק אינו גיבוי תקין של טיק.")}return}
+  if(act==="reset"){if(!pendingReset){pendingReset=true;renderPlan();$("details").open=true;return}pendingReset=false;cloudSignOut(true);try{localStorage.removeItem(LS)}catch(err){}S=defaults();S.trades=[];migrate();lastPH=profileOf(S);save();toast("כל הנתונים נמחקו",2500);show("today");return}
+});
+function blobToDataURL(b){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(b)})}
+function dataURLToBlob(u){const[h,d]=u.split(",");const bin=atob(d);const a=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);return new Blob([a],{type:(h.match(/data:([^;]+)/)||[])[1]||"image/jpeg"})}
+async function backupFile(){
+  S.lastBackup=todayKey();save();
+  const shots={};for(const t of S.trades.filter(x=>x.shot)){try{const b=await DB.get(t.id);if(b)shots[t.id]=await blobToDataURL(b)}catch(e){}}
+  const json=JSON.stringify({...S,shots});
+  if(!embeddable){copy(JSON.stringify(S),"בגרסה הזו אפשר רק להעתיק טקסט. הגיבוי הועתק.");rerender();return}
+  const file=new File([json],`tick-backup-${todayKey()}.json`,{type:"application/json"});
+  try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"גיבוי טיק"});toast("הגיבוי מוכן",2500);rerender();return}}catch(e){if(e&&e.name==="AbortError")return}
+  try{const a=document.createElement("a");a.href=URL.createObjectURL(file);a.download=file.name;document.body.appendChild(a);a.click();a.remove();toast("קובץ הגיבוי נשמר בהורדות",3000)}catch(e){copy(JSON.stringify(S))}
+  rerender();
+}
+async function restoreFile(f){
+  try{const raw=JSON.parse(await f.text());const s=cleanState(raw,false);if(!s)throw 0;const shots=raw.shots&&typeof raw.shots==="object"?raw.shots:{};
+    let n=0;for(const[id,u]of Object.entries(shots)){if(!ID_RE.test(id)||typeof u!=="string"||!/^data:image\/(jpeg|png|webp);base64,/.test(u)||u.length>8e6)continue;try{await DB.put(id,dataURLToBlob(u));n++}catch(e){}}
+    S=s;migrate();markAllDirty();save();toast(`הגיבוי שוחזר: ${S.trades.length} עסקאות${n?`, ${n} צילומים`:""}`,4000);rerender()}
+  catch(e){toast("הקובץ הזה אינו גיבוי תקין של טיק.")}
+}
+async function copy(text,msg){try{await navigator.clipboard.writeText(text);toast(msg||"הועתק",msg?5000:2000)}catch(e){toast("סמן את הטקסט והעתק ידנית",3000)}}
+
+document.addEventListener("change",e=>{
+  const t=e.target;
+  if(t.dataset.r){S.routine.done[t.dataset.r]=t.checked;const all=ROUTINE.every(r=>S.routine.done[r.id]);S.days[todayKey()]=all||undefined;if(!all)delete S.days[todayKey()];save();renderToday();if(all)toast("שגרת ההכנה הושלמה. עכשיו רק הסטאפים שלך.",3500);return}
+  if(t.dataset.p!=null){calcState.pre[t.dataset.p]=t.checked;updCalc();return}
+  if(t.dataset.s){const k=t.dataset.s;S.settings[k]=k==="sym"?t.value:(parseFloat(t.value)||0);save();return}
+  const rem=t.closest("[data-rid]");if(rem&&t.dataset.k){const r=S.reminders.find(x=>x.id===rem.dataset.rid);const k=t.dataset.k;r[k]=t.type==="checkbox"?t.checked:k==="off"?(parseInt(t.value)||0):t.value;if(k==="anchor"&&r.anchor&&r.off==null)r.off=0;save();if(k==="anchor"||k==="off")renderPlan();return}
+  if(t.id==="c-sym"){updCalc();return}
+  if(t.id==="restore-file"&&t.files&&t.files[0]){restoreFile(t.files[0]);t.value="";return}
+  if(t.id==="t-shot"&&t.files&&t.files[0]){shrink(t.files[0]).then(b=>{shotState={blob:b,remove:false};showShot(b)}).catch(()=>toast("לא הצלחתי לקרוא את התמונה."));t.value="";return}
+  if(t.closest("#tform"))sheetPrev();
+});
+document.addEventListener("input",e=>{const t=e.target;if(t.closest("#v-calc")&&t.id&&t.id.startsWith("c-"))updCalc();else if(t.id==="t-sym")sheetPrev();else if(t.closest("#tform"))sheetPrev()});
+document.addEventListener("submit",e=>{
+  e.preventDefault();
+  if(e.target.id==="cloud-form"){cloudAuth(false);return}
+  if(e.target.id==="watch-form"){const v=normSym($("#watch-in").value);if(!v)return;const w=watchList();if(!w.includes(v)){w.push(v);save();$("#watch-chips").innerHTML=watchChips();buildWatchWidget()}$("#watch-in").value="";if(embeddable){chartSym=v;buildChartWidget()}toast(`${v} נוסף לרשימה`,2000);return}
+  if(e.target.id==="rule-form"){const v=$("#rule-in").value.trim();if(v){S.rules.push(v);save();renderPlan()}return}
+  if(e.target.id==="tform"){const t=sheetRead();
+    if(t.exits.length){const q=sum(t.exits.map(x=>x.q));if(q!==t.qty){toast(`סך הכמויות ביציאות (${q}) שונה מהכמות (${t.qty}).`,4000);return}t.exit=+(sum(t.exits.map(x=>x.p*x.q))/q).toFixed(6)}else delete t.exits;
+    if(!isFinite(t.entry)||!isFinite(t.exit)){toast("חסר מחיר כניסה או יציאה.",3000);return}
+    if(t.sym==="?"){toast("חסר סימול של המניה.",3000);return}
+    t.u=Date.now();S.sync??={};S.sync.up??={};
+    if(shotState.blob){t.shot=true;delete S.sync.up[t.id];DB.put(t.id,shotState.blob).then(()=>scheduleSync()).catch(()=>toast("לא הצלחתי לשמור את הצילום. ייתכן שאין מקום במכשיר."))}else if(shotState.remove){t.shot=false;DB.del(t.id).catch(()=>{})}t.fee=+feeFor(t.sym,t.qty).toFixed(2);delete t.sample;
+    const i=S.trades.findIndex(x=>x.id===t.id);if(i>=0)S.trades[i]=t;else S.trades.push(t);save();closeSheet();
+    const tt=todayTrades(),pnl=sum(tt.map(x=>calcT(x).net));
+    if(t.d===todayKey()&&pnl<=-S.settings.maxDaily)toast("הגעת להפסד היומי. סגור את הפלטפורמה להיום.",10000);
+    else if(t.d===todayKey()&&tt.length>=S.settings.maxTrades)toast("זו העסקה האחרונה שלך היום לפי הכללים.",6000);
+    else toast(calcT(t).net>=0?"נשמר. עסקה טובה.":"נשמר. הפסד לפי התוכנית הוא חלק מהעבודה.",3000);
+    rerender()}
+});
+// log from calculator
+document.addEventListener("click",e=>{if(e.target.id!=="c-log")return;const e1=readNum("#c-entry"),s1=readNum("#c-stop");openSheet();if(e1!=null)$("#t-entry").value=e1;if(s1!=null)$("#t-stop").value=s1;if(calcState.mode==="stock"){setSheetKind("stock",calcState.stock)}else $("#t-sym").value=calcState.sym;const q=parseInt($("#c-out .big")?.textContent);if(q>0)$("#t-qty").value=q;$$("[data-side]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.side===calcState.side));sheetT.side=calcState.side;$("#t-plan").checked=PRETRADE.every((_,i)=>calcState.pre[i]);sheetPrev()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#sheetBg").hidden)closeSheet()});
+addEventListener("hashchange",()=>{const v=location.hash.slice(1);if(v&&v!==cur&&!v.includes("="))show(v)});
+
+
+/* ---------- cloud sync (Supabase) ---------- */
+const SB_URL="https://albvjenyvyanzzlmvmqa.supabase.co",SB_KEY="sb_publishable_lpFIlyWsy-yU1cucxaP-wQ_M00a_n6h";
+const cloud={sb:null,user:null,status:"idle",err:"",loading:false,timer:null,pending:false,last:null};
+function loadSB(){return new Promise((res,rej)=>{if(window.supabase&&window.supabase.createClient)return res(window.supabase);const sc=document.createElement("script");sc.src="vendor/supabase.js";sc.onload=()=>res(window.supabase);sc.onerror=()=>rej(new Error("load"));document.head.appendChild(sc)})}
+function heErr(e){const m=String((e&&(e.message||e.error_description||e.code))||e||"");
+  if(/Invalid login credentials/i.test(m))return"המייל או הסיסמה לא נכונים.";
+  if(/Email not confirmed/i.test(m))return"צריך לאשר את המייל קודם. בדוק את תיבת הדואר (וגם את הספאם).";
+  if(/already registered|already been registered|User already/i.test(m))return"כבר יש חשבון עם המייל הזה. לחץ \"התחבר\".";
+  if(/Password should be|at least 6/i.test(m))return"הסיסמה קצרה מדי. צריך לפחות 6 תווים.";
+  if(/valid email|invalid format|Unable to validate email/i.test(m))return"כתובת המייל לא תקינה.";
+  if(/rate limit|too many/i.test(m))return"יותר מדי ניסיונות. נסה שוב בעוד כמה דקות.";
+  if(/PGRST205|does not exist|schema cache|relation/i.test(m))return"הטבלאות עוד לא נוצרו ב-Supabase. צריך להריץ את קוד ה-SQL.";
+  if(/Bucket not found/i.test(m))return"אחסון הצילומים לא הוגדר ב-Supabase. צריך להריץ את קוד ה-SQL.";
+  if(/Failed to fetch|NetworkError|network|Load failed/i.test(m))return"אין חיבור לאינטרנט. ננסה שוב אוטומטית.";
+  if(/load/.test(m))return"לא הצלחתי לטעון את רכיב הסנכרון.";
+  return"שגיאה: "+m.slice(0,120)}
+async function cloudInit(){
+  if(!embeddable||cloud.sb||cloud.loading)return;cloud.loading=true;
+  try{const lib=await loadSB();cloud.sb=lib.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:"tick-auth"}});
+    const{data}=await cloud.sb.auth.getSession();cloud.user=data.session?data.session.user:null;
+    cloud.sb.auth.onAuthStateChange((ev,session)=>{const was=cloud.user&&cloud.user.id;cloud.user=session?session.user:null;if(cur==="plan")renderPlan();if(ev==="SIGNED_IN"&&was!==(cloud.user&&cloud.user.id))syncNow()});
+    if(/access_token|error_description/.test(location.hash)){try{history.replaceState(null,"",location.pathname+"#today")}catch(e){}toast(/error/.test(location.hash)?"הקישור מהמייל לא תקין או שפג תוקפו.":"המייל אושר. אפשר להתחבר.",5000)}
+    if(cloud.user)syncNow();
+  }catch(e){cloud.status="error";cloud.err=heErr(e)}
+  cloud.loading=false;if(cur==="plan")renderPlan();
+}
+function cloudMsg(){const m=$("#cl-msg");if(m)m.innerHTML=`${cloud.err?`<div class="warn">${esc(cloud.err)}</div>`:""}${cloud.msg?`<div class="okmsg">${esc(cloud.msg)}</div>`:""}`;else if(cur==="plan")renderPlan()}
+function cloudCard(){
+  const cc=`<h2>סנכרון וגיבוי בענן ${I("cloud")}</h2>`;
+  if(!embeddable)return`<div class="card">${cc}<p class="muted small" style="margin:0">הסנכרון לענן זמין בגרסה שמותקנת מ-GitHub.</p></div>`;
+  if(!cloud.sb)return`<div class="card">${cc}<p class="muted small" style="margin:0">${cloud.status==="error"?esc(cloud.err):"מתחבר…"}</p></div>`;
+  if(!cloud.user)return`<div class="card">${cc}
+    <p class="small muted" style="margin:0">התחבר כדי שהיומן יישמר בענן ויסתנכרן בין מכשירים. בלי חשבון הכל נשאר רק בטלפון.</p>
+    <form id="cloud-form" style="display:grid;gap:10px">
+      <label class="f">מייל<input type="email" id="cl-email" value="${esc(cloud.email||"")}" autocomplete="email" inputmode="email" style="direction:ltr;text-align:right" required></label>
+      <label class="f">סיסמה (לחשבון חדש: לפחות 8 תווים)<input type="password" id="cl-pass" autocomplete="current-password" minlength="6" style="direction:ltr;text-align:right" required></label>
+      <div class="grid2"><button type="button" class="btn primary" data-act="cloud-in">התחבר</button><button type="button" class="btn" data-act="cloud-up">צור חשבון</button></div>
+      <button type="button" class="btn ghost small" data-act="cloud-reset" style="min-height:34px">שכחתי סיסמה</button>
+    </form>
+    <div id="cl-msg">${cloud.err?`<div class="warn">${esc(cloud.err)}</div>`:""}${cloud.msg?`<div class="okmsg">${esc(cloud.msg)}</div>`:""}</div></div>`;
+  const st=cloud.status==="syncing"?`<span class="chip acc pulse"><span class="dot"></span>מסנכרן…</span>`:cloud.status==="error"?`<span class="chip bad">לא מסונכרן</span>`:`<span class="chip ok">מסונכרן</span>`;
+  return`<div class="card">${cc}
+    <div class="row between"><span class="small" style="direction:ltr;unicode-bidi:isolate">${esc(cloud.user.email||"")}</span>${st}</div>
+    <div class="muted small">${S.sync&&S.sync.lastOk?"סנכרון אחרון: "+new Date(S.sync.lastOk).toLocaleString("he-IL",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"עוד לא סונכרן"}</div>
+    ${cloud.status==="error"&&cloud.err?`<div class="warn">${esc(cloud.err)}</div>`:""}
+    <div class="grid2"><button class="btn" data-act="cloud-sync">סנכרן עכשיו</button><button class="btn ghost" data-act="cloud-out">התנתק</button></div></div>`;
+}
+async function cloudAuth(signup){
+  const email=($("#cl-email").value||"").trim(),password=$("#cl-pass").value||"";cloud.err="";cloud.msg="";cloud.email=email;
+  if(!email||password.length<6||(signup&&password.length<8)){cloud.err=!email?"חסר מייל.":signup?"לחשבון חדש צריך סיסמה של לפחות 8 תווים.":"הסיסמה צריכה להיות לפחות 6 תווים.";cloudMsg();return}
+  cloud.msg=signup?"יוצר חשבון…":"מתחבר…";cloudMsg();cloud.msg="";
+  try{
+    if(signup){const{data,error}=await cloud.sb.auth.signUp({email,password,options:{emailRedirectTo:location.origin+location.pathname}});if(error)throw error;
+      if(data.user&&Array.isArray(data.user.identities)&&data.user.identities.length===0)throw new Error("User already registered");
+      if(!data.session)cloud.msg="נשלח אליך מייל אישור. לחץ על הקישור במייל, ואז חזור לכאן ולחץ \"התחבר\".";}
+    else{const{error}=await cloud.sb.auth.signInWithPassword({email,password});if(error)throw error;toast("מחובר. מסנכרן את היומן…",3000)}
+  }catch(e){cloud.err=heErr(e)}
+  if(cloud.user){cloud.err="";cloud.msg="";if(cur==="plan")renderPlan()}else cloudMsg();
+}
+async function cloudReset(){const email=($("#cl-email").value||"").trim();cloud.err="";cloud.msg="";cloud.email=email;if(!email){cloud.err="כתוב את המייל שלך למעלה ואז לחץ שוב.";cloudMsg();return}
+  try{const{error}=await cloud.sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});if(error)throw error;cloud.msg="נשלח מייל לאיפוס הסיסמה."}catch(e){cloud.err=heErr(e)}cloudMsg()}
+async function cloudSignOut(silent){if(!cloud.sb||!cloud.user)return;try{await cloud.sb.auth.signOut()}catch(e){}cloud.user=null;S.sync={};try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}if(!silent){toast("התנתקת. הנתונים נשארו בטלפון.",3000);renderPlan()}}
+function markAllDirty(){const n=Date.now();S.trades.forEach(t=>{if(!t.sample)t.u=n});S.pu=n;lastPH=profileOf(S);S.sync=S.sync||{};S.sync.up={}}
+function isDirty(){const sy=S.sync||{},p=sy.pushed||0;return S.trades.some(t=>!t.sample&&(t.u||0)>p)||Object.values(S.tomb||{}).some(x=>x>p)||(S.pu||0)>(sy.puSynced||0)}
+function scheduleSync(){if(!cloud.user)return;clearTimeout(cloud.timer);cloud.timer=setTimeout(()=>syncNow(),1500)}
+async function syncNow(manual){
+  if(!cloud.sb||!cloud.user)return;if(cloud.status==="syncing"){cloud.pending=true;return}
+  cloud.status="syncing";cloud.err="";if(cur==="plan")renderPlan();
+  const sb=cloud.sb,uid=cloud.user.id;S.sync=S.sync||{};const sy=S.sync;sy.up=sy.up||{};S.tomb=S.tomb||{};let changed=false;
+  try{
+    const startedAt=Date.now();
+    S.trades.forEach(t=>{if(!t.sample&&!t.u)t.u=startedAt});
+    // 1) pull trades changed since last pull
+    let q=sb.from("trades").select("id,data,deleted,updated_at").order("updated_at",{ascending:true}).limit(5000);
+    if(sy.lastPull)q=q.gt("updated_at",sy.lastPull);
+    const{data:rows,error:e1}=await q;if(e1)throw e1;
+    for(const r of rows||[]){const ts=Date.parse(r.updated_at),i=S.trades.findIndex(t=>t.id===r.id),loc=i>=0?S.trades[i]:null;
+      if(!ID_RE.test(r.id)){sy.lastPull=r.updated_at;continue}if(r.deleted){if(loc&&(loc.u||0)<=ts){S.trades.splice(i,1);DB.del(r.id).catch(()=>{});changed=true}if(!S.tomb[r.id]||S.tomb[r.id]<ts)S.tomb[r.id]=ts}
+      else if(!loc||(loc.u||0)<ts){if(S.tomb[r.id]&&S.tomb[r.id]>=ts)continue;const t=cleanTrade({...(r.data||{}),id:r.id,u:ts});if(!t){sy.lastPull=r.updated_at;continue}delete t.sample;if(loc)S.trades[i]=t;else S.trades.push(t);if(t.shot)delete sy.up[t.id];changed=true}
+      sy.lastPull=r.updated_at}
+    if((rows||[]).some(r=>!r.deleted)&&S.trades.some(t=>t.sample)){S.trades=S.trades.filter(t=>!t.sample);changed=true}
+    // 2) push local trade changes and deletions
+    const p=sy.pushed||0;
+    const up=S.trades.filter(t=>!t.sample&&(t.u||0)>p).map(t=>{const{u,...data}=t;return{user_id:uid,id:t.id,data,deleted:false,updated_at:new Date(t.u).toISOString()}});
+    const del=Object.entries(S.tomb).filter(([,x])=>x>p).map(([id,x])=>({user_id:uid,id,data:{},deleted:true,updated_at:new Date(x).toISOString()}));
+    const all=[...up,...del];
+    for(let k=0;k<all.length;k+=200){const{error}=await sb.from("trades").upsert(all.slice(k,k+200),{onConflict:"user_id,id"});if(error)throw error}
+    sy.pushed=Math.max(p,...S.trades.map(t=>t.u||0),...Object.values(S.tomb));
+    // 3) profile (settings, rules, reminders, watchlist, routine)
+    const{data:pr,error:e3}=await sb.from("profiles").select("data,updated_at").maybeSingle();if(e3)throw e3;
+    const rts=pr?Date.parse(pr.updated_at):0;
+    if(pr&&rts>(S.pu||0)){const cp=cleanProfile(pr.data);PROFILE_KEYS.forEach(k=>{if(pr.data&&k in pr.data&&k in cp)S[k]=cp[k]});if(S.routine&&S.routine.date!==todayKey())S.routine={date:todayKey(),done:{}};S.pu=rts;sy.puSynced=rts;lastPH=profileOf(S);changed=true}
+    else if((S.pu||0)>(sy.puSynced||0)||!pr){const ts=S.pu||Date.now();const data={};PROFILE_KEYS.forEach(k=>data[k]=S[k]??null);
+      const{error}=await sb.from("profiles").upsert({user_id:uid,data,updated_at:new Date(ts).toISOString()},{onConflict:"user_id"});if(error)throw error;S.pu=ts;sy.puSynced=ts}
+    // 4) screenshots
+    const st=sb.storage.from("shots");
+    for(const t of S.trades){if(t.sample)continue;const path=`${uid}/${t.id}.jpg`;
+      if(t.shot&&!sy.up[t.id]){const blob=await DB.get(t.id).catch(()=>null);
+        if(blob){const{error}=await st.upload(path,blob,{upsert:true,contentType:"image/jpeg"});if(error)throw error;sy.up[t.id]=1}
+        else{const{data:b,error}=await st.download(path);if(!error&&b){await DB.put(t.id,b);sy.up[t.id]=1}}}
+      else if(!t.shot&&sy.up[t.id]){await st.remove([path]);delete sy.up[t.id]}}
+    for(const id of Object.keys(sy.up)){if(!S.trades.some(t=>t.id===id)){await st.remove([`${uid}/${id}.jpg`]);delete sy.up[id]}}
+    sy.lastOk=Date.now();cloud.status="idle";
+    try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}
+    if(manual)toast("היומן מסונכרן עם הענן",2500);
+  }catch(e){cloud.status="error";cloud.err=heErr(e);try{localStorage.setItem(LS,JSON.stringify(S))}catch(x){}if(manual)toast(cloud.err,5000)}
+  if(changed&&$("#sheetBg").hidden)rerender();else if(cur==="plan")renderPlan();
+  if(cloud.pending||(cloud.status==="idle"&&isDirty())){cloud.pending=false;if(cloud.status==="idle")scheduleSync()}
+}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&cloud.user&&(!S.sync||!S.sync.lastOk||Date.now()-S.sync.lastOk>60000))syncNow()});
+addEventListener("online",()=>{if(cloud.user)syncNow()});
+setInterval(()=>{if(cloud.user&&document.visibilityState==="visible")syncNow()},5*60000);
+
+show(location.hash.includes("=")?"today":(location.hash.slice(1)||"today"));
+cloudInit();
+setInterval(()=>{if(S.routine.date!==todayKey()){S.routine={date:todayKey(),done:{}};save()}tickReminders();if(cur==="today"&&$("#sheetBg").hidden&&!document.activeElement.closest?.("#v-today"))renderToday()},20000);
+tickReminders();
+try{if("serviceWorker" in navigator&&document.querySelector('link[rel="manifest"]'))navigator.serviceWorker.register("sw.js")}catch(e){}
+})();

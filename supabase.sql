@@ -45,3 +45,5 @@ create policy "own shots update" on storage.objects for update to authenticated
 drop policy if exists "own shots delete" on storage.objects;
 create policy "own shots delete" on storage.objects for delete to authenticated
   using (bucket_id = 'shots' and (storage.foldername(name))[1] = auth.uid()::text);
+
+-- After this file, also run supabase-hardening.sql (limits and extra protection).
