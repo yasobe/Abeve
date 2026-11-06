@@ -135,6 +135,11 @@ th{font-size:.76rem;color:var(--muted);font-weight:600;border-top:0}
 .rule:first-child{border-top:0}
 .rule .n{flex:none;font-family:var(--f-num);color:var(--accent);font-weight:700;width:22px}
 .rule p{margin:0;flex:1;min-width:0}
+.info{position:relative;display:inline-grid;place-items:center;width:19px;height:19px;border-radius:50%;border:1.5px solid var(--accent);background:var(--accent-soft);color:var(--accent);font:700 12px/1 var(--f-num);padding:0;margin-inline-start:4px;vertical-align:middle;cursor:pointer;flex:none}
+.info::after{content:"";position:absolute;inset:-11px}
+.infobody{display:grid;gap:10px;font-size:1rem;line-height:1.6}
+.infobody p{margin:0}
+.infobody .ex{background:var(--surface2);border-radius:10px;padding:10px 12px;font-size:.92rem}
 .x{border:0;background:none;color:var(--muted);cursor:pointer;padding:4px 8px;font-size:1.1rem;min-height:32px}
 svg.chart{width:100%;height:auto;display:block}
 .tabs{position:fixed;inset:auto 0 0 0;z-index:20;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:6px max(10px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px))}
@@ -345,6 +350,36 @@ function insights(st){
   return out;
 }
 
+
+/* ---------- explanations behind the "!" buttons ---------- */
+const INFO={
+  market:["מצב השוק",["<b>גלובקס</b> הוא המסחר האלקטרוני של CME. הוא פתוח כמעט 24 שעות, מראשון בערב עד שישי בערב, עם הפסקה של שעה בכל יום.","<b>ניו יורק פתוחה</b> הם שעות המסחר הרגילות (8:30–15:00 שעון שיקגו). אז יש הכי הרבה מחזור ותנועה.","השעות בסוגריים כבר מתורגמות לשעון שלך. חגים אמריקאיים לא מחושבים."]],
+  daily:["הפסד יומי מקסימלי",["הסכום שאחריו מפסיקים לסחור עד מחר, לא משנה מה. זה הבלם שמונע מיום רע להפוך לחודש רע.","הפס מתמלא ככל שמתקרבים לגבול: ירוק, אחר כך כתום, ואז אדום.","<span class='ex'>נהוג להגדיר 2–3 פעמים הסיכון לעסקה. סיכון $250 לעסקה → הפסד יומי $500–750.</span>"]],
+  routine:["שגרת הכנה",["5 צעדים לפני פתיחת השוק. סוחרים שמתכוננים מראש מקבלים פחות החלטות אימפולסיביות.","השגרה מתאפסת כל יום. כשמסמנים את כל 5 הצעדים, היום נספר ברצף."]],
+  streak:["ימי שגרה ברצף",["כמה ימי מסחר ברצף השלמת את כל שגרת ההכנה. שבת וראשון לא שוברים את הרצף.","המטרה היא הרגל: לא לסחור הרבה, אלא להתכונן כל יום."]],
+  roll:["גלגול חוזים",["לחוזה עתידי יש תאריך פקיעה. חוזי המדדים (ES, NQ, YM, RTY והמיקרו) פוקעים ביום שישי השלישי של מרץ, יוני, ספטמבר ודצמבר.","כשמונה ימים לפני הפקיעה רוב הסוחרים עוברים לחוזה הבא. זה <b>יום הגלגול</b>. אחריו הנזילות בחוזה הישן יורדת.","<span class='ex'>האותיות הן קודי חודשים: H=מרץ, M=יוני, U=ספטמבר, Z=דצמבר. הספרה היא השנה: ESZ6 = דצמבר 2026.</span>","ביום הגלגול צריך לפתוח את הגרף והפקודות על החוזה החדש."]],
+  pretrade:["צ'קליסט לפני כניסה",["5 שאלות לפני כל עסקה. אם אחת מהן לא מסומנת, כנראה שעדיף לוותר.","כשלוחצים \"רשום ביומן\", העסקה מסומנת \"לפי התוכנית\" רק אם כל הצ'קליסט מסומן."]],
+  insights:["מה היומן אומר עליך",["תובנות שמחושבות אוטומטית מהעסקאות שרשמת: איזה סטאפ הכי רווחי, איזה מצב רגשי עולה לך כסף, ואם אתה חורג מהכללים.","ככל שתרשום יותר עסקאות בכנות, התובנות יהיו מדויקות יותר."]],
+  reminders:["תזכורות",["<b>הוסף ליומן האייפון</b> יוצר אירועים חוזרים עם התראה ביומן של הטלפון. זו הדרך היחידה לקבל תזכורת כשהאפליקציה סגורה.","<b>הפעל התראות</b> עובד רק כשהאפליקציה פתוחה ונוספה למסך הבית.","אחרי שינוי בתזכורות, צריך להוסיף ליומן שוב (ולמחוק את הישנות ביומן)."]],
+  pf:["Profit factor",["סך כל הרווחים חלקי סך כל ההפסדים.","<span class='ex'>רווחת $1,500 והפסדת $1,000 → Profit factor = 1.5</span>","מעל 1 אתה ברווח. מעל 1.5 זה טוב. מתחת ל-1 השיטה מפסידה כרגע."]],
+  avgr:["R ממוצע",["<b>R</b> הוא הסיכון שלקחת בעסקה: המרחק מהכניסה לסטופ.","<span class='ex'>סיכנת $100 והרווחת $200 → ‎+2R. נעצרת בסטופ → ‎−1R.</span>","R ממוצע חיובי אומר שבממוצע אתה מרוויח יותר ממה שאתה מסכן. כדי לחשב R צריך לרשום סטופ בעסקה."]],
+  exp:["תוחלת לעסקה",["כמה אתה מרוויח או מפסיד בממוצע על כל עסקה, אחרי עמלות.","זה המספר הכי חשוב: אם הוא חיובי לאורך הרבה עסקאות, יש לך יתרון."]],
+  dd:["ירידה מקסימלית",["הירידה הגדולה ביותר מהשיא של החשבון ועד לשפל שאחריו.","היא מראה כמה כאב היית צריך לסבול בדרך. אם היא גדולה מדי בשבילך, הקטן את הסיכון לעסקה."]],
+  plan:["לפי התוכנית",["כמה מהעסקאות סימנת כ\"לפי התוכנית\": סטאפ מוכר, סטופ מוגדר, ובלי לשבור חוקים.","המטרה היא 100%. משמעת היא דבר שאתה שולט בו, בניגוד לתוצאה של עסקה בודדת."]],
+  rr:["יחס סיכוי-סיכון (R:R)",["כמה אתה יכול להרוויח ביעד לעומת כמה אתה מסכן עד הסטופ.","<span class='ex'>סטופ 5 נקודות ויעד 10 נקודות → 1:2</span>","ביחס 1:2 מספיק לצדוק ב-34% מהעסקאות כדי לא להפסיד. מתחת ל-1:1.5 כדאי לחשוב פעמיים."]],
+  ticks:["טיקים לסטופ",["<b>טיק</b> הוא התזוזה הקטנה ביותר האפשרית במחיר של החוזה.","זה מספר הטיקים בין מחיר הכניסה לסטופ. כפול שווי הטיק, זה ההפסד לחוזה אחד אם נעצרת."]],
+  allowed:["סיכון מותר",["גודל החשבון כפול אחוז הסיכון לעסקה.","<span class='ex'>חשבון $25,000 × 1% = מותר לך להפסיד $250 בעסקה הזו</span>","המחשבון בוחר את מספר החוזים הגדול ביותר שלא עובר את הסכום הזה."]],
+  risk:["סיכון בפועל",["כמה תפסיד אם המחיר יגיע לסטופ, עם מספר החוזים שהמחשבון המליץ, כולל עמלות.","הוא תמיד קטן או שווה לסיכון המותר, כי אי אפשר לקנות חצי חוזה."]],
+  riskpct:["סיכון לעסקה (%)",["איזה אחוז מהחשבון אתה מוכן להפסיד בעסקה אחת.","רוב הסוחרים המקצועיים מסכנים 0.5%–1%. כך גם 10 הפסדים ברצף לא מוחקים את החשבון."]],
+  commission:["עמלה לחוזה לכל צד",["העמלה שהברוקר גובה על חוזה אחד בכניסה, ושוב ביציאה. האפליקציה מכפילה אותה ב-2 לכל עסקה.","אפשר למצוא אותה באתר של הברוקר. בחוזי מיקרו היא לרוב בין $0.25 ל-$1.50 לצד, כולל עמלות הבורסה."]],
+  contract:["איזה חוזה לבחור",["חוזי <b>מיקרו</b> (שמתחילים ב-M, כמו MES ו-MNQ) הם עשירית מגודל החוזה הרגיל. הם מתאימים לחשבון קטן או למי שמתחיל.","<span class='ex'>תזוזה של נקודה אחת ב-S&P: ‏ES = $50, ‏MES = $5</span>"]],
+  tick:["טיק ונקודה",["<b>טיק</b> הוא התזוזה הקטנה ביותר במחיר. <b>נקודה</b> היא תזוזה של 1.00 במחיר.","<span class='ex'>ב-MES טיק הוא 0.25 ושווה $1.25. נקודה = 4 טיקים = $5.</span>"]],
+  setup:["סטאפ",["שם קבוע לסוג העסקה, למשל \"פריצת טווח פתיחה\" או \"פולבק במגמה\".","כדאי להשתמש באותם שמות כל פעם. כך היומן יוכל להראות איזה סטאפ באמת מרוויח."]],
+  emo:["מצב רגשי",["איך הרגשת כשנכנסת לעסקה. זה נשמע מוזר, אבל זה אחד הנתונים הכי מועילים ביומן.","אחרי כמה שבועות תראה למשל שעסקאות מתוך \"נקמה\" או \"שעמום\" מפסידות, ותדע מתי לעצור."]]
+};
+const I=k=>`<button type="button" class="info" data-info="${k}" aria-label="הסבר: ${INFO[k][0]}">!</button>`;
+function openInfo(k){const[t,ps]=INFO[k];$("#sheet").innerHTML=`<div class="grab"></div><div class="row between"><h2 style="font-size:1.3rem">${t}</h2><button class="x" data-act="close" aria-label="סגור">✕</button></div><div class="infobody">${ps.map(p=>`<p>${p}</p>`).join("")}</div><button class="btn primary block" data-act="close">הבנתי</button>`;$("#sheetBg").hidden=false;document.body.style.overflow="hidden"}
+
 /* ---------- views ---------- */
 function todayTrades(){const k=todayKey();return S.trades.filter(t=>t.d===k)}
 function streak(){
@@ -374,26 +409,26 @@ function renderToday(){
   else mkt=`<span class="chip bad"><span class="dot"></span>${m.halt?"הפסקה יומית":"השוק סגור"}</span><span class="muted small">נפתח בעוד ${fmtDur(m.toGlobex)} (${localHM(m.toGlobex)})</span>`;
   $("#v-today").innerHTML=`
   <div class="top"><div><div class="eyebrow">${new Date().toLocaleDateString("he-IL",{weekday:"long",day:"numeric",month:"long"})}</div><h1>${hello}</h1></div>
-    <span class="chip ${sk?"acc":""}" title="ימי מסחר רצופים עם שגרת הכנה מלאה"><span class="num">${sk}</span> ימי שגרה ברצף</span></div>
-  <div class="card"><div class="row between"><h2>מצב השוק</h2><span class="muted small">חוזי CME</span></div><div class="row">${mkt}</div></div>
+    <span class="row" style="gap:6px;flex-wrap:nowrap"><span class="chip ${sk?"acc":""}" title="ימי מסחר רצופים עם שגרת הכנה מלאה"><span class="num">${sk}</span> ימי שגרה ברצף</span>${I("streak")}</span></div>
+  <div class="card"><div class="row between"><h2>מצב השוק ${I("market")}</h2><span class="muted small">חוזי CME</span></div><div class="row">${mkt}</div></div>
   <div class="card">
-    <div class="row between"><h2>הסיכון של היום</h2><span class="chip ${stop?"bad":"ok"}">${stop?"עצור להיום":"אפשר לסחור"}</span></div>
+    <div class="row between"><h2>הסיכון של היום ${I("daily")}</h2><span class="chip ${stop?"bad":"ok"}">${stop?"עצור להיום":"אפשר לסחור"}</span></div>
     <div class="row between"><div><div class="big num ${cls(pnl)}">${money(pnl)}</div><div class="muted small"><span class="num">${tt.length}</span> מתוך <span class="num">${S.settings.maxTrades}</span> עסקאות</div></div>
       <div class="muted small" style="text-align:left">הפסד מקסימלי<br><span class="num">${moneyPlain(lim)}</span></div></div>
     <div class="bar" role="img" aria-label="ניצול ההפסד היומי ${Math.round(used*100)}%"><i style="width:${Math.max(used*100,2)}%;background:${used>.75?"var(--down)":used>.4?"var(--accent)":"var(--up)"}"></i></div>
     ${stop?`<div class="warn">${pnl<=-lim?"הגעת להפסד היומי. סוגרים את הפלטפורמה. מחר יום חדש.":"הגעת למכסת העסקאות להיום. מספיק."}</div>`:""}
   </div>
   <div class="card">
-    <div class="row between"><h2>שגרת הכנה</h2><span class="chip ${done===ROUTINE.length?"ok":""}"><span class="num">${done}/${ROUTINE.length}</span></span></div>
+    <div class="row between"><h2>שגרת הכנה ${I("routine")}</h2><span class="chip ${done===ROUTINE.length?"ok":""}"><span class="num">${done}/${ROUTINE.length}</span></span></div>
     <div id="routine">${ROUTINE.map(r=>`<label class="check"><input type="checkbox" data-r="${r.id}" ${S.routine.done[r.id]?"checked":""}><span class="box"></span><span>${r.t}</span></label>`).join("")}</div>
   </div>
   <div class="grid2">
     <div class="card"><div class="eyebrow">התזכורת הבאה</div>${nr?`<div class="num" style="font-size:1.4rem;font-weight:700">${nr.r.time}</div><div class="small">${esc(nr.r.label)}</div><div class="muted small">${nr.at.toDateString()===new Date().toDateString()?"היום":DAYN[nr.at.getDay()]+"' "+dmy(nr.at)}</div>`:`<div class="muted small">אין תזכורות פעילות</div>`}</div>
-    <div class="card"><div class="eyebrow">גלגול חוזים רבעוני</div><div style="font-size:1.4rem;font-weight:700"><span class="num">${rd<=0?"היום":rd}</span>${rd>0?` <span class="small muted">ימים</span>`:""}</div><div class="small"><span class="num">ES${rl.code}</span> → <span class="num">ES${rl.nextCode}</span> ב-${dmy(rl.roll)}</div><div class="muted small">פקיעה <span class="num">${rl.code}</span> ב-${dmy(rl.exp)}</div></div>
+    <div class="card"><div class="eyebrow">גלגול חוזים רבעוני ${I("roll")}</div><div style="font-size:1.4rem;font-weight:700"><span class="num">${rd<=0?"היום":rd}</span>${rd>0?` <span class="small muted">ימים</span>`:""}</div><div class="small"><span class="num">ES${rl.code}</span> → <span class="num">ES${rl.nextCode}</span> ב-${dmy(rl.roll)}</div><div class="muted small">פקיעה <span class="num">${rl.code}</span> ב-${dmy(rl.exp)}</div></div>
   </div>
   <div class="card">
     <div class="row between"><h2>החודש</h2><button class="btn ghost small" data-go="journal" style="min-height:34px;padding:4px 10px">ליומן ←</button></div>
-    ${month.length?`<div class="grid3"><div class="stat"><span class="k">רווח נקי</span><span class="v num ${cls(st.total)}">${money(st.total)}</span></div><div class="stat"><span class="k">הצלחה</span><span class="v num">${Math.round(st.win*100)}%</span></div><div class="stat"><span class="k">לפי התוכנית</span><span class="v num">${Math.round(st.plan*100)}%</span></div></div>${curveSVG(st.curve,70)}`:`<div class="empty">עוד אין עסקאות החודש.</div>`}
+    ${month.length?`<div class="grid3"><div class="stat"><span class="k">רווח נקי</span><span class="v num ${cls(st.total)}">${money(st.total)}</span></div><div class="stat"><span class="k">הצלחה</span><span class="v num">${Math.round(st.win*100)}%</span></div><div class="stat"><span class="k">לפי התוכנית ${I("plan")}</span><span class="v num">${Math.round(st.plan*100)}%</span></div></div>${curveSVG(st.curve,70)}`:`<div class="empty">עוד אין עסקאות החודש.</div>`}
   </div>
   <button class="btn primary block" data-act="new">+ רשום עסקה</button>`;
 }
@@ -414,13 +449,13 @@ function renderCalc(){
   $("#v-calc").innerHTML=`
   <div class="top"><div><div class="eyebrow">לפני כל כניסה</div><h1>גודל פוזיציה</h1></div></div>
   <div class="card">
-    <label class="f">חוזה<select id="c-sym">${Object.entries(C).map(([k,v])=>`<option value="${k}" ${k===calcState.sym?"selected":""}>${k} · ${v.n}</option>`).join("")}</select></label>
+    <label class="f"><span>חוזה ${I("contract")}</span><select id="c-sym">${Object.entries(C).map(([k,v])=>`<option value="${k}" ${k===calcState.sym?"selected":""}>${k} · ${v.n}</option>`).join("")}</select></label>
     <div class="muted small" id="c-spec"></div>
-    <div class="grid2"><label class="f">גודל חשבון ($)<input type="number" id="c-acc" inputmode="decimal" step="any" value="${s.account}"></label><label class="f">סיכון לעסקה (%)<input type="number" id="c-risk" inputmode="decimal" step="0.1" value="${s.riskPct}"></label></div>
+    <div class="grid2"><label class="f">גודל חשבון ($)<input type="number" id="c-acc" inputmode="decimal" step="any" value="${s.account}"></label><label class="f"><span>סיכון לעסקה (%) ${I("riskpct")}</span><input type="number" id="c-risk" inputmode="decimal" step="0.1" value="${s.riskPct}"></label></div>
     <div class="grid3"><label class="f">כניסה<input type="number" id="c-entry" inputmode="decimal" step="any" placeholder="5900"></label><label class="f">סטופ<input type="number" id="c-stop" inputmode="decimal" step="any" placeholder="5895"></label><label class="f">יעד<input type="number" id="c-tgt" inputmode="decimal" step="any" placeholder="5910"></label></div>
   </div>
   <div class="card" id="c-out"></div>
-  <div class="card"><div class="row between"><h2>צ'קליסט לפני כניסה</h2><span class="chip" id="pre-count"></span></div>
+  <div class="card"><div class="row between"><h2>צ'קליסט לפני כניסה ${I("pretrade")}</h2><span class="chip" id="pre-count"></span></div>
     <div id="pre">${PRETRADE.map((t,i)=>`<label class="check"><input type="checkbox" data-p="${i}" ${calcState.pre[i]?"checked":""}><span class="box"></span><span>${t}</span></label>`).join("")}</div>
     <button class="btn primary block" id="c-log">רשום ביומן</button>
   </div>`;
@@ -429,7 +464,7 @@ function renderCalc(){
 function readNum(id){const v=parseFloat($(id).value);return isFinite(v)?v:null}
 function updCalc(){
   const sym=$("#c-sym").value;calcState.sym=sym;const c=C[sym],P=pv(sym);
-  $("#c-spec").innerHTML=`טיק <span class="num">${c.tick}</span> = <span class="num">${usd2.format(c.tv)}</span> · נקודה = <span class="num">${usd2.format(P)}</span>`;
+  $("#c-spec").innerHTML=`${I("tick")} טיק <span class="num">${c.tick}</span> = <span class="num">${usd2.format(c.tv)}</span> · נקודה = <span class="num">${usd2.format(P)}</span>`;
   const acc=readNum("#c-acc"),rp=readNum("#c-risk"),e=readNum("#c-entry"),st=readNum("#c-stop"),tg=readNum("#c-tgt");
   const out=$("#c-out");const pc=PRETRADE.filter((_,i)=>calcState.pre[i]).length;
   $("#pre-count").textContent=`${pc}/${PRETRADE.length}`;$("#pre-count").className="chip "+(pc===PRETRADE.length?"ok":"");
@@ -444,8 +479,8 @@ function updCalc(){
   else if(rr!=null&&rr<1.5)note=`<div class="warn">יחס סיכוי-סיכון ${rr.toFixed(2)} נמוך מ-1.5. שקול לוותר.</div>`;
   else if(rr!=null)note=`<div class="okmsg">יחס סיכוי-סיכון ${rr.toFixed(2)}. עומד בכללים.</div>`;
   out.innerHTML=`<div class="result"><div class="eyebrow">${side==="L"?"לונג":"שורט"} · ${sym}</div><div class="big num">${qty}</div><div class="muted small">חוזים</div></div>
-  <div class="grid3"><div class="stat"><span class="k">סיכון בפועל</span><span class="v num down">${moneyPlain(risk)}</span></div><div class="stat"><span class="k">מותר</span><span class="v num">${moneyPlain(allow)}</span></div><div class="stat"><span class="k">טיקים לסטופ</span><span class="v num">${N(ticks,0)}</span></div>
-  <div class="stat"><span class="k">רווח ביעד</span><span class="v num up">${rew!=null?moneyPlain(rew):"–"}</span></div><div class="stat"><span class="k">R:R</span><span class="v num">${rr!=null?"1:"+rr.toFixed(2):"–"}</span></div><div class="stat"><span class="k">עמלות</span><span class="v num">${usd2.format(fee*qty)}</span></div></div>${note}`;
+  <div class="grid3"><div class="stat"><span class="k">סיכון בפועל ${I("risk")}</span><span class="v num down">${moneyPlain(risk)}</span></div><div class="stat"><span class="k">מותר ${I("allowed")}</span><span class="v num">${moneyPlain(allow)}</span></div><div class="stat"><span class="k">טיקים לסטופ ${I("ticks")}</span><span class="v num">${N(ticks,0)}</span></div>
+  <div class="stat"><span class="k">רווח ביעד</span><span class="v num up">${rew!=null?moneyPlain(rew):"–"}</span></div><div class="stat"><span class="k">R:R ${I("rr")}</span><span class="v num">${rr!=null?"1:"+rr.toFixed(2):"–"}</span></div><div class="stat"><span class="k">עמלות</span><span class="v num">${usd2.format(fee*qty)}</span></div></div>${note}`;
 }
 
 /* ---- journal ---- */
@@ -466,14 +501,14 @@ function renderJournal(){
     ${curveSVG(st.curve)}
     <div class="grid3">
       <div class="stat"><span class="k">אחוז הצלחה</span><span class="v num">${Math.round(st.win*100)}%</span></div>
-      <div class="stat"><span class="k">Profit factor</span><span class="v num">${st.pf===Infinity?"∞":N(st.pf)}</span></div>
-      <div class="stat"><span class="k">R ממוצע</span><span class="v num ${cls(st.avgR)}">${st.avgR==null?"–":N(st.avgR)}</span></div>
-      <div class="stat"><span class="k">תוחלת לעסקה</span><span class="v num ${cls(st.exp)}">${money(st.exp)}</span></div>
-      <div class="stat"><span class="k">ירידה מקסימלית</span><span class="v num down">${money(st.dd)}</span></div>
-      <div class="stat"><span class="k">לפי התוכנית</span><span class="v num">${Math.round(st.plan*100)}%</span></div>
+      <div class="stat"><span class="k">Profit factor ${I("pf")}</span><span class="v num">${st.pf===Infinity?"∞":N(st.pf)}</span></div>
+      <div class="stat"><span class="k">R ממוצע ${I("avgr")}</span><span class="v num ${cls(st.avgR)}">${st.avgR==null?"–":N(st.avgR)}</span></div>
+      <div class="stat"><span class="k">תוחלת לעסקה ${I("exp")}</span><span class="v num ${cls(st.exp)}">${money(st.exp)}</span></div>
+      <div class="stat"><span class="k">ירידה מקסימלית ${I("dd")}</span><span class="v num down">${money(st.dd)}</span></div>
+      <div class="stat"><span class="k">לפי התוכנית ${I("plan")}</span><span class="v num">${Math.round(st.plan*100)}%</span></div>
     </div>
   </div>
-  <div class="card"><h2>מה היומן אומר עליך</h2><div>${insights(st).map(i=>`<div class="insight ${i.tone}"><b class="i"></b><span>${i.text}</span></div>`).join("")}</div></div>
+  <div class="card"><h2>מה היומן אומר עליך ${I("insights")}</h2><div>${insights(st).map(i=>`<div class="insight ${i.tone}"><b class="i"></b><span>${i.text}</span></div>`).join("")}</div></div>
   <div class="card"><h2>עסקאות</h2><div>${list.length?list.map(r=>{const t=r.t;return`<button class="trade" data-edit="${t.id}"><span class="side ${t.side}">${t.side==="L"?"L":"S"}</span><span style="min-width:0"><b>${esc(t.sym)}</b> <span class="muted small"><span class="num">${t.qty}</span> חוזים · ${dmy(new Date(t.d+"T12:00"))}${t.time?" · <span class='num'>"+esc(t.time)+"</span>":""}</span><span class="tags">${t.setup?`<span class="tag">${esc(t.setup)}</span>`:""}${t.emo?`<span class="tag">${esc(t.emo)}</span>`:""}${t.plan?"":`<span class="tag" style="color:var(--down)">מחוץ לתוכנית</span>`}</span></span><span style="text-align:left"><span class="num ${cls(r.net)}" style="font-weight:700">${money(r.net)}</span><br><span class="muted small num">${r.r==null?"":(r.r>=0?"+":"")+r.r.toFixed(2)+"R"}</span></span></button>`}).join(""):`<div class="empty">אין עסקאות בטווח הזה. רשום את העסקה הראשונה וקבל סטטיסטיקה ותובנות.</div>`}</div></div>
   ${bySet.length?`<div class="card"><h2>לפי סטאפ</h2><div class="tablewrap"><table><thead><tr><th>סטאפ</th><th>עסקאות</th><th>הצלחה</th><th>סה"כ</th></tr></thead><tbody>${bySet.map(g=>`<tr><td>${esc(g.k)}</td><td class="num">${g.n}</td><td class="num">${Math.round(g.win*100)}%</td><td class="num ${cls(g.total)}">${money(g.total)}</td></tr>`).join("")}</tbody></table></div>
   <h2>לפי חוזה</h2><div class="tablewrap"><table><thead><tr><th>חוזה</th><th>עסקאות</th><th>הצלחה</th><th>סה"כ</th></tr></thead><tbody>${bySym.map(g=>`<tr><td class="num">${esc(g.k)}</td><td class="num">${g.n}</td><td class="num">${Math.round(g.win*100)}%</td><td class="num ${cls(g.total)}">${money(g.total)}</td></tr>`).join("")}</tbody></table></div></div>`:""}`;
@@ -489,7 +524,7 @@ function renderPlan(){
   <div class="top"><div><div class="eyebrow">משמעת</div><h1>תוכנית ותזכורות</h1></div></div>
   ${isIOS&&!standalone?`<div class="banner"><span>באייפון: Safari ← שיתוף ← <b>הוסף למסך הבית</b>. כך האפליקציה נפתחת במסך מלא ושומרת את הנתונים שלך.</span></div>`:""}
   <div class="card">
-    <div class="row between"><h2>תזכורות</h2><button class="btn" data-act="add-rem" style="min-height:36px;padding:6px 12px">+ הוסף</button></div>
+    <div class="row between"><h2>תזכורות ${I("reminders")}</h2><button class="btn" data-act="add-rem" style="min-height:36px;padding:6px 12px">+ הוסף</button></div>
     <div>${S.reminders.map(r=>`<div class="rem" data-rid="${r.id}">
       <div style="display:grid;gap:8px;min-width:0"><div class="row"><input type="time" value="${r.time}" data-k="time" style="width:auto;min-width:110px"><button class="x" data-act="del-rem" aria-label="מחק תזכורת">✕</button></div>
       <input type="text" value="${esc(r.label)}" data-k="label" aria-label="נוסח התזכורת">
@@ -505,7 +540,7 @@ function renderPlan(){
     <form class="row" id="rule-form" style="flex-wrap:nowrap"><input type="text" id="rule-in" placeholder="חוק חדש…" aria-label="חוק חדש"><button class="btn" type="submit">הוסף</button></form>
   </div>
   <div class="card">
-    <h2>גלגולי חוזים קרובים</h2>
+    <h2>גלגולי חוזים קרובים ${I("roll")}</h2>
     <div class="tablewrap"><table><thead><tr><th>חוזה נוכחי</th><th>יום גלגול</th><th>פקיעה</th><th>עוד</th></tr></thead><tbody>${rolls(4).map(r=>`<tr><td class="num">ES${r.code} → ES${r.nextCode}</td><td>${dmy(r.roll)}</td><td>${dmy(r.exp)}</td><td class="num">${Math.max(0,dayDiff(r.roll))}d</td></tr>`).join("")}</tbody></table></div>
     <p class="muted small" style="margin:0">חוזי המדדים (ES, NQ, YM, RTY והמיקרו) פוקעים ביום שישי השלישי של מרץ, יוני, ספטמבר ודצמבר. הנזילות עוברת לחוזה הבא כשמונה ימים לפני.</p>
   </div>
@@ -513,10 +548,10 @@ function renderPlan(){
     <h2>הגדרות סיכון</h2>
     <div class="grid2">
       <label class="f">גודל חשבון ($)<input type="number" data-s="account" inputmode="decimal" value="${s.account}"></label>
-      <label class="f">סיכון לעסקה (%)<input type="number" data-s="riskPct" inputmode="decimal" step="0.1" value="${s.riskPct}"></label>
-      <label class="f">הפסד יומי מקסימלי ($)<input type="number" data-s="maxDaily" inputmode="decimal" value="${s.maxDaily}"></label>
+      <label class="f"><span>סיכון לעסקה (%) ${I("riskpct")}</span><input type="number" data-s="riskPct" inputmode="decimal" step="0.1" value="${s.riskPct}"></label>
+      <label class="f"><span>הפסד יומי מקסימלי ($) ${I("daily")}</span><input type="number" data-s="maxDaily" inputmode="decimal" value="${s.maxDaily}"></label>
       <label class="f">מקסימום עסקאות ביום<input type="number" data-s="maxTrades" inputmode="numeric" value="${s.maxTrades}"></label>
-      <label class="f">עמלה לחוזה לכל צד ($)<input type="number" data-s="commission" inputmode="decimal" step="0.01" value="${s.commission}"></label>
+      <label class="f"><span>עמלה לחוזה לכל צד ($) ${I("commission")}</span><input type="number" data-s="commission" inputmode="decimal" step="0.01" value="${s.commission}"></label>
       <label class="f">חוזה ברירת מחדל<select data-s="sym">${Object.keys(C).map(k=>`<option ${k===s.sym?"selected":""}>${k}</option>`).join("")}</select></label>
     </div>
   </div>
@@ -548,8 +583,8 @@ function openSheet(t){
   <div class="grid2"><label class="f">תאריך<input type="date" id="t-d" value="${sheetT.d}" required></label><label class="f">שעה<input type="time" id="t-time" value="${sheetT.time||""}"></label></div>
   <div class="grid3"><label class="f">כניסה<input type="number" id="t-entry" inputmode="decimal" step="any" value="${sheetT.entry}" required></label><label class="f">יציאה<input type="number" id="t-exit" inputmode="decimal" step="any" value="${sheetT.exit}" required></label><label class="f">סטופ<input type="number" id="t-stop" inputmode="decimal" step="any" value="${sheetT.stop??""}"></label></div>
   <div id="t-prev" class="stat"></div>
-  <label class="f">סטאפ<input type="text" id="t-setup" list="setups" value="${esc(sheetT.setup)}" placeholder="למשל: פריצת טווח פתיחה"><datalist id="setups">${sets.map(x=>`<option value="${esc(x)}">`).join("")}</datalist></label>
-  <label class="f">מצב רגשי<select id="t-emo">${EMO.map(e=>`<option ${e===sheetT.emo?"selected":""}>${e}</option>`).join("")}</select></label>
+  <label class="f"><span>סטאפ ${I("setup")}</span><input type="text" id="t-setup" list="setups" value="${esc(sheetT.setup)}" placeholder="למשל: פריצת טווח פתיחה"><datalist id="setups">${sets.map(x=>`<option value="${esc(x)}">`).join("")}</datalist></label>
+  <label class="f"><span>מצב רגשי ${I("emo")}</span><select id="t-emo">${EMO.map(e=>`<option ${e===sheetT.emo?"selected":""}>${e}</option>`).join("")}</select></label>
   <label class="check" style="border:0"><input type="checkbox" id="t-plan" ${sheetT.plan?"checked":""}><span class="box"></span><span>העסקה הייתה לפי התוכנית</span></label>
   <label class="f">מה למדתי<textarea id="t-note" placeholder="משפט אחד שיעזור לך מחר">${esc(sheetT.note)}</textarea></label>
   <button class="btn primary block" type="submit">שמור</button>
@@ -593,6 +628,7 @@ let cur="today";
 function rerender(){show(cur)}
 
 document.addEventListener("click",async e=>{
+  const inf=e.target.closest("[data-info]");if(inf){e.preventDefault();openInfo(inf.dataset.info);return}
   const go=e.target.closest("[data-go]");if(go){show(go.dataset.go);return}
   if(e.target.closest("#toast .x")){$("#toast").hidden=true;return}
   const a=e.target.closest("[data-act]");const act=a&&a.dataset.act;
