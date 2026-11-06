@@ -417,6 +417,16 @@ function renderSymHits(q){const box=$("#watch-results");if(!box)return;
   symHits=searchSymbols(q);box.hidden=false;
   box.innerHTML=symHits.length?symHits.map((it,i)=>`<button type="button" role="option" data-addsym="${esc(it.s)}" class="${i?"":"on"}"><b>${esc(it.k)}</b><span class="nm">${esc(it.n)}</span><span class="ex">${esc(it.x)}${it.e?" · קרן סל":""}</span></button>`).join(""):`<div class="none">לא נמצא. אפשר לכתוב סימול מדויק וללחוץ "הוסף".</div>`;
 }
+// generic stock picker for the calculator and journal (US-listed stocks/ETFs only)
+function renderPick(inp){
+  const box=inp.parentElement.querySelector(".sresults");if(!box)return;const q=inp.value;
+  if(!q.trim()||inp._picked===q){box.hidden=true;box.innerHTML="";return}
+  if(!SYMS){box.hidden=false;box.innerHTML=`<span class="none">טוען רשימת מניות…</span>`;loadSymbols().then(()=>{if(document.activeElement===inp)renderPick(inp)}).catch(()=>{box.hidden=true});return}
+  const hits=searchSymbols(q).filter(it=>!it.s.includes(":")).slice(0,6);
+  if(!hits.length||(hits.length===1&&hits[0].k===q.trim().toUpperCase())){box.hidden=true;box.innerHTML="";return}
+  box.hidden=false;box.innerHTML=hits.map(it=>`<button type="button" data-picksym="${esc(it.k)}"><b>${esc(it.k)}</b><span class="nm">${esc(it.n)}</span><span class="ex">${esc(it.x)}${it.e?" · קרן סל":""}</span></button>`).join("");
+}
+function closePicks(except){$$(".spick .sresults").forEach(b=>{if(!except||!except.contains(b)){b.hidden=true;b.innerHTML=""}})}
 function addWatch(v){v=normSym(v);if(!v)return;const w=watchList();if(!w.includes(v)){w.push(v);save();$("#watch-chips").innerHTML=watchChips();buildWatchWidget()}$("#watch-in").value="";renderSymHits("");if(embeddable){chartSym=v;buildChartWidget()}toast(`${v.split(":").pop()} נוסף לרשימה`,2000)}
 function buildWatchWidget(){const el=$("#tv-watch");if(!el)return;const w=watchList();
   if(!w.length){el.innerHTML=`<div class="empty">הרשימה ריקה. הוסף סימול למעלה.</div>`;return}
@@ -468,7 +478,7 @@ function renderCalc(){
   <div class="top"><div><div class="eyebrow">לפני כל כניסה</div><h1>גודל פוזיציה</h1></div></div>
   <div class="seg" role="group" aria-label="סוג נכס"><button data-cmode="fut" aria-pressed="${!st}">חוזים עתידיים</button><button data-cmode="stock" aria-pressed="${st}">מניות</button></div>
   <div class="card">
-    ${st?`<label class="f"><span>סימול המניה ${I("stock")}</span><input type="text" id="c-stock" list="c-watch" value="${esc(calcState.stock)}" autocapitalize="characters" autocomplete="off" spellcheck="false" style="direction:ltr;text-align:right"><datalist id="c-watch">${watchList().map(x=>`<option value="${esc(x)}">`).join("")}</datalist></label>`
+    ${st?`<label class="f"><span>סימול המניה ${I("stock")}</span><span class="spick"><input type="text" id="c-stock" data-pick="1" value="${esc(calcState.stock)}" placeholder="חפש: BMNR, Tesla, טבע…" autocapitalize="characters" autocomplete="off" spellcheck="false" style="direction:ltr;text-align:right"><span class="sresults" hidden></span></span></label>`
     :`<label class="f"><span>חוזה ${I("contract")}</span><select id="c-sym">${Object.entries(C).map(([k,v])=>`<option value="${k}" ${k===calcState.sym?"selected":""}>${k} · ${v.n}</option>`).join("")}</select></label>`}
     <div class="muted small" id="c-spec"></div>
     <div class="grid2"><label class="f">גודל חשבון ($)<input type="number" id="c-acc" inputmode="decimal" step="any" value="${s.account}"></label><label class="f"><span>סיכון לעסקה (%) ${I("riskpct")}</span><input type="number" id="c-risk" inputmode="decimal" step="0.1" value="${s.riskPct}"></label></div>
@@ -675,7 +685,7 @@ function openSheet(t){
   if(t&&t.shot){const id=t.id;DB.get(id).then(b=>{if(b&&sheetT&&sheetT.id===id)showShot(b)}).catch(()=>{})}
 }
 function symField(sym){return isStock(sym)
-  ?`<label class="f">סימול<input type="text" id="t-sym" list="t-watch" value="${esc(sym)}" required autocapitalize="characters" autocomplete="off" spellcheck="false" style="direction:ltr;text-align:right"><datalist id="t-watch">${[...new Set([...watchList(),...S.trades.filter(x=>isStock(x.sym)).map(x=>x.sym)])].map(x=>`<option value="${esc(x)}">`).join("")}</datalist></label>`
+  ?`<label class="f">סימול<span class="spick"><input type="text" id="t-sym" data-pick="1" value="${esc(sym)}" required placeholder="חפש מניה" autocapitalize="characters" autocomplete="off" spellcheck="false" style="direction:ltr;text-align:right"><span class="sresults" hidden></span></span></label>`
   :`<label class="f">חוזה<select id="t-sym">${Object.keys(C).map(k=>`<option ${k===sym?"selected":""}>${k}</option>`).join("")}</select></label>`}
 function setSheetKind(kind,sym){$$("[data-kind]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.kind===kind));$("#t-symbox").innerHTML=symField(kind==="stock"?(sym||S.settings.stockSym||"BMNR"):(sym&&C[sym]?sym:S.settings.sym));sheetPrev()}
 const exitRow=(q="",p="")=>`<div class="exrow"><input type="number" class="ex-q" inputmode="numeric" min="1" step="1" value="${q}" placeholder="כמות" aria-label="כמות ביציאה"><input type="number" class="ex-p" inputmode="decimal" step="any" value="${p}" placeholder="מחיר יציאה" aria-label="מחיר יציאה"><button type="button" class="x" data-act="del-exit" aria-label="מחק יציאה">✕</button></div>`;
@@ -745,6 +755,8 @@ document.addEventListener("click",async e=>{
   if(act==="del-shot"){shotState={blob:null,remove:true};$("#t-shotbox").innerHTML="";$("#t-shotlbl").textContent="צרף צילום של הגרף";return}
   if(e.target.matches("img.shot")){e.target.classList.toggle("zoom");return}
   const as=e.target.closest("[data-addsym]");if(as){addWatch(as.dataset.addsym);return}
+  const pk=e.target.closest("[data-picksym]");if(pk){const inp=pk.closest(".spick").querySelector("input");inp.value=pk.dataset.picksym;inp._picked=inp.value;closePicks();if(inp.id==="c-stock")updCalc();else sheetPrev();return}
+  closePicks(e.target.closest(".spick"));
   if(!e.target.closest("#watch-form")&&$("#watch-results")&&!$("#watch-results").hidden)renderSymHits("");
   const ch=e.target.closest("[data-chart]");if(ch){chartSym=ch.dataset.chart;buildChartWidget();$("#tv-chart").closest(".card").scrollIntoView({behavior:"smooth",block:"start"});return}
   const uw=e.target.closest("[data-unwatch]");if(uw){S.watch=watchList().filter(x=>x!==uw.dataset.unwatch);save();$("#watch-chips").innerHTML=watchChips();buildWatchWidget();return}
@@ -772,6 +784,8 @@ document.addEventListener("click",async e=>{
   if(act==="cloud-out"){cloudSignOut(false);return}
   if(act==="cloud-sync"){syncNow(true);return}
   if(act==="cloud-reset"){cloudReset();return}
+  if(act==="pw-open"){cloud.pwOpen=true;renderPlan();setTimeout(()=>$("#pw-new")&&$("#pw-new").focus(),50);return}
+  if(act==="pw-cancel"){cloud.pwOpen=false;cloud.recovery=false;renderPlan();return}
   if(act==="cloud-delete"){if(!cloud.delArm){cloud.delArm=true;renderPlan();setTimeout(()=>{cloud.delArm=false},8000);return}cloud.delArm=false;cloudDeleteAccount();return}
   if(act==="import"){try{const s=cleanState(JSON.parse($("#backup").value),false);if(!s)throw 0;S=s;migrate();markAllDirty();save();toast("הגיבוי שוחזר",2500);rerender()}catch(err){toast("הטקסט שהודבק אינו גיבוי תקין של טיק.")}return}
   if(act==="reset"){if(!pendingReset){pendingReset=true;renderPlan();$("details").open=true;return}pendingReset=false;cloudSignOut(true);try{localStorage.removeItem(LS)}catch(err){}S=defaults();S.trades=[];migrate();lastPH=profileOf(S);save();toast("כל הנתונים נמחקו",2500);show("today");return}
@@ -807,10 +821,12 @@ document.addEventListener("change",e=>{
   if(t.id==="t-shot"&&t.files&&t.files[0]){shrink(t.files[0]).then(b=>{shotState={blob:b,remove:false};showShot(b)}).catch(()=>toast("לא הצלחתי לקרוא את התמונה."));t.value="";return}
   if(t.closest("#tform"))sheetPrev();
 });
-document.addEventListener("input",e=>{const t=e.target;if(t.id==="watch-in"){renderSymHits(t.value);return}if(t.closest("#v-calc")&&t.id&&t.id.startsWith("c-"))updCalc();else if(t.id==="t-sym")sheetPrev();else if(t.closest("#tform"))sheetPrev()});
+document.addEventListener("input",e=>{const t=e.target;if(t.id==="watch-in"){renderSymHits(t.value);return}if(t.dataset&&t.dataset.pick){t._picked=null;renderPick(t)}if(t.closest("#v-calc")&&t.id&&t.id.startsWith("c-"))updCalc();else if(t.id==="t-sym")sheetPrev();else if(t.closest("#tform"))sheetPrev()});
 document.addEventListener("submit",e=>{
   e.preventDefault();
   if(e.target.id==="cloud-form"){cloudAuth(false);return}
+  if(e.target.id==="pw-form"){const v=$("#pw-new").value||"";if(v.length<8){toast("הסיסמה צריכה להיות לפחות 8 תווים.",3000);return}
+    cloud.sb.auth.updateUser({password:v}).then(({error})=>{if(error)throw error;cloud.pwOpen=false;cloud.recovery=false;toast("הסיסמה עודכנה",3000);renderPlan()}).catch(err=>toast(heErr(err),5000));return}
   if(e.target.id==="watch-form"){const raw=$("#watch-in").value.trim();if(!raw)return;const exact=SYMS&&SYMS.find(it=>it.k===raw.toUpperCase());addWatch(exact?exact.s:(symHits[0]?symHits[0].s:raw));$("#watch-in").blur();return}
   if(e.target.id==="rule-form"){const v=$("#rule-in").value.trim();if(v){S.rules.push(v);save();renderPlan()}return}
   if(e.target.id==="tform"){const t=sheetRead();
@@ -852,7 +868,7 @@ async function cloudInit(){
   if(!embeddable||cloud.sb||cloud.loading)return;cloud.loading=true;
   try{const lib=await loadSB();cloud.sb=lib.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:"tick-auth"}});
     const{data}=await cloud.sb.auth.getSession();cloud.user=data.session?data.session.user:null;
-    cloud.sb.auth.onAuthStateChange((ev,session)=>{const was=cloud.user&&cloud.user.id;cloud.user=session?session.user:null;if(cur==="plan")renderPlan();if(ev==="SIGNED_IN"&&was!==(cloud.user&&cloud.user.id))syncNow()});
+    cloud.sb.auth.onAuthStateChange((ev,session)=>{if(ev==="PASSWORD_RECOVERY"){cloud.recovery=true;setTimeout(()=>show("plan"),0)}const was=cloud.user&&cloud.user.id;cloud.user=session?session.user:null;if(cur==="plan")renderPlan();if(ev==="SIGNED_IN"&&was!==(cloud.user&&cloud.user.id))syncNow()});
     if(/access_token|error_description/.test(location.hash)){try{history.replaceState(null,"",location.pathname+"#today")}catch(e){}toast(/error/.test(location.hash)?"הקישור מהמייל לא תקין או שפג תוקפו.":"המייל אושר. אפשר להתחבר.",5000)}
     if(cloud.user)syncNow();
   }catch(e){cloud.status="error";cloud.err=heErr(e)}
@@ -878,6 +894,11 @@ function cloudCard(){
     <div class="muted small">${S.sync&&S.sync.lastOk?"סנכרון אחרון: "+new Date(S.sync.lastOk).toLocaleString("he-IL",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"עוד לא סונכרן"}</div>
     ${cloud.status==="error"&&cloud.err?`<div class="warn">${esc(cloud.err)}</div>`:""}
     <div class="grid2"><button class="btn" data-act="cloud-sync">סנכרן עכשיו</button><button class="btn ghost" data-act="cloud-out">התנתק</button></div>
+    ${cloud.pwOpen||cloud.recovery?`<form id="pw-form" style="display:grid;gap:8px">
+      ${cloud.recovery?`<div class="okmsg">בחר סיסמה חדשה לחשבון.</div>`:""}
+      <label class="f">סיסמה חדשה (לפחות 8 תווים)<input type="password" id="pw-new" autocomplete="new-password" minlength="8" style="direction:ltr;text-align:right" required></label>
+      <div class="grid2"><button type="submit" class="btn primary">שמור סיסמה</button><button type="button" class="btn ghost" data-act="pw-cancel">ביטול</button></div></form>`
+    :`<button class="btn ghost small" data-act="pw-open" style="min-height:34px">שנה סיסמה</button>`}
     <button class="btn danger ghost small" data-act="cloud-delete" style="min-height:34px">${cloud.delArm?"לחץ שוב: מחק את החשבון וכל הנתונים מהענן":"מחק את החשבון שלי מהענן"}</button></div>`;
 }
 async function cloudAuth(signup){

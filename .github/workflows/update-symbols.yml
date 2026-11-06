@@ -1,0 +1,37 @@
+name: Update symbol list
+
+# Refreshes docs/symbols.txt (watchlist search) from Nasdaq's public symbol directory.
+on:
+  schedule:
+    - cron: "17 6 2 * *"   # monthly, 2nd day 06:17 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download Nasdaq symbol directory
+        run: |
+          mkdir -p /tmp/sym
+          curl -fsS -o /tmp/sym/nasdaqlisted.txt https://www.nasdaqtrader.com/dynamic/SymDir/nasdaqlisted.txt
+          curl -fsS -o /tmp/sym/otherlisted.txt https://www.nasdaqtrader.com/dynamic/SymDir/otherlisted.txt
+      - name: Build symbols.txt
+        run: python3 tools/build_symbols.py /tmp/sym
+      - name: Sanity check
+        run: |
+          n=$(wc -l < docs/symbols.txt)
+          echo "symbols: $n"
+          test "$n" -gt 5000
+          grep -q '^AAPL|' docs/symbols.txt
+      - name: Commit if changed
+        run: |
+          if git diff --quiet docs/symbols.txt; then echo "no changes"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/symbols.txt
+          git commit -m "Update symbol list from Nasdaq directory"
+          git push
