@@ -135,6 +135,8 @@ img.shot.zoom{max-height:none;object-fit:contain;cursor:zoom-out}
 .cal .h{font-size:.72rem;color:var(--muted);text-align:center;font-weight:600}
 .cal .d{aspect-ratio:1;border-radius:8px;background:var(--surface2);display:grid;align-content:center;justify-items:center;gap:1px;min-width:0;font-size:.72rem;line-height:1.1}
 .cal .d.today{outline:1.5px solid var(--accent)}
+.cal button.d{border:0;font:inherit;color:inherit;cursor:pointer;padding:0}
+.cal button.d:active{transform:scale(.95)}
 .cal .d .a{font-family:var(--f-num);font-size:.62rem;font-weight:700;direction:ltr}
 .cal .d.hol{background:transparent;border:1px dashed var(--line);color:var(--muted)}
 #watch-form{position:relative}
@@ -176,6 +178,34 @@ details summary::-webkit-details-marker{display:none}
 details summary::after{content:"＋";float:left;color:var(--muted)}
 details[open] summary::after{content:"−"}
 code.ics{display:block;max-height:140px;overflow:auto;font-family:var(--f-num);font-size:.7rem;background:var(--surface2);padding:8px;border-radius:8px;direction:ltr;text-align:left;white-space:pre}
+
+/* ---------- desktop: side menu, two-column cards, centered dialogs ---------- */
+.brand,.kbd{display:none}
+@media (min-width:960px){
+  body{padding-right:232px}
+  .app{max-width:1180px;padding-block:28px 40px;padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:28px}
+  .view{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start}
+  .view>.top,.view>.banner,.view>.seg,.view>.btn.block,.view>p,.view>.wide{grid-column:1/-1}
+  .view>.seg{max-width:420px}
+  h1{font-size:2rem}
+  .tabs{inset:0 0 0 auto;width:232px;border-top:0;border-left:1px solid var(--line);padding:28px 14px;background:var(--surface);backdrop-filter:none;-webkit-backdrop-filter:none;display:flex;flex-direction:column;gap:18px}
+  .tabs nav{grid-template-columns:1fr;gap:4px;margin:0;max-width:none}
+  .tab{grid-auto-flow:column;justify-content:start;align-items:center;gap:12px;padding:11px 14px;font-size:1rem;border-radius:12px;text-align:start}
+  .tab:hover{background:var(--surface2);color:var(--fg)}
+  .tab[aria-current="page"]{background:var(--accent-soft)}
+  .brand{display:flex;align-items:center;gap:10px;padding:0 10px;font-family:var(--f-display);font-weight:700;font-size:1.35rem}
+  .brand i{width:30px;height:30px;border-radius:9px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink);font-style:normal;font-size:1rem}
+  .kbd{display:block;margin-top:auto;padding:0 10px;font-size:.78rem;color:var(--muted);line-height:1.8}
+  .kbd b{font-family:var(--f-num);border:1px solid var(--line);border-radius:5px;padding:0 5px;font-weight:600}
+  .sheet-bg{align-items:center;padding:24px}
+  .sheet{border-radius:20px;max-height:88vh;padding:22px 24px}
+  .grab{display:none}
+  .toast{top:20px;right:auto;left:24px;transform:none;width:380px}
+  .btn:hover{filter:brightness(1.06)}
+  .trade:hover{background:var(--surface2)}
+  #tv-chart .tvbox,#tv-chart{min-height:460px}
+}
+@media (min-width:1400px){.app{max-width:1320px}}
 @media (max-width:380px){.grid3{grid-template-columns:1fr 1fr}.result .big{font-size:2.5rem}}
 </style>
 
@@ -188,6 +218,7 @@ code.ics{display:block;max-height:140px;overflow:auto;font-family:var(--f-num);f
 </div>
 
 <div class="tabs" dir="rtl">
+  <div class="brand"><i>ט</i>טיק</div>
   <nav aria-label="ניווט ראשי">
     <button class="tab" data-go="today" aria-current="page">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M7 4v3M7 17v3M17 7v3M17 18v2"/><rect x="5" y="7" width="4" height="10" rx="1" fill="currentColor" fill-opacity=".18"/><rect x="15" y="10" width="4" height="8" rx="1"/></svg>היום</button>
@@ -200,6 +231,7 @@ code.ics{display:block;max-height:140px;overflow:auto;font-family:var(--f-num);f
     <button class="tab" data-go="plan">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M10.5 20a1.7 1.7 0 0 0 3 0"/></svg>תוכנית</button>
   </nav>
+  <div class="kbd">קיצורים: <b>N</b> עסקה חדשה · <b>1</b>–<b>5</b> לשוניות · <b>/</b> חיפוש מניה · <b>Esc</b> סגירה</div>
 </div>
 
 <div class="sheet-bg" id="sheetBg" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
@@ -743,7 +775,7 @@ function updCalc(){
 }
 
 /* ---- journal ---- */
-const jState={filter:"all",cal:0};
+const jState={filter:"all",cal:0,day:null,view:(()=>{try{return localStorage.getItem("tick_jview")==="cal"?"cal":"list"}catch(e){return"list"}})()};
 const fmtK=v=>{const a=Math.abs(v);return(v<0?"−":"+")+(a>=1000?(a/1000).toFixed(1)+"k":Math.round(a))};
 function calHTML(){
   const b=new Date();b.setDate(1);b.setMonth(b.getMonth()+jState.cal);const y=b.getFullYear(),m=b.getMonth(),pre=`${y}-${String(m+1).padStart(2,"0")}`;
@@ -752,7 +784,8 @@ function calHTML(){
   let cells=DAYN.map(d=>`<div class="h">${d}</div>`).join("")+"<div></div>".repeat(b.getDay());
   for(let d=1;d<=days;d++){const k=`${pre}-${String(d).padStart(2,"0")}`,v=by[k],h=holOn(k);
     const st=v==null?"":`background:color-mix(in srgb,var(${v>=0?"--up":"--down"}) ${Math.round(18+55*Math.abs(v)/mx)}%,var(--surface2))`;
-    cells+=`<div class="d${k===tk?" today":""}${h&&v==null&&h.type!=="early"?" hol":""}" style="${st}" title="${h?h.n:""}"><span>${d}</span>${v!=null?`<span class="a">${fmtK(v)}</span>`:""}</div>`}
+    const cl=`d${k===tk?" today":""}${h&&v==null&&h.type!=="early"?" hol":""}`,inner=`<span>${d}</span>${v!=null?`<span class="a">${fmtK(v)}</span>`:""}`;
+    cells+=v!=null?`<button type="button" class="${cl}" style="${st}" data-dpick="${k}" aria-label="עסקאות ${d} בחודש: ${money(v)}">${inner}</button>`:`<div class="${cl}" title="${h?h.n:""}">${inner}</div>`}
   return`<div class="row between"><button class="x" data-cal="-1" aria-label="חודש קודם">→</button><span><b>${b.toLocaleDateString("he-IL",{month:"long",year:"numeric"})}</b> · <span class="num ${cls(tot)}">${money(tot)}</span></span><button class="x" data-cal="1" aria-label="חודש הבא" ${jState.cal>=0?"disabled":""}>←</button></div><div class="cal">${cells}</div>`;
 }
 function journalCSV(sep){
@@ -771,7 +804,7 @@ async function exportCSV(){
 function renderJournal(){
   const all=sortedTrades();const f=jState.filter;
   const ts=f==="all"?all:all.filter(t=>f==="month"?t.d.slice(0,7)===todayKey().slice(0,7):t.d>=daysAgo(6));
-  const st=stats(ts);const list=[...st.rows].reverse();
+  const st=stats(ts);const dayRows=jState.day?stats(all.filter(t=>t.d===jState.day)).rows:null;const list=[...(dayRows||st.rows)].reverse();const dayTot=dayRows?sum(dayRows.map(r=>r.net)):0;
   const hasSample=S.trades.some(t=>t.sample);
   const bySet=groupBy(st.rows,t=>t.setup).sort((a,b)=>b.total-a.total);
   const bySym=groupBy(st.rows,t=>t.sym).sort((a,b)=>b.total-a.total);
@@ -791,9 +824,9 @@ function renderJournal(){
       <div class="stat"><span class="k">לפי התוכנית ${I("plan")}</span><span class="v num">${Math.round(st.plan*100)}%</span></div>
     </div>
   </div>
-  <div class="card"><h2>לוח חודשי ${I("cal")}</h2>${calHTML()}</div>
   <div class="card"><h2>מה היומן אומר עליך ${I("insights")}</h2><div>${insights(st).map(i=>`<div class="insight ${i.tone}"><b class="i"></b><span>${i.text}</span></div>`).join("")}</div></div>
-  <div class="card"><div class="row between"><h2>עסקאות</h2><button class="btn" data-act="csv" style="min-height:36px;padding:6px 12px">ייצוא לאקסל</button></div><div>${list.length?list.map(r=>{const t=r.t;return`<button class="trade" data-edit="${t.id}"><span class="side ${t.side}">${t.side==="L"?"L":"S"}</span><span style="min-width:0"><b>${esc(t.sym)}</b> <span class="muted small"><span class="num">${t.qty}</span> ${unitName(t.sym,t.qty)} · ${dmy(new Date(t.d+"T12:00"))}${t.time?" · <span class='num'>"+esc(t.time)+"</span>":""}</span><span class="tags">${t.setup?`<span class="tag">${esc(t.setup)}</span>`:""}${t.emo?`<span class="tag">${esc(t.emo)}</span>`:""}${t.exits&&t.exits.length?`<span class="tag">${t.exits.length} יציאות</span>`:""}${t.shot?`<span class="tag">צילום</span>`:""}${t.plan?"":`<span class="tag" style="color:var(--down)">מחוץ לתוכנית</span>`}</span></span><span style="text-align:left"><span class="num ${cls(r.net)}" style="font-weight:700">${money(r.net)}</span><br><span class="muted small num">${r.r==null?"":(r.r>=0?"+":"")+r.r.toFixed(2)+"R"}</span></span></button>`}).join(""):`<div class="empty">אין עסקאות בטווח הזה. רשום את העסקה הראשונה וקבל סטטיסטיקה ותובנות.</div>`}</div></div>
+  <div class="card" id="j-trades"><div class="row between"><h2>עסקאות ${jState.view==="cal"?I("cal"):""}</h2><div class="row" style="gap:8px"><div class="seg" role="group" aria-label="תצוגה" style="min-width:150px"><button data-jview="list" aria-pressed="${jState.view==="list"}">רשימה</button><button data-jview="cal" aria-pressed="${jState.view==="cal"}">לוח</button></div><button class="btn" data-act="csv" style="min-height:36px;padding:6px 12px">ייצוא לאקסל</button></div></div>
+  ${jState.view==="cal"?calHTML():`${jState.day?`<div class="row between banner" style="padding:8px 12px"><span>${DAYN[new Date(jState.day+"T12:00").getDay()]}' ${dmy(new Date(jState.day+"T12:00"))} · <span class="num ${cls(dayTot)}">${money(dayTot)}</span></span><button class="btn" data-act="clear-day" style="min-height:32px;padding:4px 10px">כל העסקאות ✕</button></div>`:""}<div>${list.length?list.map(r=>{const t=r.t;return`<button class="trade" data-edit="${t.id}"><span class="side ${t.side}">${t.side==="L"?"L":"S"}</span><span style="min-width:0"><b>${esc(t.sym)}</b> <span class="muted small"><span class="num">${t.qty}</span> ${unitName(t.sym,t.qty)} · ${dmy(new Date(t.d+"T12:00"))}${t.time?" · <span class='num'>"+esc(t.time)+"</span>":""}</span><span class="tags">${t.setup?`<span class="tag">${esc(t.setup)}</span>`:""}${t.emo?`<span class="tag">${esc(t.emo)}</span>`:""}${t.exits&&t.exits.length?`<span class="tag">${t.exits.length} יציאות</span>`:""}${t.shot?`<span class="tag">צילום</span>`:""}${t.plan?"":`<span class="tag" style="color:var(--down)">מחוץ לתוכנית</span>`}</span></span><span style="text-align:left"><span class="num ${cls(r.net)}" style="font-weight:700">${money(r.net)}</span><br><span class="muted small num">${r.r==null?"":(r.r>=0?"+":"")+r.r.toFixed(2)+"R"}</span></span></button>`}).join(""):`<div class="empty">אין עסקאות בטווח הזה. רשום את העסקה הראשונה וקבל סטטיסטיקה ותובנות.</div>`}</div>`}</div>
   ${bySet.length?`<div class="card"><h2>לפי סטאפ</h2><div class="tablewrap"><table><thead><tr><th>סטאפ</th><th>עסקאות</th><th>הצלחה</th><th>סה"כ</th></tr></thead><tbody>${bySet.map(g=>`<tr><td>${esc(g.k)}</td><td class="num">${g.n}</td><td class="num">${Math.round(g.win*100)}%</td><td class="num ${cls(g.total)}">${money(g.total)}</td></tr>`).join("")}</tbody></table></div>
   <h2>לפי נכס</h2><div class="tablewrap"><table><thead><tr><th>נכס</th><th>עסקאות</th><th>הצלחה</th><th>סה"כ</th></tr></thead><tbody>${bySym.map(g=>`<tr><td class="num">${esc(g.k)}</td><td class="num">${g.n}</td><td class="num">${Math.round(g.win*100)}%</td><td class="num ${cls(g.total)}">${money(g.total)}</td></tr>`).join("")}</tbody></table></div></div>`:""}`;
 }
@@ -972,6 +1005,9 @@ document.addEventListener("click",async e=>{
   if(act==="del-trade"){if(!delArm){delArm=true;a.textContent="לחץ שוב כדי למחוק";return}S.trades=S.trades.filter(t=>t.id!==sheetT.id);DB.del(sheetT.id).catch(()=>{});if(!sheetT.sample){S.tomb??={};S.tomb[sheetT.id]=Date.now()}save();closeSheet();rerender();toast("העסקה נמחקה",2500);return}
   if(act==="clear-sample"){S.trades=S.trades.filter(t=>!t.sample);save();rerender();toast("הדוגמאות נמחקו. היומן שלך מוכן.",3000);return}
   const ed=e.target.closest("[data-edit]");if(ed){openSheet(S.trades.find(t=>t.id===ed.dataset.edit));return}
+  const jv=e.target.closest("[data-jview]");if(jv){jState.view=jv.dataset.jview;jState.day=null;try{localStorage.setItem("tick_jview",jState.view)}catch(err){}renderJournal();return}
+  const dp=e.target.closest("[data-dpick]");if(dp){jState.day=dp.dataset.dpick;jState.view="list";renderJournal();const el=$("#j-trades");if(el)el.scrollIntoView({behavior:"smooth",block:"start"});return}
+  if(act==="clear-day"){jState.day=null;renderJournal();return}
   const fb=e.target.closest("[data-f]");if(fb){jState.filter=fb.dataset.f;renderJournal();return}
   const kd=e.target.closest("[data-kind]");if(kd){setSheetKind(kd.dataset.kind);return}
   const cm=e.target.closest("[data-cmode]");if(cm){calcState.mode=cm.dataset.cmode;renderCalc();return}
@@ -1051,7 +1087,14 @@ document.addEventListener("submit",e=>{
 });
 // log from calculator
 document.addEventListener("click",e=>{if(e.target.id!=="c-log")return;const e1=readNum("#c-entry"),s1=readNum("#c-stop");openSheet();if(e1!=null)$("#t-entry").value=e1;if(s1!=null)$("#t-stop").value=s1;if(calcState.mode==="stock"){setSheetKind("stock",calcState.stock)}else $("#t-sym").value=calcState.sym;const q=parseInt($("#c-out .big")?.textContent);if(q>0)$("#t-qty").value=q;$$("[data-side]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.side===calcState.side));sheetT.side=calcState.side;$("#t-plan").checked=PRETRADE.every((_,i)=>calcState.pre[i]);sheetPrev()});
-document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#sheetBg").hidden)closeSheet()});
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){if(!$("#sheetBg").hidden){closeSheet();return}closePicks();renderSymHits("");return}
+  const tg=e.target,typing=/^(INPUT|TEXTAREA|SELECT)$/.test(tg.tagName)||tg.isContentEditable;
+  if(typing||e.metaKey||e.ctrlKey||e.altKey||!$("#sheetBg").hidden)return;
+  if(e.key==="n"||e.key==="N"||e.key==="מ"){e.preventDefault();openSheet();return}
+  const i="12345".indexOf(e.key);if(i>=0){e.preventDefault();show(VIEWS[i]);return}
+  if(e.key==="/"){e.preventDefault();show("market");setTimeout(()=>$("#watch-in")&&$("#watch-in").focus(),50)}
+});
 addEventListener("hashchange",()=>{const v=location.hash.slice(1);if(v&&v!==cur&&!v.includes("="))show(v)});
 
 

@@ -536,7 +536,7 @@ function updCalc(){
 }
 
 /* ---- journal ---- */
-const jState={filter:"all",cal:0};
+const jState={filter:"all",cal:0,day:null,view:(()=>{try{return localStorage.getItem("tick_jview")==="cal"?"cal":"list"}catch(e){return"list"}})()};
 const fmtK=v=>{const a=Math.abs(v);return(v<0?"−":"+")+(a>=1000?(a/1000).toFixed(1)+"k":Math.round(a))};
 function calHTML(){
   const b=new Date();b.setDate(1);b.setMonth(b.getMonth()+jState.cal);const y=b.getFullYear(),m=b.getMonth(),pre=`${y}-${String(m+1).padStart(2,"0")}`;
@@ -545,7 +545,8 @@ function calHTML(){
   let cells=DAYN.map(d=>`<div class="h">${d}</div>`).join("")+"<div></div>".repeat(b.getDay());
   for(let d=1;d<=days;d++){const k=`${pre}-${String(d).padStart(2,"0")}`,v=by[k],h=holOn(k);
     const st=v==null?"":`background:color-mix(in srgb,var(${v>=0?"--up":"--down"}) ${Math.round(18+55*Math.abs(v)/mx)}%,var(--surface2))`;
-    cells+=`<div class="d${k===tk?" today":""}${h&&v==null&&h.type!=="early"?" hol":""}" style="${st}" title="${h?h.n:""}"><span>${d}</span>${v!=null?`<span class="a">${fmtK(v)}</span>`:""}</div>`}
+    const cl=`d${k===tk?" today":""}${h&&v==null&&h.type!=="early"?" hol":""}`,inner=`<span>${d}</span>${v!=null?`<span class="a">${fmtK(v)}</span>`:""}`;
+    cells+=v!=null?`<button type="button" class="${cl}" style="${st}" data-dpick="${k}" aria-label="עסקאות ${d} בחודש: ${money(v)}">${inner}</button>`:`<div class="${cl}" title="${h?h.n:""}">${inner}</div>`}
   return`<div class="row between"><button class="x" data-cal="-1" aria-label="חודש קודם">→</button><span><b>${b.toLocaleDateString("he-IL",{month:"long",year:"numeric"})}</b> · <span class="num ${cls(tot)}">${money(tot)}</span></span><button class="x" data-cal="1" aria-label="חודש הבא" ${jState.cal>=0?"disabled":""}>←</button></div><div class="cal">${cells}</div>`;
 }
 function journalCSV(sep){
@@ -564,7 +565,7 @@ async function exportCSV(){
 function renderJournal(){
   const all=sortedTrades();const f=jState.filter;
   const ts=f==="all"?all:all.filter(t=>f==="month"?t.d.slice(0,7)===todayKey().slice(0,7):t.d>=daysAgo(6));
-  const st=stats(ts);const list=[...st.rows].reverse();
+  const st=stats(ts);const dayRows=jState.day?stats(all.filter(t=>t.d===jState.day)).rows:null;const list=[...(dayRows||st.rows)].reverse();const dayTot=dayRows?sum(dayRows.map(r=>r.net)):0;
   const hasSample=S.trades.some(t=>t.sample);
   const bySet=groupBy(st.rows,t=>t.setup).sort((a,b)=>b.total-a.total);
   const bySym=groupBy(st.rows,t=>t.sym).sort((a,b)=>b.total-a.total);
@@ -584,9 +585,9 @@ function renderJournal(){
       <div class="stat"><span class="k">לפי התוכנית ${I("plan")}</span><span class="v num">${Math.round(st.plan*100)}%</span></div>
     </div>
   </div>
-  <div class="card"><h2>לוח חודשי ${I("cal")}</h2>${calHTML()}</div>
   <div class="card"><h2>מה היומן אומר עליך ${I("insights")}</h2><div>${insights(st).map(i=>`<div class="insight ${i.tone}"><b class="i"></b><span>${i.text}</span></div>`).join("")}</div></div>
-  <div class="card"><div class="row between"><h2>עסקאות</h2><button class="btn" data-act="csv" style="min-height:36px;padding:6px 12px">ייצוא לאקסל</button></div><div>${list.length?list.map(r=>{const t=r.t;return`<button class="trade" data-edit="${t.id}"><span class="side ${t.side}">${t.side==="L"?"L":"S"}</span><span style="min-width:0"><b>${esc(t.sym)}</b> <span class="muted small"><span class="num">${t.qty}</span> ${unitName(t.sym,t.qty)} · ${dmy(new Date(t.d+"T12:00"))}${t.time?" · <span class='num'>"+esc(t.time)+"</span>":""}</span><span class="tags">${t.setup?`<span class="tag">${esc(t.setup)}</span>`:""}${t.emo?`<span class="tag">${esc(t.emo)}</span>`:""}${t.exits&&t.exits.length?`<span class="tag">${t.exits.length} יציאות</span>`:""}${t.shot?`<span class="tag">צילום</span>`:""}${t.plan?"":`<span class="tag" style="color:var(--down)">מחוץ לתוכנית</span>`}</span></span><span style="text-align:left"><span class="num ${cls(r.net)}" style="font-weight:700">${money(r.net)}</span><br><span class="muted small num">${r.r==null?"":(r.r>=0?"+":"")+r.r.toFixed(2)+"R"}</span></span></button>`}).join(""):`<div class="empty">אין עסקאות בטווח הזה. רשום את העסקה הראשונה וקבל סטטיסטיקה ותובנות.</div>`}</div></div>
+  <div class="card" id="j-trades"><div class="row between"><h2>עסקאות ${jState.view==="cal"?I("cal"):""}</h2><div class="row" style="gap:8px"><div class="seg" role="group" aria-label="תצוגה" style="min-width:150px"><button data-jview="list" aria-pressed="${jState.view==="list"}">רשימה</button><button data-jview="cal" aria-pressed="${jState.view==="cal"}">לוח</button></div><button class="btn" data-act="csv" style="min-height:36px;padding:6px 12px">ייצוא לאקסל</button></div></div>
+  ${jState.view==="cal"?calHTML():`${jState.day?`<div class="row between banner" style="padding:8px 12px"><span>${DAYN[new Date(jState.day+"T12:00").getDay()]}' ${dmy(new Date(jState.day+"T12:00"))} · <span class="num ${cls(dayTot)}">${money(dayTot)}</span></span><button class="btn" data-act="clear-day" style="min-height:32px;padding:4px 10px">כל העסקאות ✕</button></div>`:""}<div>${list.length?list.map(r=>{const t=r.t;return`<button class="trade" data-edit="${t.id}"><span class="side ${t.side}">${t.side==="L"?"L":"S"}</span><span style="min-width:0"><b>${esc(t.sym)}</b> <span class="muted small"><span class="num">${t.qty}</span> ${unitName(t.sym,t.qty)} · ${dmy(new Date(t.d+"T12:00"))}${t.time?" · <span class='num'>"+esc(t.time)+"</span>":""}</span><span class="tags">${t.setup?`<span class="tag">${esc(t.setup)}</span>`:""}${t.emo?`<span class="tag">${esc(t.emo)}</span>`:""}${t.exits&&t.exits.length?`<span class="tag">${t.exits.length} יציאות</span>`:""}${t.shot?`<span class="tag">צילום</span>`:""}${t.plan?"":`<span class="tag" style="color:var(--down)">מחוץ לתוכנית</span>`}</span></span><span style="text-align:left"><span class="num ${cls(r.net)}" style="font-weight:700">${money(r.net)}</span><br><span class="muted small num">${r.r==null?"":(r.r>=0?"+":"")+r.r.toFixed(2)+"R"}</span></span></button>`}).join(""):`<div class="empty">אין עסקאות בטווח הזה. רשום את העסקה הראשונה וקבל סטטיסטיקה ותובנות.</div>`}</div>`}</div>
   ${bySet.length?`<div class="card"><h2>לפי סטאפ</h2><div class="tablewrap"><table><thead><tr><th>סטאפ</th><th>עסקאות</th><th>הצלחה</th><th>סה"כ</th></tr></thead><tbody>${bySet.map(g=>`<tr><td>${esc(g.k)}</td><td class="num">${g.n}</td><td class="num">${Math.round(g.win*100)}%</td><td class="num ${cls(g.total)}">${money(g.total)}</td></tr>`).join("")}</tbody></table></div>
   <h2>לפי נכס</h2><div class="tablewrap"><table><thead><tr><th>נכס</th><th>עסקאות</th><th>הצלחה</th><th>סה"כ</th></tr></thead><tbody>${bySym.map(g=>`<tr><td class="num">${esc(g.k)}</td><td class="num">${g.n}</td><td class="num">${Math.round(g.win*100)}%</td><td class="num ${cls(g.total)}">${money(g.total)}</td></tr>`).join("")}</tbody></table></div></div>`:""}`;
 }
@@ -765,6 +766,9 @@ document.addEventListener("click",async e=>{
   if(act==="del-trade"){if(!delArm){delArm=true;a.textContent="לחץ שוב כדי למחוק";return}S.trades=S.trades.filter(t=>t.id!==sheetT.id);DB.del(sheetT.id).catch(()=>{});if(!sheetT.sample){S.tomb??={};S.tomb[sheetT.id]=Date.now()}save();closeSheet();rerender();toast("העסקה נמחקה",2500);return}
   if(act==="clear-sample"){S.trades=S.trades.filter(t=>!t.sample);save();rerender();toast("הדוגמאות נמחקו. היומן שלך מוכן.",3000);return}
   const ed=e.target.closest("[data-edit]");if(ed){openSheet(S.trades.find(t=>t.id===ed.dataset.edit));return}
+  const jv=e.target.closest("[data-jview]");if(jv){jState.view=jv.dataset.jview;jState.day=null;try{localStorage.setItem("tick_jview",jState.view)}catch(err){}renderJournal();return}
+  const dp=e.target.closest("[data-dpick]");if(dp){jState.day=dp.dataset.dpick;jState.view="list";renderJournal();const el=$("#j-trades");if(el)el.scrollIntoView({behavior:"smooth",block:"start"});return}
+  if(act==="clear-day"){jState.day=null;renderJournal();return}
   const fb=e.target.closest("[data-f]");if(fb){jState.filter=fb.dataset.f;renderJournal();return}
   const kd=e.target.closest("[data-kind]");if(kd){setSheetKind(kd.dataset.kind);return}
   const cm=e.target.closest("[data-cmode]");if(cm){calcState.mode=cm.dataset.cmode;renderCalc();return}
@@ -844,7 +848,14 @@ document.addEventListener("submit",e=>{
 });
 // log from calculator
 document.addEventListener("click",e=>{if(e.target.id!=="c-log")return;const e1=readNum("#c-entry"),s1=readNum("#c-stop");openSheet();if(e1!=null)$("#t-entry").value=e1;if(s1!=null)$("#t-stop").value=s1;if(calcState.mode==="stock"){setSheetKind("stock",calcState.stock)}else $("#t-sym").value=calcState.sym;const q=parseInt($("#c-out .big")?.textContent);if(q>0)$("#t-qty").value=q;$$("[data-side]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.side===calcState.side));sheetT.side=calcState.side;$("#t-plan").checked=PRETRADE.every((_,i)=>calcState.pre[i]);sheetPrev()});
-document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#sheetBg").hidden)closeSheet()});
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){if(!$("#sheetBg").hidden){closeSheet();return}closePicks();renderSymHits("");return}
+  const tg=e.target,typing=/^(INPUT|TEXTAREA|SELECT)$/.test(tg.tagName)||tg.isContentEditable;
+  if(typing||e.metaKey||e.ctrlKey||e.altKey||!$("#sheetBg").hidden)return;
+  if(e.key==="n"||e.key==="N"||e.key==="מ"){e.preventDefault();openSheet();return}
+  const i="12345".indexOf(e.key);if(i>=0){e.preventDefault();show(VIEWS[i]);return}
+  if(e.key==="/"){e.preventDefault();show("market");setTimeout(()=>$("#watch-in")&&$("#watch-in").focus(),50)}
+});
 addEventListener("hashchange",()=>{const v=location.hash.slice(1);if(v&&v!==cur&&!v.includes("="))show(v)});
 
 
