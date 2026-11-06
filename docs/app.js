@@ -382,11 +382,16 @@ const FUT=[["ES","CME_MINI:ES1!","S&P 500"],["NQ","CME_MINI:NQ1!","Nasdaq-100"],
 const embeddable=(()=>{try{return window.self===window.top}catch(e){return false}})();
 let tvBuilt=false;
 function tvWidget(el,name,cfg){
-  const th=cfg.colorTheme||cfg.theme||"dark",h=cfg.height||400;
-  const doc=`<!doctype html><html><head><meta charset="utf-8"><meta name="color-scheme" content="${th}"><style>:root{color-scheme:${th}}html,body{margin:0;background:transparent}</style></head><body><div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div><script src="https://s3.tradingview.com/external-embedding/embed-widget-${name}.js" async>${JSON.stringify(cfg).replace(/</g,"\\u003c")}<\/script></div></body></html>`;
-  const f=document.createElement("iframe");f.setAttribute("sandbox","allow-scripts allow-popups allow-popups-to-escape-sandbox");f.setAttribute("title","נתונים מ-TradingView");f.setAttribute("referrerpolicy","no-referrer");
-  f.srcdoc=doc;f.style.cssText=`width:100%;height:${h}px;border:0;display:block;background:transparent;color-scheme:${th}`;el.innerHTML="";el.appendChild(f);
+  // TradingView's own widget page, loaded directly in a cross-origin frame:
+  // their code runs on their domain and cannot read this app's data or login.
+  const h=cfg.height||400,settings={...cfg};delete settings.locale;
+  Object.assign(settings,{utm_source:location.hostname||"tick",utm_medium:"widget",utm_campaign:name,"page-uri":location.href.split("#")[0]});
+  const f=document.createElement("iframe");
+  f.src=`https://www.tradingview-widget.com/embed-widget/${name}/?locale=${encodeURIComponent(cfg.locale||"he_IL")}#${encodeURIComponent(JSON.stringify(settings))}`;
+  f.setAttribute("title","נתונים מ-TradingView");f.setAttribute("referrerpolicy","strict-origin-when-cross-origin");f.setAttribute("allowtransparency","true");f.setAttribute("scrolling","no");f.setAttribute("allow","clipboard-write");
+  f.style.cssText=`width:100%;height:${h}px;border:0;display:block;background:transparent;color-scheme:normal`;el.innerHTML="";el.appendChild(f);
 }
+
 const theme=()=>(getComputedStyle(document.documentElement).colorScheme||"").includes("dark")?"dark":"light";
 const normSym=v=>String(v||"").toUpperCase().replace(/[^A-Z0-9:.!_-]/g,"").slice(0,24);
 function watchList(){if(!Array.isArray(S.watch))S.watch=["BMNR","NVDA","TSLA","AAPL"];return S.watch}

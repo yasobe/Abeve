@@ -18,11 +18,11 @@ assert not re.search(r'\son[a-z]+="', body), "inline event handler found"
 SB = "https://albvjenyvyanzzlmvmqa.supabase.co"
 csp = "; ".join([
     "default-src 'self'",
-    "script-src 'self' https://s3.tradingview.com",
+    "script-src 'self'",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src https://fonts.gstatic.com",
     "img-src 'self' data: blob: https:",
-    f"connect-src 'self' {SB} wss://albvjenyvyanzzlmvmqa.supabase.co https://*.tradingview.com",
+    f"connect-src 'self' {SB} wss://albvjenyvyanzzlmvmqa.supabase.co",
     "frame-src https://*.tradingview.com https://*.tradingview-widget.com",
     "worker-src 'self'",
     "manifest-src 'self'",
