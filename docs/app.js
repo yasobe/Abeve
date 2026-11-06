@@ -390,7 +390,12 @@ function tvWidget(el,name,cfg){
   f.src=`https://www.tradingview-widget.com/embed-widget/${name}/?locale=${encodeURIComponent(cfg.locale||"he_IL")}#${encodeURIComponent(JSON.stringify(settings))}`;
   f.setAttribute("title","נתונים מ-TradingView");f.setAttribute("referrerpolicy","strict-origin-when-cross-origin");f.setAttribute("allowtransparency","true");f.setAttribute("scrolling","no");f.setAttribute("allow","clipboard-write");
   f.style.cssText=`width:100%;height:${h}px;border:0;display:block;background:transparent;color-scheme:normal`;el.innerHTML="";el.appendChild(f);
+  if(cfg.autoHeight)tvAuto.add(f);
 }
+// widgets report their real height; let auto-height frames follow it
+const tvAuto=new Set();
+addEventListener("message",e=>{if(e.origin!=="https://www.tradingview-widget.com"||!e.data||e.data.name!=="tv-widget-resize-iframe")return;
+  for(const f of tvAuto){if(!f.isConnected){tvAuto.delete(f);continue}if(f.contentWindow===e.source){const h=Math.round(+e.data.data?.height||0);if(h>20&&h<3000)f.style.height=h+"px"}}});
 
 const theme=()=>(getComputedStyle(document.documentElement).colorScheme||"").includes("dark")?"dark":"light";
 const normSym=v=>String(v||"").toUpperCase().replace(/[^A-Z0-9:.!_-]/g,"").slice(0,24);
@@ -398,7 +403,8 @@ function watchList(){if(!Array.isArray(S.watch))S.watch=["BMNR","NVDA","TSLA","A
 let chartSym=null;
 function buildWatchWidget(){const el=$("#tv-watch");if(!el)return;const w=watchList();
   if(!w.length){el.innerHTML=`<div class="empty">הרשימה ריקה. הוסף סימול למעלה.</div>`;return}
-  tvWidget(el,"market-quotes",{width:"100%",height:70+w.length*56,symbolsGroups:[{name:"הרשימה שלי",symbols:w.map(x=>({name:x,displayName:x.split(":").pop()}))}],showSymbolLogo:true,isTransparent:true,colorTheme:theme(),locale:"he_IL"})}
+  el.innerHTML="";el.classList.add("watchgrid");
+  w.forEach(x=>{const cell=document.createElement("div");el.appendChild(cell);tvWidget(cell,"single-quote",{symbol:x,width:"100%",height:110,isTransparent:true,colorTheme:theme(),locale:"he_IL",autoHeight:true})})}
 function buildChartWidget(){const el=$("#tv-chart");if(!el)return;
   tvWidget(el,"advanced-chart",{width:"100%",height:460,symbol:chartSym||watchList()[0]||"AMEX:SPY",interval:"D",timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||"Etc/UTC",theme:theme(),style:"1",locale:"he_IL",allow_symbol_change:true,hide_side_toolbar:true,calendar:false,save_image:false,support_host:"https://www.tradingview.com"})}
 function watchChips(){return watchList().map(x=>embeddable

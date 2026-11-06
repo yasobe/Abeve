@@ -159,6 +159,8 @@ img.shot.zoom{max-height:none;object-fit:contain;cursor:zoom-out}
 .links a b{font-family:var(--f-num);direction:ltr;text-align:right}
 .links a span{font-size:.78rem;color:var(--muted)}
 .tvbox{min-height:200px;border-radius:12px;overflow:hidden}
+.tvbox.watchgrid{min-height:0;display:grid;grid-template-columns:minmax(0,1fr);gap:6px;overflow:visible}
+.watchgrid>div{background:var(--surface2);border-radius:12px;overflow:hidden;min-width:0}
 .x{border:0;background:none;color:var(--muted);cursor:pointer;padding:4px 8px;font-size:1.1rem;min-height:32px}
 svg.chart{width:100%;height:auto;display:block}
 .tabs{position:fixed;inset:auto 0 0 0;z-index:20;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:6px max(10px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px))}
