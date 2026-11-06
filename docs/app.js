@@ -286,7 +286,7 @@ const INFO={
   cloud:["סנכרון בענן",["כשמתחברים, כל עסקה, הגדרה וצילום גרף נשמרים אוטומטית בענן (Supabase). אם הטלפון אובד, מתחברים במכשיר חדש וכל היומן חוזר.","אפשר להתחבר מכמה מכשירים, למשל אייפון ואייפד, והם יסתנכרנו ביניהם.","כל משתמש רואה רק את הנתונים שלו. הסיסמה לא נשמרת באפליקציה.","בלי חיבור לאינטרנט הכל ממשיך לעבוד, והשינויים יעלו לענן כשהחיבור יחזור."]],
   stock:["מחשבון למניות",["כמו בחוזים: מזינים כניסה וסטופ, והמחשבון אומר כמה מניות לקנות כך שאם הסטופ ייפגע תפסיד רק את אחוז הסיכון שבחרת.","<span class='ex'>חשבון $25,000, סיכון 1% = $250. כניסה $25, סטופ $24 → סיכון $1 למניה → 248 מניות (אחרי עמלות).</span>","אם החשבון לא מספיק לקנות את כל הכמות, המחשבון מגביל לפי הכסף שיש לך, בלי מרגין."]],
   stockfee:["עמלה במניות",["כמה הברוקר גובה על כל פקודה במניות, בקנייה ושוב במכירה. האפליקציה מכפילה ב-2 לכל עסקה.","בהרבה ברוקרים זה $0 עד $2 לפקודה. אם אצלך העמלה היא לפי מניה, הכנס סכום משוער לפקודה."]],
-  watch:["הרשימה שלי",["מוסיפים כל מניה, קרן או מטבע לפי הסימול שלה בבורסה, למשל BMNR, NVDA, SPY או BTCUSD. המחירים מתעדכנים לבד.","לחיצה על סימול מציגה אותו בגרף למטה. ✕ מסיר אותו מהרשימה.","אם סימול לא נמצא, הוסף לפניו את שם הבורסה: NASDAQ:AAPL, NYSE:F, AMEX:BMNR.","שים לב: היומן והמחשבון בנויים לחוזים עתידיים, לא למניות."]],
+  watch:["הרשימה שלי",["מתחילים להקליד סימול או שם חברה, באנגלית או בעברית לחברות מוכרות (טבע, אנבידיה), ובוחרים מהרשימה. יש בה כ-11,600 מניות וקרנות סל מהבורסות בארה\"ב, וגם ביטקוין, דולר-שקל ומדדים.","המחירים מתעדכנים לבד.","לחיצה על סימול מציגה אותו בגרף למטה. ✕ מסיר אותו מהרשימה.","אם סימול לא נמצא, הוסף לפניו את שם הבורסה: NASDAQ:AAPL, NYSE:F, AMEX:BMNR.","שים לב: היומן והמחשבון בנויים לחוזים עתידיים, לא למניות."]],
   chart:["גרף עם חיפוש",["גרף מלא של TradingView. לחיצה על שם הסימול בפינת הגרף פותחת חיפוש, ומשם אפשר להגיע כמעט לכל מניה, קרן, מטבע או קריפטו בעולם.","את טווח הזמן (יום, שעה, 5 דקות) משנים בכפתור שליד הסימול."]],
   partial:["יציאה חלקית",["כשסוגרים את העסקה בכמה שלבים, למשל חצי ביעד הראשון וחצי ביעד השני.","<span class='ex'>3 חוזים: 2 נסגרו ב-5910 ו-1 ב-5920</span>","סכום הכמויות ביציאות חייב להיות שווה לכמות שנכנסת איתה. מחיר היציאה מחושב כממוצע משוקלל."]],
   cal:["לוח חודשי",["כל משבצת היא יום. ירוק = יום רווחי, אדום = יום מפסיד, וככל שהצבע חזק יותר הסכום גדול יותר.","ימים מקווקווים הם חגים בבורסה. כך רואים במבט אחד אם יש ימים בשבוע שקשים לך."]],
@@ -400,7 +400,24 @@ addEventListener("message",e=>{if(e.origin!=="https://www.tradingview-widget.com
 const theme=()=>(getComputedStyle(document.documentElement).colorScheme||"").includes("dark")?"dark":"light";
 const normSym=v=>String(v||"").toUpperCase().replace(/[^A-Z0-9:.!_-]/g,"").slice(0,24);
 function watchList(){if(!Array.isArray(S.watch))S.watch=["BMNR","NVDA","TSLA","AAPL"];return S.watch}
-let chartSym=null;
+let chartSym=null,SYMS=null,symLoad=null,symHits=[];
+function loadSymbols(){return symLoad??=fetch("symbols.txt").then(r=>{if(!r.ok)throw new Error(r.status);return r.text()}).then(t=>{SYMS=t.split("\n").filter(Boolean).map(l=>{const[s,n,x,e]=l.split("|");return{s,n,x,e:e==="E",u:n.toUpperCase(),k:s.split(":").pop()}})}).catch(e=>{symLoad=null;throw e})}
+function searchSymbols(q){
+  q=q.trim();if(!q||!SYMS)return[];const Q=q.toUpperCase(),res=[],words=Q.split(/\s+/).filter(Boolean);
+  for(const it of SYMS){let sc=-1;
+    if(words.length>1){if(words.every(w=>it.u.includes(w)||it.k.startsWith(w)))res.push([5,it]);continue}
+    if(it.k===Q||it.s===Q)sc=0;else if(it.k.startsWith(Q))sc=1+it.k.length/10;
+    else{const i=it.u.indexOf(Q);if(i===0)sc=3;else if(i>0)sc=(/[\s(·./-]/.test(it.u[i-1])?4:6)}
+    if(sc>=0)res.push([sc,it]);}
+  return res.sort((a,b)=>a[0]-b[0]||a[1].k.length-b[1].k.length).slice(0,8).map(r=>r[1]);
+}
+function renderSymHits(q){const box=$("#watch-results");if(!box)return;
+  if(!q.trim()){box.hidden=true;box.innerHTML="";symHits=[];return}
+  if(!SYMS){box.hidden=false;box.innerHTML=`<div class="none">טוען רשימת מניות…</div>`;loadSymbols().then(()=>renderSymHits($("#watch-in").value)).catch(()=>{box.innerHTML=`<div class="none">אין חיבור. אפשר לכתוב סימול מדויק וללחוץ "הוסף".</div>`});return}
+  symHits=searchSymbols(q);box.hidden=false;
+  box.innerHTML=symHits.length?symHits.map((it,i)=>`<button type="button" role="option" data-addsym="${esc(it.s)}" class="${i?"":"on"}"><b>${esc(it.k)}</b><span class="nm">${esc(it.n)}</span><span class="ex">${esc(it.x)}${it.e?" · קרן סל":""}</span></button>`).join(""):`<div class="none">לא נמצא. אפשר לכתוב סימול מדויק וללחוץ "הוסף".</div>`;
+}
+function addWatch(v){v=normSym(v);if(!v)return;const w=watchList();if(!w.includes(v)){w.push(v);save();$("#watch-chips").innerHTML=watchChips();buildWatchWidget()}$("#watch-in").value="";renderSymHits("");if(embeddable){chartSym=v;buildChartWidget()}toast(`${v.split(":").pop()} נוסף לרשימה`,2000)}
 function buildWatchWidget(){const el=$("#tv-watch");if(!el)return;const w=watchList();
   if(!w.length){el.innerHTML=`<div class="empty">הרשימה ריקה. הוסף סימול למעלה.</div>`;return}
   el.innerHTML="";el.classList.add("watchgrid");
@@ -408,15 +425,15 @@ function buildWatchWidget(){const el=$("#tv-watch");if(!el)return;const w=watchL
 function buildChartWidget(){const el=$("#tv-chart");if(!el)return;
   tvWidget(el,"advanced-chart",{width:"100%",height:460,symbol:chartSym||watchList()[0]||"AMEX:SPY",interval:"D",timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||"Etc/UTC",theme:theme(),style:"1",locale:"he_IL",allow_symbol_change:true,hide_side_toolbar:true,calendar:false,save_image:false,support_host:"https://www.tradingview.com"})}
 function watchChips(){return watchList().map(x=>embeddable
-  ?`<span class="chip" style="padding-inline-end:4px"><button class="x" data-chart="${esc(x)}" style="padding:0 4px;min-height:24px;color:var(--fg);font-weight:700" aria-label="הצג גרף של ${esc(x)}">${esc(x)}</button><button class="x" data-unwatch="${esc(x)}" style="padding:0 4px;min-height:24px" aria-label="הסר ${esc(x)}">✕</button></span>`
-  :`<span class="chip" style="padding-inline-end:4px"><a href="https://www.tradingview.com/symbols/${encodeURIComponent(x.replace(":","-"))}/" target="_blank" rel="noopener" style="color:var(--fg);font-weight:700;text-decoration:none">${esc(x)}</a><button class="x" data-unwatch="${esc(x)}" style="padding:0 4px;min-height:24px" aria-label="הסר ${esc(x)}">✕</button></span>`).join("")}
+  ?`<span class="chip" style="padding-inline-end:4px"><button class="x" data-chart="${esc(x)}" style="padding:0 4px;min-height:24px;color:var(--fg);font-weight:700" aria-label="הצג גרף של ${esc(x)}">${esc(x.split(":").pop())}</button><button class="x" data-unwatch="${esc(x)}" style="padding:0 4px;min-height:24px" aria-label="הסר ${esc(x)}">✕</button></span>`
+  :`<span class="chip" style="padding-inline-end:4px"><a href="https://www.tradingview.com/symbols/${encodeURIComponent(x.replace(":","-"))}/" target="_blank" rel="noopener" style="color:var(--fg);font-weight:700;text-decoration:none">${esc(x.split(":").pop())}</a><button class="x" data-unwatch="${esc(x)}" style="padding:0 4px;min-height:24px" aria-label="הסר ${esc(x)}">✕</button></span>`).join("")}
 function renderMarket(){
   const v=$("#v-market");if(tvBuilt&&embeddable){$("#watch-chips").innerHTML=watchChips();return}
   v.innerHTML=`
   <div class="top"><div><div class="eyebrow">נתונים חיים</div><h1>שוק</h1></div></div>
   ${embeddable?"":`<div class="banner"><span>המחירים החיים, הגרפים והלוח הכלכלי מופיעים רק בגרסה שמותקנת מ-GitHub. בינתיים כל סימול נפתח בלחיצה.</span></div>`}
   <div class="card"><h2>הרשימה שלי ${I("watch")}</h2>
-    <form class="row" id="watch-form" style="flex-wrap:nowrap"><input type="text" id="watch-in" placeholder="סימול, למשל BMNR" aria-label="הוסף סימול" autocapitalize="characters" autocomplete="off" spellcheck="false" style="direction:ltr;text-align:right"><button class="btn primary" type="submit">הוסף</button></form>
+    <form class="row" id="watch-form" style="flex-wrap:nowrap"><div class="sbox"><input type="search" id="watch-in" placeholder="חפש: BMNR, Tesla, טבע…" aria-label="חפש מניה להוספה" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="search"><div class="sresults" id="watch-results" role="listbox" hidden></div></div><button class="btn primary" type="submit">הוסף</button></form>
     <div class="row" id="watch-chips" style="gap:6px">${watchChips()}</div>
     ${embeddable?`<div class="tvbox" id="tv-watch"></div>`:""}
   </div>
@@ -727,6 +744,8 @@ document.addEventListener("click",async e=>{
   if(act==="del-exit"){a.closest(".exrow").remove();sheetPrev();return}
   if(act==="del-shot"){shotState={blob:null,remove:true};$("#t-shotbox").innerHTML="";$("#t-shotlbl").textContent="צרף צילום של הגרף";return}
   if(e.target.matches("img.shot")){e.target.classList.toggle("zoom");return}
+  const as=e.target.closest("[data-addsym]");if(as){addWatch(as.dataset.addsym);return}
+  if(!e.target.closest("#watch-form")&&$("#watch-results")&&!$("#watch-results").hidden)renderSymHits("");
   const ch=e.target.closest("[data-chart]");if(ch){chartSym=ch.dataset.chart;buildChartWidget();$("#tv-chart").closest(".card").scrollIntoView({behavior:"smooth",block:"start"});return}
   const uw=e.target.closest("[data-unwatch]");if(uw){S.watch=watchList().filter(x=>x!==uw.dataset.unwatch);save();$("#watch-chips").innerHTML=watchChips();buildWatchWidget();return}
   const cb=e.target.closest("[data-cal]");if(cb){jState.cal=Math.min(0,jState.cal+ +cb.dataset.cal);renderJournal();return}
@@ -788,11 +807,11 @@ document.addEventListener("change",e=>{
   if(t.id==="t-shot"&&t.files&&t.files[0]){shrink(t.files[0]).then(b=>{shotState={blob:b,remove:false};showShot(b)}).catch(()=>toast("לא הצלחתי לקרוא את התמונה."));t.value="";return}
   if(t.closest("#tform"))sheetPrev();
 });
-document.addEventListener("input",e=>{const t=e.target;if(t.closest("#v-calc")&&t.id&&t.id.startsWith("c-"))updCalc();else if(t.id==="t-sym")sheetPrev();else if(t.closest("#tform"))sheetPrev()});
+document.addEventListener("input",e=>{const t=e.target;if(t.id==="watch-in"){renderSymHits(t.value);return}if(t.closest("#v-calc")&&t.id&&t.id.startsWith("c-"))updCalc();else if(t.id==="t-sym")sheetPrev();else if(t.closest("#tform"))sheetPrev()});
 document.addEventListener("submit",e=>{
   e.preventDefault();
   if(e.target.id==="cloud-form"){cloudAuth(false);return}
-  if(e.target.id==="watch-form"){const v=normSym($("#watch-in").value);if(!v)return;const w=watchList();if(!w.includes(v)){w.push(v);save();$("#watch-chips").innerHTML=watchChips();buildWatchWidget()}$("#watch-in").value="";if(embeddable){chartSym=v;buildChartWidget()}toast(`${v} נוסף לרשימה`,2000);return}
+  if(e.target.id==="watch-form"){const raw=$("#watch-in").value.trim();if(!raw)return;const exact=SYMS&&SYMS.find(it=>it.k===raw.toUpperCase());addWatch(exact?exact.s:(symHits[0]?symHits[0].s:raw));$("#watch-in").blur();return}
   if(e.target.id==="rule-form"){const v=$("#rule-in").value.trim();if(v){S.rules.push(v);save();renderPlan()}return}
   if(e.target.id==="tform"){const t=sheetRead();
     if(t.exits.length){const q=sum(t.exits.map(x=>x.q));if(q!==t.qty){toast(`סך הכמויות ביציאות (${q}) שונה מהכמות (${t.qty}).`,4000);return}t.exit=+(sum(t.exits.map(x=>x.p*x.q))/q).toFixed(6)}else delete t.exits;
