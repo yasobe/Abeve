@@ -414,8 +414,10 @@ const INFO={
   tick:["טיק ונקודה",["<b>טיק</b> הוא התזוזה הקטנה ביותר במחיר. <b>נקודה</b> היא תזוזה של 1.00 במחיר.","<span class='ex'>ב-MES טיק הוא 0.25 ושווה $1.25. נקודה = 4 טיקים = $5.</span>"]],
   setup:["סטאפ",["שם קבוע לסוג העסקה, למשל \"פריצת טווח פתיחה\" או \"פולבק במגמה\".","כדאי להשתמש באותם שמות כל פעם. כך היומן יוכל להראות איזה סטאפ באמת מרוויח."]],
   holidays:["חגים בבורסה",["בחגים האמריקאיים הבורסה סגורה או פועלת חלקית, גם אם אצלך זה יום רגיל.","<b>סגור לגמרי:</b> אין מסחר בכלל, גם לא בגלובקס.","<b>אין מסחר רגיל:</b> גלובקס פתוח רק עד הצהריים בשיקגו, עם מעט מאוד מחזור. עדיף לא לסחור.","<b>סגירה מוקדמת:</b> ניו יורק נסגרת ב-12:15 שעון שיקגו (20:15 בישראל ברוב השנה).","החגים מחושבים אוטומטית לפי הכללים של CME. כדאי לוודא באתר של CME לפני חגים חריגים (למשל יום אבל לאומי)."]],
-  quotes:["מחירים חיים",["המחירים מגיעים מ-TradingView ומתעדכנים בזמן אמת או בעיכוב קצר.","<b>חשוב:</b> אלה מחירי המדד עצמו (למשל S&P 500), לא של החוזה העתידי. ההפרש בין חוזה למדד נקרא בסיס, והוא בדרך כלל כמה נקודות.","לחיצה על חוזה ברשימה למטה פותחת את הגרף של החוזה העתידי האמיתי ב-TradingView."]],
+  quotes:["מחירים חיים",["המחירים מגיעים מ-TradingView ומתעדכנים בזמן אמת או בעיכוב קצר.","<b>חשוב:</b> אלה מחירי המדד עצמו (למשל S&P 500), לא של החוזה העתידי. ההפרש בין חוזה למדד נקרא בסיס, והוא בדרך כלל כמה נקודות.","ראסל, VIX, אג\"ח והדולר מוצגים דרך קרנות סל שעוקבות אחריהם (IWM, VIXY, IEF, UUP), כי TradingView לא מאפשר להציג את המדדים עצמם מחוץ לאתר שלו. הכיוון זהה, אבל המספר שונה. קרן האג\"ח IEF עולה כשהתשואה יורדת.","לחיצה על חוזה ברשימה למטה פותחת את הגרף של החוזה העתידי האמיתי ב-TradingView."]],
   econ:["לוח כלכלי",["פרסומים כלכליים בארה\"ב שמזיזים את השוק: אינפלציה (CPI), משרות (NFP), החלטות ריבית (FOMC) ועוד.","השעות מוצגות לפי השעון שלך. מומלץ לא להחזיק עסקה חדשה בדקות של פרסום חשוב, כי המחיר יכול לקפוץ ולדלג על הסטופ."]],
+  watch:["הרשימה שלי",["מוסיפים כל מניה, קרן או מטבע לפי הסימול שלה בבורסה, למשל BMNR, NVDA, SPY או BTCUSD. המחירים מתעדכנים לבד.","לחיצה על סימול מציגה אותו בגרף למטה. ✕ מסיר אותו מהרשימה.","אם סימול לא נמצא, הוסף לפניו את שם הבורסה: NASDAQ:AAPL, NYSE:F, AMEX:BMNR.","שים לב: היומן והמחשבון בנויים לחוזים עתידיים, לא למניות."]],
+  chart:["גרף עם חיפוש",["גרף מלא של TradingView. לחיצה על שם הסימול בפינת הגרף פותחת חיפוש, ומשם אפשר להגיע כמעט לכל מניה, קרן, מטבע או קריפטו בעולם.","את טווח הזמן (יום, שעה, 5 דקות) משנים בכפתור שליד הסימול."]],
   partial:["יציאה חלקית",["כשסוגרים את העסקה בכמה שלבים, למשל חצי ביעד הראשון וחצי ביעד השני.","<span class='ex'>3 חוזים: 2 נסגרו ב-5910 ו-1 ב-5920</span>","סכום הכמויות ביציאות חייב להיות שווה לכמות שנכנסת איתה. מחיר היציאה מחושב כממוצע משוקלל."]],
   cal:["לוח חודשי",["כל משבצת היא יום. ירוק = יום רווחי, אדום = יום מפסיד, וככל שהצבע חזק יותר הסכום גדול יותר.","ימים מקווקווים הם חגים בבורסה. כך רואים במבט אחד אם יש ימים בשבוע שקשים לך."]],
   emo:["מצב רגשי",["איך הרגשת כשנכנסת לעסקה. זה נשמע מוזר, אבל זה אחד הנתונים הכי מועילים ביומן.","אחרי כמה שבועות תראה למשל שעסקאות מתוך \"נקמה\" או \"שעמום\" מפסידות, ותדע מתי לעצור."]]
@@ -491,14 +493,31 @@ function curveSVG(c,h=110){
 const FUT=[["ES","CME_MINI:ES1!","S&P 500"],["NQ","CME_MINI:NQ1!","Nasdaq-100"],["YM","CBOT_MINI:YM1!","Dow"],["RTY","CME_MINI:RTY1!","Russell 2000"],["CL","NYMEX:CL1!","נפט"],["GC","COMEX:GC1!","זהב"],["SI","COMEX:SI1!","כסף"],["NG","NYMEX:NG1!","גז טבעי"],["ZN","CBOT:ZN1!","אג\"ח 10 שנים"],["6E","CME:6E1!","יורו"]];
 const embeddable=(()=>{try{return window.self===window.top}catch(e){return false}})();
 let tvBuilt=false;
-function tvWidget(el,name,cfg){const s=document.createElement("script");s.src=`https://s3.tradingview.com/external-embedding/embed-widget-${name}.js`;s.async=true;s.text=JSON.stringify(cfg);el.innerHTML='<div class="tradingview-widget-container__widget"></div>';el.className+=" tradingview-widget-container";el.appendChild(s)}
+function tvWidget(el,name,cfg){const s=document.createElement("script");s.src=`https://s3.tradingview.com/external-embedding/embed-widget-${name}.js`;s.async=true;s.text=JSON.stringify(cfg);el.innerHTML='<div class="tradingview-widget-container__widget"></div>';el.classList.add("tradingview-widget-container");el.appendChild(s)}
+const theme=()=>(getComputedStyle(document.documentElement).colorScheme||"").includes("dark")?"dark":"light";
+const normSym=v=>String(v||"").toUpperCase().replace(/[^A-Z0-9:.!_-]/g,"").slice(0,24);
+function watchList(){if(!Array.isArray(S.watch))S.watch=["BMNR","NVDA","TSLA","AAPL"];return S.watch}
+let chartSym=null;
+function buildWatchWidget(){const el=$("#tv-watch");if(!el)return;const w=watchList();
+  if(!w.length){el.innerHTML=`<div class="empty">הרשימה ריקה. הוסף סימול למעלה.</div>`;return}
+  tvWidget(el,"market-quotes",{width:"100%",height:70+w.length*56,symbolsGroups:[{name:"הרשימה שלי",symbols:w.map(x=>({name:x,displayName:x.split(":").pop()}))}],showSymbolLogo:true,isTransparent:true,colorTheme:theme(),locale:"he_IL"})}
+function buildChartWidget(){const el=$("#tv-chart");if(!el)return;
+  tvWidget(el,"advanced-chart",{width:"100%",height:460,symbol:chartSym||watchList()[0]||"AMEX:SPY",interval:"D",timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||"Etc/UTC",theme:theme(),style:"1",locale:"he_IL",allow_symbol_change:true,hide_side_toolbar:true,calendar:false,save_image:false,support_host:"https://www.tradingview.com"})}
+function watchChips(){return watchList().map(x=>embeddable
+  ?`<span class="chip" style="padding-inline-end:4px"><button class="x" data-chart="${esc(x)}" style="padding:0 4px;min-height:24px;color:var(--fg);font-weight:700" aria-label="הצג גרף של ${esc(x)}">${esc(x)}</button><button class="x" data-unwatch="${esc(x)}" style="padding:0 4px;min-height:24px" aria-label="הסר ${esc(x)}">✕</button></span>`
+  :`<span class="chip" style="padding-inline-end:4px"><a href="https://www.tradingview.com/symbols/${encodeURIComponent(x.replace(":","-"))}/" target="_blank" rel="noopener" style="color:var(--fg);font-weight:700;text-decoration:none">${esc(x)}</a><button class="x" data-unwatch="${esc(x)}" style="padding:0 4px;min-height:24px" aria-label="הסר ${esc(x)}">✕</button></span>`).join("")}
 function renderMarket(){
-  const v=$("#v-market");if(tvBuilt&&embeddable)return;
-  const dark=getComputedStyle(document.documentElement).colorScheme.includes("dark")||matchMedia("(prefers-color-scheme: dark)").matches;
+  const v=$("#v-market");if(tvBuilt&&embeddable){$("#watch-chips").innerHTML=watchChips();return}
   v.innerHTML=`
   <div class="top"><div><div class="eyebrow">נתונים חיים</div><h1>שוק</h1></div></div>
-  ${embeddable?"":`<div class="banner"><span>המחירים החיים והלוח הכלכלי מופיעים רק בגרסה שמותקנת מ-GitHub. בינתיים אפשר לפתוח כל גרף בלחיצה למטה.</span></div>`}
-  ${embeddable?`<div class="card"><h2>מחירים עכשיו ${I("quotes")}</h2><div class="tvbox" id="tv-quotes"></div></div>
+  ${embeddable?"":`<div class="banner"><span>המחירים החיים, הגרפים והלוח הכלכלי מופיעים רק בגרסה שמותקנת מ-GitHub. בינתיים כל סימול נפתח בלחיצה.</span></div>`}
+  <div class="card"><h2>הרשימה שלי ${I("watch")}</h2>
+    <form class="row" id="watch-form" style="flex-wrap:nowrap"><input type="text" id="watch-in" placeholder="סימול, למשל BMNR" aria-label="הוסף סימול" autocapitalize="characters" autocomplete="off" spellcheck="false" style="direction:ltr;text-align:right"><button class="btn primary" type="submit">הוסף</button></form>
+    <div class="row" id="watch-chips" style="gap:6px">${watchChips()}</div>
+    ${embeddable?`<div class="tvbox" id="tv-watch"></div>`:""}
+  </div>
+  ${embeddable?`<div class="card"><h2>גרף עם חיפוש ${I("chart")}</h2><div class="tvbox" id="tv-chart"></div></div>
+  <div class="card"><h2>מחירים עכשיו ${I("quotes")}</h2><div class="tvbox" id="tv-quotes"></div></div>
   <div class="card"><h2>לוח כלכלי ארה"ב ${I("econ")}</h2><div class="tvbox" id="tv-econ"></div></div>`:""}
   <div class="card"><h2>גרף החוזה העתידי</h2><div class="links">${FUT.map(([k,sym,n])=>`<a href="https://www.tradingview.com/chart/?symbol=${encodeURIComponent(sym)}" target="_blank" rel="noopener"><b>${k}</b><span>${n}</span></a>`).join("")}</div></div>
   <div class="card"><h2>קישורים שימושיים</h2><div class="links">
@@ -508,14 +527,14 @@ function renderMarket(){
     <a href="https://www.tradingview.com/symbols/CBOE-VIX/" target="_blank" rel="noopener"><b>VIX</b><span>מדד הפחד</span></a>
   </div></div>`;
   if(!embeddable)return;
-  const theme=dark?"dark":"light";
   try{
-    tvWidget($("#tv-quotes"),"market-quotes",{width:"100%",height:520,symbolsGroups:[
-      {name:"מדדים",symbols:[{name:"FOREXCOM:SPXUSD",displayName:"S&P 500"},{name:"FOREXCOM:NSXUSD",displayName:"Nasdaq 100"},{name:"FOREXCOM:DJI",displayName:"Dow 30"},{name:"TVC:RUT",displayName:"Russell 2000"},{name:"TVC:VIX",displayName:"VIX"}]},
+    buildWatchWidget();buildChartWidget();
+    tvWidget($("#tv-quotes"),"market-quotes",{width:"100%",height:560,symbolsGroups:[
+      {name:"מדדים",symbols:[{name:"FOREXCOM:SPXUSD",displayName:"S&P 500"},{name:"FOREXCOM:NSXUSD",displayName:"Nasdaq 100"},{name:"FOREXCOM:DJI",displayName:"Dow 30"},{name:"AMEX:IWM",displayName:"Russell 2000 (קרן IWM)"},{name:"AMEX:VIXY",displayName:"תנודתיות VIX (קרן VIXY)"}]},
       {name:"סחורות",symbols:[{name:"TVC:USOIL",displayName:"נפט WTI"},{name:"TVC:GOLD",displayName:"זהב"},{name:"TVC:SILVER",displayName:"כסף"}]},
-      {name:"ריבית ומט\"ח",symbols:[{name:"TVC:US10Y",displayName:"תשואת 10 שנים"},{name:"TVC:DXY",displayName:"מדד הדולר"},{name:"FX:EURUSD",displayName:"EUR/USD"},{name:"BITSTAMP:BTCUSD",displayName:"ביטקוין"}]}],
-      showSymbolLogo:false,isTransparent:true,colorTheme:theme,locale:"he_IL"});
-    tvWidget($("#tv-econ"),"events",{width:"100%",height:560,isTransparent:true,colorTheme:theme,locale:"he_IL",importanceFilter:"0,1",countryFilter:"us"});
+      {name:"ריבית ומט\"ח",symbols:[{name:"NASDAQ:IEF",displayName:"אג\"ח 7-10 שנים (קרן IEF)"},{name:"AMEX:UUP",displayName:"מדד הדולר (קרן UUP)"},{name:"FX:EURUSD",displayName:"EUR/USD"},{name:"BITSTAMP:BTCUSD",displayName:"ביטקוין"}]}],
+      showSymbolLogo:false,isTransparent:true,colorTheme:theme(),locale:"he_IL"});
+    tvWidget($("#tv-econ"),"events",{width:"100%",height:560,isTransparent:true,colorTheme:theme(),locale:"he_IL",importanceFilter:"0,1",countryFilter:"us"});
     tvBuilt=true;
   }catch(e){}
 }
@@ -764,6 +783,8 @@ document.addEventListener("click",async e=>{
   if(act==="del-exit"){a.closest(".exrow").remove();sheetPrev();return}
   if(act==="del-shot"){shotState={blob:null,remove:true};$("#t-shotbox").innerHTML="";$("#t-shotlbl").textContent="צרף צילום של הגרף";return}
   if(e.target.matches("img.shot")){e.target.classList.toggle("zoom");return}
+  const ch=e.target.closest("[data-chart]");if(ch){chartSym=ch.dataset.chart;buildChartWidget();$("#tv-chart").closest(".card").scrollIntoView({behavior:"smooth",block:"start"});return}
+  const uw=e.target.closest("[data-unwatch]");if(uw){S.watch=watchList().filter(x=>x!==uw.dataset.unwatch);save();$("#watch-chips").innerHTML=watchChips();buildWatchWidget();return}
   const cb=e.target.closest("[data-cal]");if(cb){jState.cal=Math.min(0,jState.cal+ +cb.dataset.cal);renderJournal();return}
   if(act==="close"){closeSheet();return}
   if(act==="del-trade"){if(!delArm){delArm=true;a.textContent="לחץ שוב כדי למחוק";return}S.trades=S.trades.filter(t=>t.id!==sheetT.id);DB.del(sheetT.id).catch(()=>{});save();closeSheet();rerender();toast("העסקה נמחקה",2500);return}
@@ -799,6 +820,7 @@ document.addEventListener("change",e=>{
 document.addEventListener("input",e=>{const t=e.target;if(t.closest("#v-calc")&&t.id&&t.id.startsWith("c-"))updCalc();else if(t.closest("#tform"))sheetPrev()});
 document.addEventListener("submit",e=>{
   e.preventDefault();
+  if(e.target.id==="watch-form"){const v=normSym($("#watch-in").value);if(!v)return;const w=watchList();if(!w.includes(v)){w.push(v);save();$("#watch-chips").innerHTML=watchChips();buildWatchWidget()}$("#watch-in").value="";if(embeddable){chartSym=v;buildChartWidget()}toast(`${v} נוסף לרשימה`,2000);return}
   if(e.target.id==="rule-form"){const v=$("#rule-in").value.trim();if(v){S.rules.push(v);save();renderPlan()}return}
   if(e.target.id==="tform"){const t=sheetRead();
     if(t.exits.length){const q=sum(t.exits.map(x=>x.q));if(q!==t.qty){toast(`סך הכמויות ביציאות (${q}) שונה מהכמות (${t.qty}).`,4000);return}t.exit=+(sum(t.exits.map(x=>x.p*x.q))/q).toFixed(6)}else delete t.exits;
