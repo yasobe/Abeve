@@ -504,7 +504,7 @@ const INFO={
   roll:["גלגול חוזים",["לחוזה עתידי יש תאריך פקיעה. חוזי המדדים (ES, NQ, YM, RTY והמיקרו) פוקעים ביום שישי השלישי של מרץ, יוני, ספטמבר ודצמבר.","כשמונה ימים לפני הפקיעה רוב הסוחרים עוברים לחוזה הבא. זה <b>יום הגלגול</b>. אחריו הנזילות בחוזה הישן יורדת.","<span class='ex'>האותיות הן קודי חודשים: H=מרץ, M=יוני, U=ספטמבר, Z=דצמבר. הספרה היא השנה: ESZ6 = דצמבר 2026.</span>","ביום הגלגול צריך לפתוח את הגרף והפקודות על החוזה החדש."]],
   pretrade:["צ'קליסט לפני כניסה",["5 שאלות לפני כל עסקה. אם אחת מהן לא מסומנת, כנראה שעדיף לוותר.","כשלוחצים \"רשום ביומן\", העסקה מסומנת \"לפי התוכנית\" רק אם כל הצ'קליסט מסומן."]],
   insights:["מה היומן אומר עליך",["תובנות שמחושבות אוטומטית מהעסקאות שרשמת: איזה סטאפ הכי רווחי, איזה מצב רגשי עולה לך כסף, ואם אתה חורג מהכללים.","ככל שתרשום יותר עסקאות בכנות, התובנות יהיו מדויקות יותר."]],
-  reminders:["תזכורות",["<b>הוסף ליומן האייפון</b> יוצר אירועים חוזרים עם התראה ביומן של הטלפון. זו הדרך היחידה לקבל תזכורת כשהאפליקציה סגורה.","<b>הפעל התראות</b> עובד רק כשהאפליקציה פתוחה ונוספה למסך הבית.","<b>ביחס לפתיחת ניו יורק</b>: התזכורת זזה לבד עם שעון הקיץ והחורף בארה\"ב, ומדלגת על חגים בבורסה. כך \"5 דקות לפתיחה\" תמיד מדויק.","אחרי שינוי בתזכורות, צריך להוסיף ליומן שוב (ולמחוק את הישנות ביומן)."]],
+  reminders:["תזכורות",["<b>הוסף ליומן האייפון</b> יוצר אירועים חוזרים עם התראה ביומן של הטלפון. זו הדרך היחידה לקבל תזכורת כשהאפליקציה סגורה.","<b>הפעל התראות</b>: השרת שולח לאייפון התראה בזמן, גם כשהאפליקציה סגורה. צריך iOS 16.4 ומעלה, להוסיף את טיק למסך הבית ולהתחבר לסנכרון בענן.","אחרי שינוי בתזכורות, השינוי מגיע לשרת לבד תוך כמה שניות.","<b>ביחס לפתיחת ניו יורק</b>: התזכורת זזה לבד עם שעון הקיץ והחורף בארה\"ב, ומדלגת על חגים בבורסה. כך \"5 דקות לפתיחה\" תמיד מדויק.","אחרי שינוי בתזכורות, צריך להוסיף ליומן שוב (ולמחוק את הישנות ביומן)."]],
   pf:["Profit factor",["סך כל הרווחים חלקי סך כל ההפסדים.","<span class='ex'>רווחת $1,500 והפסדת $1,000 → Profit factor = 1.5</span>","מעל 1 אתה ברווח. מעל 1.5 זה טוב. מתחת ל-1 השיטה מפסידה כרגע."]],
   avgr:["R ממוצע",["<b>R</b> הוא הסיכון שלקחת בעסקה: המרחק מהכניסה לסטופ.","<span class='ex'>סיכנת $100 והרווחת $200 → ‎+2R. נעצרת בסטופ → ‎−1R.</span>","R ממוצע חיובי אומר שבממוצע אתה מרוויח יותר ממה שאתה מסכן. כדי לחשב R צריך לרשום סטופ בעסקה."]],
   exp:["תוחלת לעסקה",["כמה אתה מרוויח או מפסיד בממוצע על כל עסקה, אחרי עמלות.","זה המספר הכי חשוב: אם הוא חיובי לאורך הרבה עסקאות, יש לך יתרון."]],
@@ -849,8 +849,8 @@ function renderPlan(){
       <input type="text" value="${esc(r.label)}" data-k="label" aria-label="נוסח התזכורת">
       <div class="days">${DAYN.map((d,i)=>`<button data-day="${i}" aria-pressed="${r.days.includes(i)}" aria-label="יום ${d}">${d}</button>`).join("")}</div></div>
       <label class="switch" aria-label="הפעל"><input type="checkbox" data-k="on" ${r.on?"checked":""}><span></span></label></div>`).join("")}</div>
-    <div class="grid2"><button class="btn primary" data-act="ics">הוסף ליומן האייפון</button><button class="btn" data-act="notif">${ns==="granted"?"התראות פעילות ✓":"הפעל התראות"}</button></div>
-    <p class="muted small" style="margin:0">הדרך האמינה ביותר באייפון: "הוסף ליומן האייפון" יוצר אירועים חוזרים עם התראה, כולל ימי גלגול החוזים. האייפון יזכיר לך גם כשהאפליקציה סגורה. ההתראות בתוך האפליקציה עובדות כשהיא פתוחה.</p>
+    ${pushCard()}
+    <button class="btn ghost" data-act="ics">הוסף גם ליומן האייפון (גיבוי)</button>
     <div id="ics-fallback" hidden><p class="small muted" style="margin:0">אם הקובץ לא נפתח, העתק את הטקסט, שמור כקובץ ‎.ics ופתח אותו:</p><code class="ics" id="ics-text"></code><button class="btn" data-act="copy-ics">העתק</button></div>
   </div>
   <div class="card">
@@ -947,8 +947,51 @@ function closeSheet(){$("#sheetBg").hidden=true;document.body.style.overflow="";
 /* ---------- reminders engine ---------- */
 const fired={};
 function toast(msg,ms=6000){const t=$("#toast");t.innerHTML=`<span><b>טיק</b> · ${esc(msg)}</span><button class="x" aria-label="סגור">✕</button>`;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>t.hidden=true,ms)}
+/* ---------- push notifications (work when the app is closed) ---------- */
+const VAPID_PUB="BKoyEn3lHxcm3np8c5iWgZzYWwZmw8IR9inmJEpFcvrIADirlZV21T9Ny7o6wGgsyMVqH4LJkoUX0gcfN08_cSU";
+const pushSupported=()=>"serviceWorker" in navigator&&"PushManager" in window&&"Notification" in window;
+const pushOn=()=>{try{return localStorage.getItem("tick_push")==="1"}catch(e){return false}};
+function pushCard(){
+  const on=pushOn()&&notifState()==="granted";
+  let note;
+  if(on)note=`<div class="okmsg">התראות פעילות במכשיר הזה. תקבל תזכורות גם כשהאפליקציה סגורה.</div>`;
+  else if(isIOS&&!standalone)note=`<div class="banner"><span>כדי לקבל התראות באייפון: Safari ← שיתוף ← <b>הוסף למסך הבית</b>, ואז לפתוח את טיק מהמסך הבית וללחוץ כאן.</span></div>`;
+  else if(!embeddable)note=`<p class="muted small" style="margin:0">התראות זמינות בגרסה שמותקנת מ-GitHub.</p>`;
+  else if(!cloud.user)note=`<p class="muted small" style="margin:0">כדי לקבל התראות צריך להתחבר לסנכרון בענן (בכרטיס למעלה). השרת שולח את התזכורות לפי ההגדרות שלך.</p>`;
+  else note=`<p class="muted small" style="margin:0">לחיצה אחת, ומעכשיו האייפון יזכיר לך בזמן גם כשהאפליקציה סגורה.</p>`;
+  return `${note}<div class="grid2">${on?`<button class="btn" data-act="push-test">שלח התראת בדיקה</button><button class="btn ghost" data-act="push-off">כבה התראות</button>`:`<button class="btn primary" data-act="push-on" ${(!embeddable||(isIOS&&!standalone)||!pushSupported())?"disabled":""}>הפעל התראות</button>`}</div>`;
+}
+function b64u(s){const p="=".repeat((4-s.length%4)%4),b=atob((s+p).replace(/-/g,"+").replace(/_/g,"/"));return Uint8Array.from(b,c=>c.charCodeAt(0))}
+async function pushEnable(){
+  if(!pushSupported()){toast(isIOS?"באייפון צריך קודם 'הוסף למסך הבית' (iOS 16.4 ומעלה).":"הדפדפן הזה לא תומך בהתראות.",7000);return}
+  if(!cloud.user){toast("קודם התחבר לסנכרון בענן, למעלה בעמוד הזה.",5000);return}
+  const perm=await Notification.requestPermission();
+  if(perm!=="granted"){toast("ההתראות חסומות. אפשר לאשר אותן בהגדרות ← טיק ← התראות.",7000);return}
+  try{
+    const reg=await navigator.serviceWorker.ready;
+    const sub=(await reg.pushManager.getSubscription())||await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID_PUB)});
+    const j=sub.toJSON();
+    const{error}=await cloud.sb.from("push_subs").upsert({endpoint:j.endpoint,user_id:cloud.user.id,p256dh:j.keys.p256dh,auth:j.keys.auth,tz:Intl.DateTimeFormat().resolvedOptions().timeZone||"Asia/Jerusalem"},{onConflict:"endpoint"});
+    if(error)throw error;
+    try{localStorage.setItem("tick_push","1")}catch(e){}
+    await syncNow();renderPlan();await pushTest(true);
+  }catch(e){toast("לא הצלחתי להפעיל התראות: "+heErr(e),7000)}
+}
+async function pushTest(quiet){
+  try{const{data}=await cloud.sb.auth.getSession();const tok=data.session&&data.session.access_token;if(!tok)throw new Error("not signed in");
+    const r=await fetch(SB_URL+"/functions/v1/send-reminders",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+tok,apikey:SB_KEY},body:"{}"});
+    const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||("HTTP "+r.status));
+    toast(j.sent?"נשלחה התראת בדיקה. היא אמורה להופיע תוך כמה שניות.":"לא נמצא מכשיר רשום. לחץ 'הפעל התראות'.",5000)}
+  catch(e){if(!quiet||true)toast("שליחת הבדיקה נכשלה: "+heErr(e),6000)}
+}
+async function pushDisable(){
+  try{const reg=await navigator.serviceWorker.ready;const sub=await reg.pushManager.getSubscription();
+    if(sub){if(cloud.sb&&cloud.user)await cloud.sb.from("push_subs").delete().eq("endpoint",sub.endpoint);await sub.unsubscribe()}}catch(e){}
+  try{localStorage.removeItem("tick_push")}catch(e){}toast("ההתראות כובו במכשיר הזה.",3000);renderPlan();
+}
 async function notify(msg){
   toast(msg,15000);
+  if(pushOn())return;
   try{if(notifState()==="granted"){const reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();if(reg)reg.showNotification("טיק",{body:msg,icon:"icon-192.png",tag:"tick"});else new Notification("טיק",{body:msg})}}catch(e){}
 }
 function tickReminders(){const now=new Date(),cur=hm(now),d=now.getDay(),k=todayKey();S.reminders.forEach(r=>{if(!r.on||!r.days.includes(d))return;const at=remAt(r,now);if(!at||hm(at)!==cur)return;const key=r.id+k+cur;if(fired[key])return;fired[key]=1;notify(r.label)})}
@@ -1019,6 +1062,9 @@ document.addEventListener("click",async e=>{
   if(act==="ics"){const ics=buildICS();$("#ics-text").textContent=ics;$("#ics-fallback").hidden=false;
     try{const url="data:text/calendar;charset=utf-8,"+encodeURIComponent(ics);const l=document.createElement("a");l.href=isIOS?url:URL.createObjectURL(new Blob([ics],{type:"text/calendar"}));if(!isIOS)l.download="tick-reminders.ics";document.body.appendChild(l);l.click();l.remove()}catch(err){}return}
   if(act==="copy-ics"){copy($("#ics-text").textContent);return}
+  if(act==="push-on"){pushEnable();return}
+  if(act==="push-test"){pushTest(false);return}
+  if(act==="push-off"){pushDisable();return}
   if(act==="notif"){if(notifState()==="none"){toast(isIOS?"באייפון התראות זמינות רק אחרי 'הוסף למסך הבית'. בינתיים השתמש בהוספה ליומן.":"הדפדפן הזה לא תומך בהתראות.",8000);return}
     try{const p=await Notification.requestPermission();if(p==="granted")notify("התראות פעילות. כך תיראה תזכורת.");else toast("ההתראות חסומות. אפשר להפעיל אותן בהגדרות המכשיר.")}catch(err){toast("לא ניתן להפעיל התראות כאן. השתמש בהוספה ליומן.")}renderPlan();return}
   if(act==="export"){S.lastBackup=todayKey();save();copy(JSON.stringify(S),"הגיבוי הועתק (בלי צילומי גרפים). הדבק אותו בפתק.");$("#backup").value=JSON.stringify(S);return}
