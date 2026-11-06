@@ -934,6 +934,7 @@ document.addEventListener("click",async e=>{
   if(act==="cloud-out"){cloudSignOut(false);return}
   if(act==="cloud-sync"){syncNow(true);return}
   if(act==="cloud-reset"){cloudReset();return}
+  if(act==="cloud-delete"){if(!cloud.delArm){cloud.delArm=true;renderPlan();setTimeout(()=>{cloud.delArm=false},8000);return}cloud.delArm=false;cloudDeleteAccount();return}
   if(act==="import"){try{const s=cleanState(JSON.parse($("#backup").value),false);if(!s)throw 0;S=s;migrate();markAllDirty();save();toast("הגיבוי שוחזר",2500);rerender()}catch(err){toast("הטקסט שהודבק אינו גיבוי תקין של טיק.")}return}
   if(act==="reset"){if(!pendingReset){pendingReset=true;renderPlan();$("details").open=true;return}pendingReset=false;cloudSignOut(true);try{localStorage.removeItem(LS)}catch(err){}S=defaults();S.trades=[];migrate();lastPH=profileOf(S);save();toast("כל הנתונים נמחקו",2500);show("today");return}
 });
@@ -1038,7 +1039,8 @@ function cloudCard(){
     <div class="row between"><span class="small" style="direction:ltr;unicode-bidi:isolate">${esc(cloud.user.email||"")}</span>${st}</div>
     <div class="muted small">${S.sync&&S.sync.lastOk?"סנכרון אחרון: "+new Date(S.sync.lastOk).toLocaleString("he-IL",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"עוד לא סונכרן"}</div>
     ${cloud.status==="error"&&cloud.err?`<div class="warn">${esc(cloud.err)}</div>`:""}
-    <div class="grid2"><button class="btn" data-act="cloud-sync">סנכרן עכשיו</button><button class="btn ghost" data-act="cloud-out">התנתק</button></div></div>`;
+    <div class="grid2"><button class="btn" data-act="cloud-sync">סנכרן עכשיו</button><button class="btn ghost" data-act="cloud-out">התנתק</button></div>
+    <button class="btn danger ghost small" data-act="cloud-delete" style="min-height:34px">${cloud.delArm?"לחץ שוב: מחק את החשבון וכל הנתונים מהענן":"מחק את החשבון שלי מהענן"}</button></div>`;
 }
 async function cloudAuth(signup){
   const email=($("#cl-email").value||"").trim(),password=$("#cl-pass").value||"";cloud.err="";cloud.msg="";cloud.email=email;
@@ -1054,6 +1056,13 @@ async function cloudAuth(signup){
 }
 async function cloudReset(){const email=($("#cl-email").value||"").trim();cloud.err="";cloud.msg="";cloud.email=email;if(!email){cloud.err="כתוב את המייל שלך למעלה ואז לחץ שוב.";cloudMsg();return}
   try{const{error}=await cloud.sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});if(error)throw error;cloud.msg="נשלח מייל לאיפוס הסיסמה."}catch(e){cloud.err=heErr(e)}cloudMsg()}
+async function cloudDeleteAccount(){
+  if(!cloud.sb||!cloud.user)return;const uid=cloud.user.id;
+  try{const st=cloud.sb.storage.from("shots");const{data:files}=await st.list(uid,{limit:1000});if(files&&files.length){const{error}=await st.remove(files.map(f=>`${uid}/${f.name}`));if(error)throw error}
+    const{error}=await cloud.sb.rpc("delete_my_account");if(error)throw error;
+    await cloudSignOut(true);toast("החשבון והנתונים נמחקו מהענן. היומן נשאר בטלפון.",5000);renderPlan()}
+  catch(e){const m=heErr(e);toast(/PGRST202|delete_my_account/.test(String(e&&e.message))?"מחיקת חשבון עוד לא הוגדרה ב-Supabase (צריך להריץ את קובץ ההקשחה).":m,6000)}
+}
 async function cloudSignOut(silent){if(!cloud.sb||!cloud.user)return;try{await cloud.sb.auth.signOut()}catch(e){}cloud.user=null;S.sync={};try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}if(!silent){toast("התנתקת. הנתונים נשארו בטלפון.",3000);renderPlan()}}
 function markAllDirty(){const n=Date.now();S.trades.forEach(t=>{if(!t.sample)t.u=n});S.pu=n;lastPH=profileOf(S);S.sync=S.sync||{};S.sync.up={}}
 function isDirty(){const sy=S.sync||{},p=sy.pushed||0;return S.trades.some(t=>!t.sample&&(t.u||0)>p)||Object.values(S.tomb||{}).some(x=>x>p)||(S.pu||0)>(sy.puSynced||0)}
