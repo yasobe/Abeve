@@ -1,25 +1,18 @@
 <title>מעבדת המשכל</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="מעבדה אינטראקטיבית לפרק 9 בספר מבוא לפסיכולוגיה: משכל והערכת משכל">
+<meta name="description" content="אתר לימוד אינטראקטיבי לפרק 9 בספר מבוא לפסיכולוגיה: משכל והערכת משכל">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Hebrew:wght@400;500;600;700&family=Suez+One&display=swap">
 <style>
-/* Layout: a psychometric "lab notebook" — answer-sheet grid paper, one wide column of three labs, each a two-pane instrument (control panel + live display). */
+/* Layout: a psychometric "lab notebook" on answer-sheet grid paper. One column of chapter sections in book order, each tagged with its page range; every section pairs a control panel with a live display. */
 :root{
-  --paper:#EEF2F6;        /* answer-sheet blue-grey ground */
-  --surface:#FFFFFF;
-  --surface-2:#F6F8FB;
-  --ink:#152238;          /* graphite-navy ink */
-  --muted:#5A6781;
-  --line:#D5DCE7;
-  --grid:rgba(21,34,56,.045);
-  --accent:#0E7C86;       /* examiner teal */
-  --accent-soft:rgba(14,124,134,.12);
-  --mark:#F0B429;         /* highlighter / answer-sheet bubble */
-  --mark-soft:rgba(240,180,41,.22);
-  --an:#2F64B0; --cr:#C0407A; --pr:#3D8B47;  /* Sternberg: analytical / creative / practical */
-  --good:#2E8B57; --warn:#C77C0E; --bad:#C2413A;
+  --paper:#EEF2F6; --surface:#FFFFFF; --surface-2:#F6F8FB;
+  --ink:#152238; --muted:#5A6781; --line:#D5DCE7; --grid:rgba(21,34,56,.045);
+  --accent:#0E7C86; --accent-soft:rgba(14,124,134,.12);
+  --mark:#F0B429; --mark-soft:rgba(240,180,41,.22);
+  --an:#2F64B0; --cr:#C0407A; --pr:#3D8B47;
+  --good:#2E8B57; --warn:#B86E05; --bad:#C2413A;
   --shadow:0 1px 2px rgba(21,34,56,.06),0 8px 24px rgba(21,34,56,.07);
   --f-display:"Suez One","Rubik","Arial Hebrew",serif;
   --f-body:"IBM Plex Sans Hebrew","Rubik","Segoe UI","Arial Hebrew",Arial,sans-serif;
@@ -27,14 +20,14 @@
   --r:14px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --paper:#0D1422;--surface:#141D2F;--surface-2:#192439;--ink:#E6EBF4;--muted:#9AA7BF;--line:#26334B;--grid:rgba(230,235,244,.035);
+  --paper:#0D1422;--surface:#141D2F;--surface-2:#192439;--ink:#E6EBF4;--muted:#9AA7BF;--line:#2A374F;--grid:rgba(230,235,244,.035);
   --accent:#3BBFC8;--accent-soft:rgba(59,191,200,.14);--mark:#F5C451;--mark-soft:rgba(245,196,81,.18);
-  --an:#6E9BE3;--cr:#E57AAB;--pr:#73C27C;--good:#5BC48A;--warn:#E9A23B;--bad:#EE6B63;
+  --an:#7CA6EA;--cr:#EB86B4;--pr:#7CCB85;--good:#5BC48A;--warn:#E9A23B;--bad:#EE6B63;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.28);color-scheme:dark}}
 :root[data-theme="dark"]{
-  --paper:#0D1422;--surface:#141D2F;--surface-2:#192439;--ink:#E6EBF4;--muted:#9AA7BF;--line:#26334B;--grid:rgba(230,235,244,.035);
+  --paper:#0D1422;--surface:#141D2F;--surface-2:#192439;--ink:#E6EBF4;--muted:#9AA7BF;--line:#2A374F;--grid:rgba(230,235,244,.035);
   --accent:#3BBFC8;--accent-soft:rgba(59,191,200,.14);--mark:#F5C451;--mark-soft:rgba(245,196,81,.18);
-  --an:#6E9BE3;--cr:#E57AAB;--pr:#73C27C;--good:#5BC48A;--warn:#E9A23B;--bad:#EE6B63;
+  --an:#7CA6EA;--cr:#EB86B4;--pr:#7CCB85;--good:#5BC48A;--warn:#E9A23B;--bad:#EE6B63;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.28);color-scheme:dark}
 
 *{box-sizing:border-box}
@@ -47,26 +40,33 @@ body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-siz
 h1,h2,h3{font-family:var(--f-display);font-weight:400;line-height:1.15;text-wrap:balance;margin:0}
 p{margin:0}
 .mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
-.eyebrow{font-size:.78rem;letter-spacing:.08em;color:var(--accent);font-weight:600}
+.eyebrow{font-size:.78rem;letter-spacing:.06em;color:var(--accent);font-weight:600}
+.muted{color:var(--muted)}
 button{font:inherit;color:inherit;cursor:pointer}
 :focus-visible{outline:3px solid var(--mark);outline-offset:2px;border-radius:6px}
+.ltr{direction:ltr;unicode-bidi:isolate}
 
-/* ---------- top nav ---------- */
+/* nav */
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
 .nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)));
-  padding:10px max(16px,env(safe-area-inset-right,0px));background:color-mix(in srgb,var(--paper) 88%,transparent);
+  padding:8px max(16px,env(safe-area-inset-right,0px));background:color-mix(in srgb,var(--paper) 90%,transparent);
   backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-.nav .wrap{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-size:1.05rem;text-decoration:none;color:var(--ink)}
+.nav .wrap{display:flex;align-items:center;gap:10px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-size:1.05rem;text-decoration:none;color:var(--ink);flex:none}
 .brand b{display:grid;place-items:center;width:30px;height:30px;border-radius:8px;background:var(--ink);color:var(--paper);font-weight:400}
-.nav-links{display:flex;gap:4px;margin-inline-start:auto;flex-wrap:wrap}
-.nav-links a{color:var(--muted);text-decoration:none;font-size:.9rem;padding:6px 10px;border-radius:999px;font-weight:500}
+.nav-links{display:flex;gap:2px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none;padding-block:2px}
+.nav-links::-webkit-scrollbar{display:none}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:.86rem;padding:6px 10px;border-radius:999px;font-weight:500;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.nav-links a::before{content:"";width:7px;height:7px;border-radius:50%;border:1.5px solid currentColor;opacity:.6;flex:none}
+.nav-links a.done::before{background:var(--good);border-color:var(--good);opacity:1}
 .nav-links a:hover,.nav-links a.on{color:var(--ink);background:var(--surface)}
-.theme-btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;width:36px;height:36px;display:grid;place-items:center}
+.prog{flex:none;font-family:var(--f-mono);font-size:.8rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+.prog svg{width:28px;height:28px}
+.theme-btn{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;width:36px;height:36px;display:grid;place-items:center}
 .theme-btn svg{width:18px;height:18px}
 
-/* ---------- hero ---------- */
-.hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:40px;align-items:center;padding-block:56px 40px}
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:40px;align-items:center;padding-block:48px 28px}
 .hero-num{font-family:var(--f-display);font-size:clamp(5rem,13vw,9rem);line-height:.8;color:var(--accent);display:block;margin-bottom:10px}
 .hero h1{font-size:clamp(2.2rem,5.2vw,3.6rem)}
 .hero .lede{margin-top:16px;color:var(--muted);font-size:1.08rem;max-width:56ch}
@@ -75,85 +75,80 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   background:var(--surface);color:var(--ink);border:1px solid var(--line);transition:transform .15s,border-color .15s}
 .chip-link:hover{transform:translateY(-2px);border-color:var(--accent)}
 .chip-link i{width:10px;height:10px;border-radius:50%;background:var(--c,var(--accent))}
-.bell-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:18px 18px 12px;box-shadow:var(--shadow)}
+.bell-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:18px 18px 12px;box-shadow:var(--shadow);margin:0}
 .bell-card .head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
 .bell-card .head span{font-size:.85rem;color:var(--muted)}
-.bell-read{font-size:.95rem;margin-top:2px}
+.bell-read{font-size:.95rem}
 .bell-read strong{color:var(--accent)}
+.bell-cat{display:inline-block;margin-top:4px;font-size:.85rem;font-weight:700;padding:2px 10px;border-radius:999px;background:var(--mark-soft)}
 #bell{width:100%;height:auto;display:block;touch-action:none;cursor:ew-resize}
 .bell-note{font-size:.8rem;color:var(--muted);margin-top:6px}
 
-/* ---------- lab sections ---------- */
-.lab{margin-top:56px;scroll-margin-top:80px}
-.lab-head{display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px;align-items:end;margin-bottom:22px}
-.lab-tag{font-family:var(--f-display);font-size:1rem;color:var(--paper);background:var(--ink);border-radius:10px;padding:8px 12px;white-space:nowrap}
-.lab-head h2{font-size:clamp(1.7rem,3.6vw,2.4rem)}
-.lab-head p{color:var(--muted);margin-top:6px;max-width:70ch}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
-.grid-2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:20px}
-.cite{font-size:.8rem;color:var(--muted)}
+/* chapter map */
+.map{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:8px}
+.map a{display:flex;flex-direction:column;gap:2px;padding:12px 14px;border-radius:12px;background:var(--surface);border:1px solid var(--line);text-decoration:none;color:var(--ink);transition:border-color .15s,transform .15s;position:relative;min-width:0}
+.map a:hover{border-color:var(--accent);transform:translateY(-2px)}
+.map .pg{font-family:var(--f-mono);font-size:.72rem;color:var(--muted)}
+.map b{font-size:.95rem;line-height:1.3}
+.map .ok{position:absolute;inset-inline-start:auto;inset-inline-end:10px;top:10px;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:.7rem;color:transparent}
+.map a.done .ok{background:var(--good);border-color:var(--good);color:#fff}
+.map-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:8px}
+.map-head h2{font-size:1.3rem}
 
-/* ---------- Gardner ---------- */
-.g-controls{padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
-.seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;flex-wrap:wrap}
-.seg button{border:0;background:transparent;padding:7px 14px;border-radius:999px;font-weight:600;font-size:.88rem;color:var(--muted)}
-.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
-.sliders{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px}
-.sl{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 8px;align-items:center;padding:8px 10px;border-radius:10px;transition:background .2s}
-.sl.hl{background:var(--mark-soft)}
-.sl label{font-weight:600;font-size:.92rem;display:flex;align-items:center;gap:7px}
-.sl label i{width:9px;height:9px;border-radius:3px;background:var(--c)}
-.sl output{font-family:var(--f-mono);font-size:.9rem;color:var(--muted);min-width:2ch;text-align:left}
-.sl input{grid-column:1/-1}
-input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:22px;background:transparent;margin:0}
-input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:6px;background:linear-gradient(to left,var(--c,var(--accent)) var(--p,50%),var(--line) var(--p,50%))}
-input[type=range]::-moz-range-track{height:6px;border-radius:6px;background:var(--line)}
-input[type=range]::-moz-range-progress{height:6px;border-radius:6px;background:var(--c,var(--accent))}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--surface);border:3px solid var(--c,var(--accent));margin-top:-7px;box-shadow:0 1px 4px rgba(0,0,0,.2)}
-input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--surface);border:3px solid var(--c,var(--accent))}
-.quest{display:flex;flex-direction:column;gap:6px;max-height:520px;overflow:auto;padding-inline-end:4px}
-.q-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2)}
-.q-item p{font-size:.88rem;line-height:1.45}
-.q-item p small{display:block;color:var(--c);font-weight:600;font-size:.72rem}
-.likert{display:flex;gap:4px;direction:ltr}
-.likert button{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);background:var(--surface);font-family:var(--f-mono);font-size:.75rem;color:var(--muted);transition:all .15s}
-.likert button[aria-pressed="true"]{background:var(--c);border-color:var(--c);color:#fff;transform:scale(1.08)}
-.likert-legend{display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted)}
-.g-display{padding:14px 14px 18px;display:flex;flex-direction:column;gap:10px;min-width:0}
-.g-toolbar{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
-.toggle{display:inline-flex;align-items:center;gap:8px;font-size:.85rem;color:var(--muted);cursor:pointer;user-select:none}
-.toggle input{accent-color:var(--accent);width:16px;height:16px}
-#radar{width:100%;height:auto;display:block;direction:ltr}
-#radar text{font-family:var(--f-body)}
-.radar-axis-label{cursor:pointer}
-.g-info{border-top:1px dashed var(--line);padding-top:12px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;min-height:96px}
-.g-info .big{font-family:var(--f-display);font-size:1.35rem;grid-row:span 2;color:var(--c,var(--accent));align-self:start;min-width:6.5em}
-.g-info .end{font-size:.85rem;color:var(--muted)}
-.g-info .core{font-size:.93rem}
-.top2{display:flex;gap:8px;flex-wrap:wrap}
-.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:.82rem;font-weight:600;background:var(--surface-2);border:1px solid var(--line)}
-.pill i{width:8px;height:8px;border-radius:50%;background:var(--c)}
-.g-foot{margin-top:14px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+/* sections */
+.lab{margin-top:64px;scroll-margin-top:72px}
+.lab-head{display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px;align-items:end;margin-bottom:22px}
+.lab-tag{font-family:var(--f-mono);font-size:.8rem;color:var(--paper);background:var(--ink);border-radius:10px;padding:8px 12px;white-space:nowrap;text-align:center;line-height:1.3}
+.lab-tag b{display:block;font-family:var(--f-display);font-weight:400;font-size:1.05rem}
+.lab-head h2{font-size:clamp(1.6rem,3.4vw,2.3rem)}
+.lab-head p{color:var(--muted);margin-top:6px;max-width:72ch}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.pad{padding:20px}
+.grid-2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:20px}
+.grid-2e{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+.stack{display:flex;flex-direction:column;gap:14px;min-width:0}
+.sub-h{font-family:var(--f-body);font-weight:700;font-size:1.08rem}
+.cite{font-size:.8rem;color:var(--muted)}
 .note{padding:14px 16px;border-radius:12px;background:var(--surface);border:1px solid var(--line);font-size:.9rem}
 .note h3{font-family:var(--f-body);font-weight:700;font-size:.95rem;margin-bottom:4px}
 .note p{color:var(--muted)}
+.notes{margin-top:14px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
 
-/* ---------- Sternberg game ---------- */
-.game{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:20px}
-.stage{padding:22px;min-width:0;display:flex;flex-direction:column;gap:16px;position:relative;overflow:hidden}
-.progress{display:flex;gap:6px}
-.progress span{flex:1;height:6px;border-radius:6px;background:var(--line);transition:background .3s}
-.progress span.done{background:var(--accent)}
-.progress span.now{background:var(--mark)}
-.scn-meta{display:flex;justify-content:space-between;align-items:center;font-size:.85rem;color:var(--muted);gap:8px;flex-wrap:wrap}
-.scn-title{font-size:1.55rem}
-.scn-text{font-size:1.02rem;max-width:62ch}
-.scn-text code{font-family:var(--f-mono);background:var(--mark-soft);padding:1px 6px;border-radius:6px;direction:ltr;unicode-bidi:isolate}
+/* shared controls */
+.seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;flex-wrap:wrap;align-self:flex-start}
+.seg button{border:0;background:transparent;padding:7px 14px;border-radius:999px;font-weight:600;font-size:.88rem;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:26px;background:transparent;margin:0;touch-action:pan-y}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:6px;background:linear-gradient(to left,var(--c,var(--accent)) var(--p,50%),var(--line) var(--p,50%))}
+input[type=range]::-moz-range-track{height:6px;border-radius:6px;background:var(--line)}
+input[type=range]::-moz-range-progress{height:6px;border-radius:6px;background:var(--c,var(--accent))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--surface);border:3px solid var(--c,var(--accent));margin-top:-8px;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--surface);border:3px solid var(--c,var(--accent))}
+.toggle{display:inline-flex;align-items:center;gap:8px;font-size:.86rem;color:var(--muted);cursor:pointer;user-select:none}
+.toggle input{accent-color:var(--accent);width:16px;height:16px;flex:none}
+.btn{border:0;background:var(--ink);color:var(--paper);font-weight:700;padding:11px 20px;border-radius:999px;align-self:flex-start;transition:transform .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn.sm{padding:7px 14px;font-size:.88rem}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.big-sl{display:flex;flex-direction:column;gap:2px}
+.big-sl .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.big-sl label{font-weight:700}
+.big-sl small{color:var(--muted);font-size:.83rem}
+.big-sl output{font-family:var(--f-mono);font-weight:600;color:var(--c)}
+.readouts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.ro{padding:10px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line);min-width:0}
+.ro span{display:block;font-size:.74rem;color:var(--muted)}
+.ro b{font-family:var(--f-mono);font-size:1.15rem}
+.explain{font-size:.93rem;padding:12px 14px;border-radius:10px;background:var(--accent-soft)}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:.82rem;font-weight:600;background:var(--surface-2);border:1px solid var(--line)}
+.pill i{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.pill.ex{background:var(--mark-soft);border-color:transparent}
 .opts{display:flex;flex-direction:column;gap:10px}
-.opt{display:grid;grid-template-columns:30px minmax(0,1fr);gap:12px;align-items:start;text-align:right;padding:14px 16px;border-radius:12px;
+.opt{display:grid;grid-template-columns:30px minmax(0,1fr);gap:12px;align-items:start;text-align:right;padding:13px 15px;border-radius:12px;
   border:1.5px solid var(--line);background:var(--surface-2);transition:border-color .15s,transform .15s,background .2s}
 .opt:hover:not([disabled]){border-color:var(--accent);transform:translateX(-3px)}
-.opt .bub{width:26px;height:26px;border-radius:50%;border:2px solid var(--muted);display:grid;place-items:center;font-family:var(--f-mono);font-size:.78rem;color:var(--muted);margin-top:1px}
+.opt .bub{width:26px;height:26px;border-radius:50%;border:2px solid var(--muted);display:grid;place-items:center;font-size:.8rem;color:var(--muted);margin-top:1px}
 .opt[disabled]{cursor:default}
 .opt.right{border-color:var(--good);background:color-mix(in srgb,var(--good) 10%,var(--surface))}
 .opt.right .bub{background:var(--good);border-color:var(--good);color:#fff}
@@ -161,18 +156,90 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .opt.wrong .bub{background:var(--bad);border-color:var(--bad);color:#fff}
 .opt.dim{opacity:.55}
 .opt .why{display:block;font-size:.85rem;color:var(--muted);margin-top:6px}
+.feedback{padding:12px 16px;border-radius:12px;border-inline-start:4px solid var(--c,var(--accent));background:var(--surface-2);font-size:.95rem;animation:rise .35s ease}
+.feedback b{color:var(--c,var(--accent))}
+.progress{display:flex;gap:5px}
+.progress span{flex:1;height:6px;border-radius:6px;background:var(--line);transition:background .3s}
+.progress span.done{background:var(--accent)}
+.progress span.now{background:var(--mark)}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+svg text{font-family:var(--f-body)}
+
+/* timeline */
+.tl{position:relative;display:flex;gap:0;overflow-x:auto;padding:8px 4px 4px;scrollbar-width:thin}
+.tl::before{content:"";position:absolute;inset-inline:12px;top:32px;height:3px;background:var(--line);border-radius:3px}
+.tl button{position:relative;flex:1 0 108px;display:flex;flex-direction:column;align-items:center;gap:8px;background:none;border:0;padding:0 4px 8px;text-align:center}
+.tl .dot{width:22px;height:22px;border-radius:50%;background:var(--surface);border:3px solid var(--muted);margin-top:14px;transition:all .2s;z-index:1}
+.tl .yr{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);line-height:1.2}
+.tl .nm{font-size:.82rem;font-weight:600;line-height:1.25}
+.tl button.seen .dot{border-color:var(--accent);background:var(--accent-soft)}
+.tl button[aria-pressed="true"] .dot{background:var(--accent);border-color:var(--accent);transform:scale(1.25)}
+.tl-card{margin-top:12px;padding:20px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 20px;min-height:170px}
+.tl-card .y{font-family:var(--f-display);font-size:2rem;color:var(--accent);line-height:1;grid-row:span 3;min-width:3.5em}
+.tl-card h3{font-size:1.35rem}
+.tl-card p{max-width:70ch}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:5px 11px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);font-size:.84rem}
+.chip b{color:var(--accent);font-family:var(--f-mono)}
+
+/* gardner */
+.live-top{font-size:.92rem;padding:8px 12px;border-radius:10px;background:var(--mark-soft)}
+.live-top b{color:var(--c)}
+.sliders{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px}
+.sl{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 8px;align-items:center;padding:6px 10px;border-radius:10px;transition:background .2s}
+.sl.hl{background:var(--mark-soft)}
+.sl label{font-weight:600;font-size:.92rem;display:flex;align-items:center;gap:7px}
+.sl label i{width:9px;height:9px;border-radius:3px;background:var(--c)}
+.sl output{font-family:var(--f-mono);font-size:.9rem;color:var(--muted);min-width:2ch;text-align:left}
+.sl input{grid-column:1/-1}
+.quest{display:flex;flex-direction:column;gap:6px;max-height:540px;overflow:auto;padding-inline-end:4px}
+.q-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2)}
+.q-item.answered{border-color:color-mix(in srgb,var(--c) 45%,var(--line))}
+.q-item p{font-size:.88rem;line-height:1.45}
+.q-item p small{display:block;color:var(--c);font-weight:600;font-size:.72rem}
+.likert{display:flex;gap:4px;direction:ltr}
+.likert button{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);background:var(--surface);font-family:var(--f-mono);font-size:.78rem;color:var(--muted);transition:all .15s}
+.likert button[aria-pressed="true"]{background:var(--c);border-color:var(--c);color:#fff;transform:scale(1.08)}
+.likert-legend{display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted);gap:8px}
+.qprog{font-size:.85rem;color:var(--muted)}
+.qprog b{font-family:var(--f-mono);color:var(--ink)}
+.g-display{padding:14px 16px 18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.g-toolbar{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+#radar{width:100%;height:auto;display:block;direction:ltr;max-width:520px;align-self:center}
+#radar .dragdot{cursor:grab;touch-action:none}
+.radar-axis-label{cursor:pointer}
+.result{border-top:1px dashed var(--line);padding-top:12px;display:flex;flex-direction:column;gap:10px}
+.result-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.result-h h3{font-size:1.25rem}
+.result-lead{font-size:.98rem}
+.result-lead b{color:var(--c)}
+.rank{position:relative}
+.rank-row{position:absolute;inset-inline:0;top:0;height:32px;display:grid;grid-template-columns:7.2em minmax(0,1fr) 2.2em;gap:10px;align-items:center;
+  transition:transform .45s cubic-bezier(.2,.8,.2,1);background:none;border:0;padding:0 6px;border-radius:8px;text-align:right}
+.rank-row:hover,.rank-row.sel{background:var(--surface-2)}
+.rank-row .nm{font-size:.88rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-row .bar{height:12px;border-radius:6px;background:var(--line);overflow:hidden}
+.rank-row .bar i{display:block;height:100%;border-radius:6px;background:var(--c);transition:width .45s}
+.rank-row .v{font-family:var(--f-mono);font-size:.85rem;text-align:left}
+.rank-row.top .nm::after{content:" ★";color:var(--mark)}
+.detail{padding:12px 14px;border-radius:10px;background:var(--surface-2);border-inline-start:4px solid var(--c);font-size:.9rem}
+.detail b{color:var(--c)}
+
+/* sternberg */
+.game{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:20px}
+.stage{padding:22px;min-width:0;display:flex;flex-direction:column;gap:16px;position:relative;overflow:hidden}
+.scn-meta{display:flex;justify-content:space-between;align-items:center;font-size:.85rem;color:var(--muted);gap:8px;flex-wrap:wrap}
+.scn-title{font-size:1.5rem}
+.scn-text{font-size:1.02rem;max-width:64ch}
+.scn-text code{font-family:var(--f-mono);background:var(--mark-soft);padding:1px 6px;border-radius:6px;direction:ltr;unicode-bidi:isolate}
 .tagger{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:12px;background:var(--surface-2);border:1px dashed var(--line)}
 .tagger p{font-weight:600}
 .tag-btns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .tag-btn{border:2px solid var(--c);background:var(--surface);color:var(--c);padding:10px 8px;border-radius:10px;font-weight:700;transition:all .15s}
-.tag-btn:hover:not([disabled]){background:var(--c);color:#fff}
-.tag-btn.picked{background:var(--c);color:#fff}
-.tag-btn[disabled]:not(.picked){opacity:.45}
-.feedback{padding:14px 16px;border-radius:12px;border-inline-start:4px solid var(--c,var(--accent));background:var(--surface-2);font-size:.95rem;animation:rise .35s ease}
-.feedback b{color:var(--c,var(--accent))}
-.btn{border:0;background:var(--ink);color:var(--paper);font-weight:700;padding:11px 20px;border-radius:999px;align-self:flex-start;transition:transform .15s}
-.btn:hover{transform:translateY(-2px)}
-.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.tag-btn:hover:not([disabled]){background:var(--c);color:var(--surface)}
+.tag-btn.picked{background:var(--c);color:var(--surface)}
+.tag-btn.miss{border-style:dashed;opacity:.8}
+.tag-btn[disabled]:not(.picked):not(.miss){opacity:.4}
 .side{padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
 .comp{display:grid;grid-template-columns:12px minmax(0,1fr);gap:4px 10px}
 .comp i{width:12px;height:12px;border-radius:4px;background:var(--c);margin-top:6px}
@@ -183,89 +250,131 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .score-box span{display:block;font-size:.75rem;color:var(--muted)}
 .score-box b{font-family:var(--f-mono);font-size:1.3rem}
 #tri{width:100%;max-width:300px;height:auto;align-self:center;display:block;direction:ltr}
-#tri text{font-family:var(--f-body)}
-@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.confetti{position:absolute;inset:0;pointer-events:none}
+.confetti{position:absolute;inset:0;pointer-events:none;width:100%;height:100%}
 
-/* ---------- Reliability / validity ---------- */
+/* assessment */
 .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
 .tab{border:1.5px solid var(--line);background:var(--surface);padding:9px 16px;border-radius:999px;font-weight:600;font-size:.92rem;color:var(--muted)}
 .tab[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.tab.seen:not([aria-selected="true"])::after{content:" ✓";color:var(--good)}
 .rv{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:20px}
 .board-wrap{padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px;min-width:0}
 .board-wrap canvas{width:100%;max-width:440px;aspect-ratio:1;height:auto;display:block}
 .board-wrap canvas.wide{max-width:520px;aspect-ratio:4/3}
-.verdict{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;font-weight:700;font-size:.95rem;background:color-mix(in srgb,var(--c) 14%,var(--surface));color:var(--c);border:1.5px solid var(--c);transition:all .3s}
-.rv-ctrl{padding:20px;display:flex;flex-direction:column;gap:16px;min-width:0}
-.big-sl{display:flex;flex-direction:column;gap:4px}
-.big-sl .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-.big-sl label{font-weight:700}
-.big-sl small{color:var(--muted);font-size:.83rem}
-.big-sl output{font-family:var(--f-mono);font-weight:600;color:var(--c)}
+.verdict{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;font-weight:700;font-size:.95rem;background:color-mix(in srgb,var(--c) 14%,var(--surface));color:var(--c);border:1.5px solid var(--c);transition:all .3s;text-align:center}
 .presets{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .preset{border:1.5px solid var(--line);background:var(--surface-2);border-radius:10px;padding:9px 10px;text-align:right;font-size:.86rem;font-weight:600;transition:border-color .15s}
 .preset span{display:block;font-weight:400;color:var(--muted);font-size:.76rem}
 .preset:hover{border-color:var(--accent)}
-.readouts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.ro{padding:10px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line)}
-.ro span{display:block;font-size:.72rem;color:var(--muted)}
-.ro b{font-family:var(--f-mono);font-size:1.15rem}
-.explain{font-size:.93rem;color:var(--ink);padding:12px 14px;border-radius:10px;background:var(--accent-soft);min-height:4.2em}
-.legend-ex{display:flex;gap:12px;flex-wrap:wrap;font-size:.8rem;color:var(--muted)}
+.legend-ex{display:flex;gap:12px;flex-wrap:wrap;font-size:.8rem;color:var(--muted);justify-content:center}
 .legend-ex span{display:inline-flex;align-items:center;gap:6px}
 .legend-ex i{width:10px;height:10px;border-radius:50%;background:var(--c)}
 .concepts{margin-top:18px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-.cgroup{padding:16px}
 .cgroup h3{font-size:1.15rem;margin-bottom:10px;display:flex;align-items:center;gap:8px}
 .cgroup h3 small{font-family:var(--f-mono);font-size:.75rem;color:var(--muted)}
 .terms{display:flex;flex-wrap:wrap;gap:6px}
 .term{border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:6px 12px;font-size:.85rem;font-weight:600}
-.term[aria-expanded="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.term[aria-expanded="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
 .term-def{margin-top:10px;font-size:.9rem;color:var(--muted);min-height:3em}
 .term-def b{color:var(--ink)}
 
-/* ---------- quiz ---------- */
+/* iq section */
+.formula{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;padding:16px;border-radius:12px;background:var(--surface-2);font-size:1.05rem}
+.frac{display:inline-flex;flex-direction:column;align-items:center;font-family:var(--f-mono)}
+.frac>span:first-child{border-bottom:2px solid var(--ink);padding:0 8px 2px}
+.frac:first-child>span:first-child{border:0}
+.frac span:last-child{padding-top:2px}
+.frac small{font-family:var(--f-body);font-size:.7rem;color:var(--muted)}
+.iq-big{font-family:var(--f-display);font-size:2.6rem;color:var(--accent);line-height:1}
+.sorter{display:flex;flex-direction:column;gap:12px}
+.sort-card{padding:16px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface-2);min-height:96px;animation:rise .3s ease}
+.sort-card b{font-size:1.1rem;display:block}
+.sort-card p{color:var(--muted);font-size:.9rem;margin-top:2px}
+.sort-btns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.bins{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.bin{padding:10px;border-radius:10px;border:1.5px dashed var(--line);min-height:80px;min-width:0}
+.bin h4{margin:0 0 6px;font-size:.85rem;color:var(--c)}
+.bin .chips .chip.no{border-color:var(--bad);color:var(--bad);text-decoration:line-through}
+#venn{width:100%;max-width:360px;height:auto;display:block;margin-inline:auto;direction:ltr}
+
+/* theories */
+#gmat{width:100%;max-width:380px;height:auto;display:block;margin-inline:auto;direction:ltr}
+#cube{width:100%;height:auto;display:block;direction:ltr;min-width:480px}
+.scroll-x{overflow-x:auto;min-width:0}
+.selects{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.selects label{display:flex;flex-direction:column;gap:4px;font-size:.8rem;font-weight:600;color:var(--muted);min-width:0}
+select{font:inherit;font-size:.9rem;padding:8px 10px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);width:100%}
+
+/* politics */
+#pots{width:100%;height:auto;display:block;direction:ltr}
+#stbars{width:100%;height:auto;display:block;direction:ltr}
+.age-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.age-steps button{border:1.5px solid var(--line);background:var(--surface-2);border-radius:12px;padding:10px;text-align:center}
+.age-steps button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.age-steps b{display:block;font-family:var(--f-display);font-size:1.6rem;color:var(--accent);line-height:1.1}
+.age-steps span{font-size:.8rem;color:var(--muted)}
+
+/* creativity */
+.brick-in{display:flex;gap:8px}
+.brick-in input{flex:1;min-width:0;font:inherit;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink)}
+.timer{font-family:var(--f-mono);font-size:1.6rem;font-weight:600}
+.timer.low{color:var(--bad)}
+.ideas{display:flex;flex-wrap:wrap;gap:6px;min-height:40px}
+.ideas .chip.common{opacity:.7}
+.ideas .chip.rare{border-color:var(--cr);color:var(--cr);font-weight:600}
+#thresh{width:100%;height:auto;display:block;direction:ltr}
+
+/* society */
+.flips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.flip{padding:18px;display:flex;flex-direction:column;gap:10px;text-align:right;border:1px solid var(--line);background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);min-height:200px}
+.flip .q{font-weight:700;font-size:1.02rem}
+.flip .a{color:var(--muted);font-size:.92rem}
+.flip .hint{font-size:.8rem;color:var(--accent);font-weight:600;margin-top:auto}
+blockquote{margin:14px 0 0;padding:16px 20px;border-inline-start:4px solid var(--mark);background:var(--surface);border-radius:0 12px 12px 0;font-size:.95rem}
+blockquote footer{margin-top:6px;font-size:.82rem;color:var(--muted);border:0;padding:0}
+
+/* quiz */
 .quiz{padding:22px;display:flex;flex-direction:column;gap:14px}
 .quiz .qtext{font-size:1.15rem;font-weight:600}
-.qcount{font-family:var(--f-mono);color:var(--muted);font-size:.85rem}
+.qcount{font-family:var(--f-mono);color:var(--muted);font-size:.85rem;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.review{display:flex;flex-direction:column;gap:6px}
+.review a{color:var(--accent);font-weight:600}
 
-footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:.85rem;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.site-foot{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:.85rem;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 
+@media (max-width:1320px){.brand .bt{display:none}}
+@media (max-width:980px){.map{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:900px){
-  .hero,.grid-2,.game,.rv{grid-template-columns:minmax(0,1fr)}
-  .hero{padding-block:32px 16px;gap:24px}
-  .g-foot{grid-template-columns:minmax(0,1fr)}
-  .concepts{grid-template-columns:minmax(0,1fr)}
+  .hero,.grid-2,.grid-2e,.game,.rv{grid-template-columns:minmax(0,1fr)}
+  .hero{padding-block:28px 12px;gap:24px}
+  .notes,.concepts,.flips{grid-template-columns:minmax(0,1fr)}
+  .prog span{display:none}
 }
 @media (max-width:560px){
-  .nav .wrap{flex-wrap:nowrap}
   .brand .bt{display:none}
-  .nav-links{flex:1;min-width:0;flex-wrap:nowrap;overflow-x:auto;margin:0;scrollbar-width:none}
-  .nav-links::-webkit-scrollbar{display:none}
-  .nav-links a{white-space:nowrap}
+  .map{grid-template-columns:repeat(2,minmax(0,1fr))}
   .sliders{grid-template-columns:minmax(0,1fr)}
-  .nav-links a{padding:5px 8px;font-size:.82rem}
   .lab-head{grid-template-columns:minmax(0,1fr)}
   .lab-tag{justify-self:start}
   .tag-btns{grid-template-columns:minmax(0,1fr)}
-  .readouts{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .presets{grid-template-columns:minmax(0,1fr)}
+  .presets,.selects{grid-template-columns:minmax(0,1fr)}
   .q-item{grid-template-columns:minmax(0,1fr)}
-  .stage{padding:16px}
+  .stage,.pad,.quiz{padding:16px}
+  .tl-card{grid-template-columns:minmax(0,1fr)}
+  .tl-card .y{grid-row:auto}
+  .rank-row{grid-template-columns:6.4em minmax(0,1fr) 2em}
+  #radar .rv-val{display:none}
+  #radar .radar-axis-label text{font-size:19px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
 <div class="app" dir="rtl" lang="he">
-<nav class="nav" aria-label="ניווט">
+<nav class="nav" aria-label="ניווט בפרק">
   <div class="wrap">
     <a class="brand" href="#top"><b>9</b><span class="bt">מעבדת המשכל</span></a>
-    <div class="nav-links">
-      <a href="#gardner">גרדנר</a>
-      <a href="#sternberg">סטרנברג</a>
-      <a href="#assessment">מהימנות ותוקף</a>
-      <a href="#quiz">תרגול</a>
-    </div>
+    <div class="nav-links" id="navLinks"></div>
+    <div class="prog" id="prog" title="התקדמות בפרק"></div>
     <button class="theme-btn" id="themeBtn" type="button" aria-label="החלפת ערכת צבעים">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
     </button>
@@ -273,101 +382,55 @@ footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);color:v
 </nav>
 
 <main class="wrap" id="top">
-  <!-- HERO -->
   <header class="hero">
     <div>
       <span class="hero-num" aria-hidden="true">9</span>
       <p class="eyebrow">מבוא לפסיכולוגיה · גריג וזימברדו · פרק 9</p>
       <h1>משכל והערכת משכל</h1>
-      <p class="lede">שלוש מעבדות במקום עמודים של טקסט. מפו את פרופיל המשכל שלכם לפי גרדנר, פתרו בעיות יומיומיות בעזרת שלושת הרכיבים של סטרנברג, וזרקו חצים כדי להבין סוף־סוף מה ההבדל בין מבחן מהימן למבחן תקף.</p>
+      <p class="lede">כל הפרק, נושא אחרי נושא, עם משהו לעשות בכל אחד: לזרוק חצים כדי להבין מהימנות ותוקף, למפות את פרופיל המשכל שלכם לפי גרדנר, לפתור תרחישים לפי סטרנברג, לגדל צמחים כדי להבין תורשתיות, ולסיים במבחן תרגול.</p>
       <div class="hero-cta">
-        <a class="chip-link" href="#gardner" style="--c:var(--mark)"><i></i>מכ״ם המשכלים</a>
-        <a class="chip-link" href="#sternberg" style="--c:var(--cr)"><i></i>משחק התרחישים</a>
+        <a class="chip-link" href="#gardner" style="--c:var(--mark)"><i></i>מכ״ם גרדנר</a>
+        <a class="chip-link" href="#sternberg" style="--c:var(--cr)"><i></i>תרחישי סטרנברג</a>
         <a class="chip-link" href="#assessment" style="--c:var(--accent)"><i></i>לוח המטרה</a>
       </div>
     </div>
-    <figure class="bell-card" style="margin:0">
+    <figure class="bell-card">
       <div class="head">
-        <p class="bell-read">ציון מנת משכל <strong class="mono" id="bellIQ">115</strong> · גבוה מ־<strong class="mono" id="bellPct">84%</strong> מהאוכלוסייה</p>
+        <p class="bell-read">מנת משכל <strong class="mono" id="bellIQ">115</strong> · גבוהה מ־<strong class="mono" id="bellPct">84%</strong> מבני הגיל<br><span class="bell-cat" id="bellCat">נורמלי גבוה</span></p>
         <span>גררו לאורך העקומה</span>
       </div>
-      <svg id="bell" viewBox="0 0 520 250" role="img" aria-label="התפלגות נורמלית של ציוני מנת משכל, ממוצע 100 וסטיית תקן 15"></svg>
-      <figcaption class="bell-note">ציוני מנת משכל בנויים כך שהממוצע הוא 100 וסטיית התקן 15. כ־68% מהאנשים נמצאים בטווח 85–115, וכ־95% בטווח 70–130.</figcaption>
+      <svg id="bell" viewBox="0 0 520 250" role="slider" aria-label="מנת משכל על עקומת הפעמון" aria-valuemin="45" aria-valuemax="155" aria-valuenow="115"></svg>
+      <figcaption class="bell-note">ממוצע 100, סטיית תקן 15 (על־פי תרשים 9.2). כ־68% מהאנשים בטווח 85–115 וכ־95% בטווח 70–130.</figcaption>
     </figure>
   </header>
 
-  <!-- GARDNER -->
-  <section class="lab" id="gardner" aria-labelledby="g-h">
-    <div class="lab-head">
-      <span class="lab-tag">מעבדה א</span>
-      <div>
-        <h2 id="g-h">מכ״ם ריבוי סוגי המשכל של גרדנר</h2>
-        <p>הווארד גרדנר טען שמבחן מנת משכל מכסה רק חלק קטן מהיכולות האנושיות, וזיהה שמונה סוגי משכל. דרגו את עצמכם במחוונים, או ענו על השאלון הקצר, והמכ״ם יתעדכן תוך כדי.</p>
-      </div>
-    </div>
-    <div class="grid-2">
-      <div class="panel g-controls">
-        <div class="seg" role="group" aria-label="אופן הדירוג">
-          <button type="button" id="modeSl" aria-pressed="true">דירוג מהיר</button>
-          <button type="button" id="modeQ" aria-pressed="false">שאלון (16 היגדים)</button>
-        </div>
-        <div class="sliders" id="sliders"></div>
-        <div id="questWrap" hidden>
-          <div class="likert-legend"><span>1 = בכלל לא נכון לגביי</span><span>5 = נכון מאוד</span></div>
-          <div class="quest" id="quest"></div>
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn ghost" type="button" id="gRandom">פרופיל לדוגמה</button>
-          <button class="btn ghost" type="button" id="gReset">איפוס</button>
-        </div>
-      </div>
-      <div class="panel g-display">
-        <div class="g-toolbar">
-          <div class="top2" id="top2" aria-live="polite"></div>
-          <label class="toggle"><input type="checkbox" id="schoolOverlay"> הדגשים טיפוסיים בבית הספר (הערכה להמחשה, לא נתון מהספר)</label>
-        </div>
-        <svg id="radar" viewBox="-250 -185 500 370" role="img" aria-label="תרשים מכ״ם של שמונה סוגי המשכל"></svg>
-        <div class="g-info" id="gInfo"></div>
-      </div>
-    </div>
-    <div class="g-foot">
-      <div class="note"><h3>תרבות קובעת מה נחשב ״חכם״</h3><p>בחברה המערבית מעריכים בעיקר משכל לוגי־מתמטי ולשוני. באיי קרוליין שבמיקרונזיה נווטים מרחקים ארוכים בלי מפות, בעזרת משכל מרחבי וגופני־קינסתטי. בבאלי משכל מוסיקלי ותיאום תנועה הם חלק מחיי היום־יום.</p></div>
-      <div class="note"><h3>משכל רגשי</h3><p>הרחבה של המשכל הבין־אישי והתוך־אישי. ארבעה רכיבים: לתפוס ולבטא רגשות בדייקנות, להשתמש ברגשות כדי לסייע לחשיבה, להבין ולנתח רגשות, ולווסת רגשות לטובת צמיחה רגשית ושכלית.</p></div>
-      <div class="note"><h3>חשוב לזכור</h3><p>זהו כלי לימוד ולא מבחן תקף. דיווח עצמי מושפע מהדימוי העצמי, ובדיוק לכן מבחנים אמיתיים צריכים מהימנות, תוקף ונורמות. על כך במעבדה ג.</p></div>
-    </div>
+  <section aria-labelledby="map-h">
+    <div class="map-head"><h2 id="map-h">מפת הפרק</h2><span class="cite" id="mapCount"></span></div>
+    <div class="map" id="map"></div>
   </section>
 
-  <!-- STERNBERG -->
-  <section class="lab" id="sternberg" aria-labelledby="s-h">
+  <!-- 1 HISTORY -->
+  <section class="lab" id="history" aria-labelledby="h-h">
     <div class="lab-head">
-      <span class="lab-tag">מעבדה ב</span>
+      <span class="lab-tag">עמ׳<b>441–443</b></span>
       <div>
-        <h2 id="s-h">משחק התרחישים: שלושת רכיבי המשכל של סטרנברג</h2>
-        <p>רוברט סטרנברג מבחין בין משכל אנליטי, יצירתי ומעשי. בכל תרחיש בחרו את הפתרון הטוב ביותר, ואז זהו איזה רכיב משכל הוא מפעיל. בסוף תקבלו את משולש הנטיות שלכם.</p>
+        <h2 id="h-h">תולדות ההערכה</h2>
+        <p>מבחינות פקידים בסין העתיקה ועד סולמות וקסלר. לחצו על כל תחנה בציר הזמן.</p>
       </div>
     </div>
-    <div class="game">
-      <div class="panel stage" id="stage" aria-live="polite"></div>
-      <aside class="panel side">
-        <div class="score-row">
-          <div class="score-box"><span>פתרונות מוצלחים</span><b id="scAct">0/0</b></div>
-          <div class="score-box"><span>זיהוי רכיב</span><b id="scTag">0/0</b></div>
-        </div>
-        <svg id="tri" viewBox="-150 -140 300 270" role="img" aria-label="משולש הנטיות לפי שלושת רכיבי המשכל"></svg>
-        <div class="comp" style="--c:var(--an)"><i></i><h3>משכל אנליטי</h3><p>עיבוד מידע ופתרון בעיות: רכיבי רכישת ידע, רכיבי ביצוע ורכיבים מטה־קוגניטיביים, שבוחרים אסטרטגיה ומנטרים את ההתקדמות.</p></div>
-        <div class="comp" style="--c:var(--cr)"><i></i><h3>משכל יצירתי</h3><p>התמודדות עם שני מצבים מנוגדים: בעיות חדשות לגמרי, ומנגד ביצוע אוטומטי של משימות שגרתיות.</p></div>
-        <div class="comp" style="--c:var(--pr)"><i></i><h3>משכל מעשי</h3><p>ניהול ענייני היום־יום: הסתגלות להקשרים חדשים, בחירת הקשרים מתאימים ועיצוב הסביבה לצרכינו.</p></div>
-      </aside>
+    <div class="panel pad">
+      <div class="tl" id="tl" role="group" aria-label="ציר זמן"></div>
     </div>
+    <div class="panel tl-card" id="tlCard" aria-live="polite"></div>
   </section>
 
-  <!-- RELIABILITY / VALIDITY -->
+  <!-- 2 ASSESSMENT -->
   <section class="lab" id="assessment" aria-labelledby="a-h">
     <div class="lab-head">
-      <span class="lab-tag">מעבדה ג</span>
+      <span class="lab-tag">עמ׳<b>443–448</b></span>
       <div>
         <h2 id="a-h">לוח המטרה: מהימנות, תוקף ותקנון</h2>
-        <p>מרכז הלוח הוא התכונה שהמבחן אמור למדוד. כל חץ הוא מדידה אחת של אותו אדם. פיזור החצים מראה את המהימנות, והמרחק מהמרכז מראה את התוקף.</p>
+        <p>מרכז הלוח הוא התכונה שהמבחן אמור למדוד, וכל חץ הוא מדידה אחת של אותו אדם. פיזור החצים מראה את המהימנות, והמרחק מהמרכז מראה את התוקף.</p>
       </div>
     </div>
     <div class="tabs" role="tablist" aria-label="תצוגות">
@@ -377,9 +440,9 @@ footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);color:v
     </div>
     <div class="rv">
       <div class="panel board-wrap">
-        <canvas id="cvBoard" width="440" height="440" aria-label="לוח מטרה עם חצים"></canvas>
-        <canvas id="cvRetest" class="wide" width="520" height="390" hidden aria-label="תרשים פיזור של מבחן ומבחן חוזר"></canvas>
-        <canvas id="cvNorms" class="wide" width="520" height="390" hidden aria-label="עקומת נורמות"></canvas>
+        <canvas id="cvBoard" width="440" height="440" role="img" aria-label="לוח מטרה עם חצים"></canvas>
+        <canvas id="cvRetest" class="wide" width="520" height="390" hidden role="img" aria-label="תרשים פיזור של מבחן ומבחן חוזר"></canvas>
+        <canvas id="cvNorms" class="wide" width="520" height="390" hidden role="img" aria-label="עקומת נורמות"></canvas>
         <span class="verdict" id="verdict" style="--c:var(--good)">מהימן ותקף</span>
         <div class="legend-ex" id="exLegend" hidden>
           <span style="--c:var(--an)"><i></i>בוחנת א: נותנת זמן נוסף</span>
@@ -387,21 +450,21 @@ footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);color:v
           <span style="--c:var(--pr)"><i></i>בוחן ג: מעודד ומדרבן</span>
         </div>
       </div>
-      <div class="panel rv-ctrl" id="rvCtrl">
+      <div class="panel pad stack">
         <div class="big-sl" id="relBlock" style="--c:var(--accent)">
-          <div class="top"><label for="slRel">מהימנות</label><output id="outRel" class="mono">0.90</output></div>
+          <div class="top"><label for="slRel">מהימנות</label><output id="outRel">0.90</output></div>
           <input type="range" id="slRel" min="0" max="100" value="90" style="--c:var(--accent)">
           <small>עד כמה המבחן נותן תוצאות עקביות בכל פעם</small>
         </div>
-        <div class="big-sl" id="valBlock" style="--c:var(--mark)">
-          <div class="top"><label for="slVal">תוקף</label><output id="outVal" class="mono">0.90</output></div>
+        <div class="big-sl" id="valBlock" style="--c:var(--warn)">
+          <div class="top"><label for="slVal">תוקף</label><output id="outVal">0.90</output></div>
           <input type="range" id="slVal" min="0" max="100" value="90" style="--c:var(--mark)">
           <small>עד כמה המבחן מודד את מה שהוא אמור למדוד</small>
         </div>
-        <label class="toggle" id="stdToggle"><input type="checkbox" id="noStd"> ללא תקנון: כל בוחן מעביר את המבחן בתנאים אחרים</label>
-        <div id="normCtrls" hidden style="display:flex;flex-direction:column;gap:14px">
+        <label class="toggle" id="stdToggle"><input type="checkbox" id="noStd"><span id="stdLabel">ללא תקנון: כל בוחן מעביר את המבחן בתנאים אחרים</span></label>
+        <div id="normCtrls" class="stack" hidden>
           <div class="big-sl" style="--c:var(--accent)">
-            <div class="top"><label for="slRaw">הציון הגולמי שלכם בשאלון דיכאון</label><output id="outRaw" class="mono">18</output></div>
+            <div class="top"><label for="slRaw">הציון הגולמי שלכם בשאלון דיכאון</label><output id="outRaw">18</output></div>
             <input type="range" id="slRaw" min="0" max="40" value="18" style="--c:var(--accent)">
           </div>
           <div class="seg" role="group" aria-label="אוכלוסייה נורמטיבית">
@@ -412,38 +475,319 @@ footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);color:v
         <div class="readouts" id="readouts"></div>
         <div class="presets" id="presets"></div>
         <p class="explain" id="explain"></p>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn" type="button" id="throwBtn">זריקה חוזרת</button>
-        </div>
+        <button class="btn" type="button" id="throwBtn">זריקה חוזרת</button>
       </div>
     </div>
     <div class="concepts">
-      <div class="panel cgroup" data-group="rel">
-        <h3>דרכים למדוד מהימנות <small>reliability</small></h3>
+      <div class="panel pad cgroup" data-group="rel">
+        <h3>דרכים למדוד מהימנות <small class="ltr">reliability</small></h3>
         <div class="terms"></div>
-        <p class="term-def">בחרו מושג כדי לראות הגדרה.</p>
+        <p class="term-def"></p>
       </div>
-      <div class="panel cgroup" data-group="val">
-        <h3>סוגי תוקף <small>validity</small></h3>
+      <div class="panel pad cgroup" data-group="val">
+        <h3>סוגי תוקף ונורמות <small class="ltr">validity</small></h3>
         <div class="terms"></div>
-        <p class="term-def">בחרו מושג כדי לראות הגדרה.</p>
+        <p class="term-def"></p>
       </div>
     </div>
   </section>
 
-  <!-- QUIZ -->
+  <!-- 3 IQ -->
+  <section class="lab" id="iq" aria-labelledby="iq-h">
+    <div class="lab-head">
+      <span class="lab-tag">עמ׳<b>448–456</b></span>
+      <div>
+        <h2 id="iq-h">מבחני מנת משכל</h2>
+        <p>בינה המציא את הגיל השכלי, טרמן הפך אותו למנת משכל, ווקסלר הוסיף מבחנים ביצועיים. נסו את הנוסחה המקורית, מיינו את תת־המבחנים של וקסלר, וגלו מה הופך אדם למחונן.</p>
+      </div>
+    </div>
+    <div class="grid-2e">
+      <div class="panel pad stack">
+        <h3 class="sub-h">הנוסחה של טרמן (1916)</h3>
+        <div class="big-sl" style="--c:var(--accent)">
+          <div class="top"><label for="slMA">גיל שכלי</label><output id="outMA">10</output></div>
+          <input type="range" id="slMA" min="2" max="20" step="0.5" value="10" style="--c:var(--accent)">
+          <small>רמת הביצוע הממוצעת של ילדים בגיל הזה</small>
+        </div>
+        <div class="big-sl" style="--c:var(--an)">
+          <div class="top"><label for="slCA">גיל כרונולוגי</label><output id="outCA">8</output></div>
+          <input type="range" id="slCA" min="3" max="40" step="1" value="8" style="--c:var(--an)">
+          <small>מספר השנים שעברו מאז הלידה</small>
+        </div>
+        <div class="formula" aria-live="polite">
+          <span class="frac"><span><small>מנת משכל</small></span><span class="iq-big mono" id="iqOut" style="border:0;padding:0">125</span></span><span>=</span>
+          <span class="frac"><span><small>גיל שכלי</small> <b id="fMA">10</b></span><span><small>גיל כרונולוגי</small> <b id="fCA">8</b></span></span>
+          <span class="ltr">× 100</span>
+        </div>
+        <p class="explain" id="iqExplain"></p>
+        <div class="row">
+          <button class="btn ghost sm" type="button" data-ma="10" data-ca="8">ילד בן 8, גיל שכלי 10</button>
+          <button class="btn ghost sm" type="button" data-ma="6" data-ca="8">ילד בן 8, גיל שכלי 6</button>
+          <button class="btn ghost sm" type="button" data-ma="16" data-ca="40">מבוגר בן 40</button>
+        </div>
+      </div>
+      <div class="panel pad stack">
+        <h3 class="sub-h">מיון: תת־מבחנים בסולם וקסלר למבוגרים (טבלה 9.1)</h3>
+        <p class="muted" style="font-size:.9rem">ב־WAIS-III יש 14 תת־מבחנים מילוליים וביצועיים. לאיזה סוג שייכת כל שאלה?</p>
+        <div class="sorter" id="sortWais"></div>
+      </div>
+    </div>
+    <div class="grid-2e" style="margin-top:20px">
+      <div class="panel pad stack">
+        <h3 class="sub-h">מחוננות: תפיסת ״שלושת המעגלים״ של רנזולי</h3>
+        <p class="muted" style="font-size:.9rem">לפי רנזולי, מנת משכל גבוהה לבדה אינה מספיקה. סמנו אילו מאפיינים יש לתלמידה, וראו אם היא עומדת בהגדרה.</p>
+        <div class="row" id="vennCtl">
+          <label class="toggle"><input type="checkbox" data-ring="0" checked> יכולת מעל הממוצע</label>
+          <label class="toggle"><input type="checkbox" data-ring="1"> יצירתיות</label>
+          <label class="toggle"><input type="checkbox" data-ring="2"> מחויבות למשימה</label>
+        </div>
+        <svg id="venn" viewBox="0 0 360 300" role="img" aria-label="שלושה מעגלים חופפים"></svg>
+        <p class="explain" id="vennOut"></p>
+      </div>
+      <div class="panel pad stack">
+        <h3 class="sub-h">ציוני משכל קיצוניים</h3>
+        <div class="note"><h3>פיגור שכלי</h3><p>שלושה תנאים יחד: מנת משכל של 70–75 או פחות, קשיים ממשיים בשני תחומים או יותר של מיומנויות הסתגלות (תקשורת, השגחה עצמית, מיומנויות חברתיות ועוד), והתסמינים הופיעו לפני גיל 18. הגורמים יכולים להיות תורשתיים (תסמונת דאון, פנילקטונוריה) או סביבתיים. בפנילקטונוריה דיאטה מיוחדת מונעת את רוב הנזק.</p></div>
+        <div class="note"><h3>לקות למידה</h3><p>פער גדול בין מנת המשכל להישגים, כשאין לו הסבר אחר כמו מוטיבציה נמוכה, הוראה בינונית או בעיה גופנית.</p></div>
+        <div class="note"><h3>מחוננות</h3><p>בדרך כלל מנת משכל מעל 130. המחקר של טרמן (1921) עקב אחרי יותר מ־1,500 ילדים מחוננים לאורך עשרות שנים, ומצא שהם הסתגלו טוב יותר מבני גילם, בניגוד למיתוס.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 PSYCHOMETRIC THEORIES -->
+  <section class="lab" id="theories" aria-labelledby="t-h">
+    <div class="lab-head">
+      <span class="lab-tag">עמ׳<b>457–459</b></span>
+      <div>
+        <h2 id="t-h">תיאוריות פסיכומטריות: ספירמן, קאטל וגילפורד</h2>
+        <p>תיאוריות שנבנו מתוך הקשרים הסטטיסטיים בין מבחנים. ניתוח גורמים מחפש מעט גורמים בסיסיים שמסבירים הרבה מדדים.</p>
+      </div>
+    </div>
+    <div class="grid-2e">
+      <div class="panel pad stack">
+        <h3 class="sub-h">ספירמן: הגורם הכללי <span class="ltr">g</span></h3>
+        <p class="muted" style="font-size:.9rem">ספירמן מצא שאנשים שמצליחים במבחן אחד נוטים להצליח גם באחרים. הזיזו את עוצמת <span class="ltr">g</span> וראו איך המתאמים בין חמישה מבחנים משתנים.</p>
+        <div class="big-sl" style="--c:var(--accent)">
+          <div class="top"><label for="slG">עוצמת המשכל הכללי</label><output id="outG">0.70</output></div>
+          <input type="range" id="slG" min="0" max="95" value="70" style="--c:var(--accent)">
+        </div>
+        <svg id="gmat" viewBox="0 0 380 320" role="img" aria-label="מטריצת מתאמים בין חמישה מבחנים"></svg>
+        <p class="explain" id="gOut"></p>
+      </div>
+      <div class="panel pad stack">
+        <h3 class="sub-h">קאטל: משכל נזיל או מגובש?</h3>
+        <p class="muted" style="font-size:.9rem">משכל מגובש הוא הידע שכבר רכשתם. משכל נזיל הוא היכולת לראות יחסים מורכבים ולפתור בעיות חדשות. מיינו את המשימות.</p>
+        <div class="sorter" id="sortCattell"></div>
+      </div>
+    </div>
+    <div class="panel pad stack" style="margin-top:20px">
+      <h3 class="sub-h">גילפורד: מבנה האינטלקט (תרשים 9.4)</h3>
+      <p class="muted" style="font-size:.9rem">כל מטלה שכלית מוגדרת לפי שלושה ממדים: סוג התוכן, סוג התוצר וסוג הפעולה. ⁦5 × 6 × 5 = 150⁩ קוביות. בחרו צירוף, או טענו את אחת הדוגמאות מהספר.</p>
+      <div class="selects">
+        <label>תוכן<select id="gcC"></select></label>
+        <label>תוצר<select id="gcP"></select></label>
+        <label>פעולה<select id="gcO"></select></label>
+      </div>
+      <div class="row">
+        <button class="btn ghost sm" type="button" id="gcEx1">מבחן אוצר מילים</button>
+        <button class="btn ghost sm" type="button" id="gcEx2">לימוד צעדי ריקוד</button>
+      </div>
+      <div class="grid-2" style="align-items:center">
+        <p class="explain" id="gcOut"></p>
+        <div class="scroll-x"><svg id="cube" viewBox="0 0 560 450" role="img" aria-label="קובית מבנה האינטלקט"></svg></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 STERNBERG -->
+  <section class="lab" id="sternberg" aria-labelledby="s-h">
+    <div class="lab-head">
+      <span class="lab-tag">עמ׳<b>460–462</b></span>
+      <div>
+        <h2 id="s-h">משחק התרחישים: שלושת רכיבי המשכל של סטרנברג</h2>
+        <p>בכל תרחיש בחרו את הפתרון הטוב ביותר, ואז זהו איזה רכיב משכל הוא מפעיל. תשעה תרחישים, שלושה לכל רכיב, בסדר אקראי.</p>
+      </div>
+    </div>
+    <div class="game">
+      <div class="panel stage" id="stage" aria-live="polite"></div>
+      <aside class="panel side">
+        <div class="score-row">
+          <div class="score-box"><span>פתרונות מוצלחים</span><b id="scAct">0/0</b></div>
+          <div class="score-box"><span>זיהוי רכיב</span><b id="scTag">0/0</b></div>
+        </div>
+        <svg id="tri" viewBox="-160 -150 320 290" role="img" aria-label="הצלחה לפי רכיב משכל"></svg>
+        <div class="comp" style="--c:var(--an)"><i></i><h3>משכל אנליטי</h3><p>עיבוד מידע ופתרון בעיות: רכיבי רכישת ידע, רכיבי ביצוע, ורכיבים מטה־קוגניטיביים שבוחרים אסטרטגיה ומנטרים את ההתקדמות.</p></div>
+        <div class="comp" style="--c:var(--cr)"><i></i><h3>משכל יצירתי</h3><p>התמודדות עם שני מצבים מנוגדים: בעיות חדשות לגמרי, ומנגד ביצוע אוטומטי של משימות שגרתיות.</p></div>
+        <div class="comp" style="--c:var(--pr)"><i></i><h3>משכל מעשי</h3><p>ניהול ענייני היום־יום: הסתגלות להקשרים חדשים, בחירת הקשרים מתאימים ועיצוב הסביבה לצרכינו.</p></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- 6 GARDNER -->
+  <section class="lab" id="gardner" aria-labelledby="g-h">
+    <div class="lab-head">
+      <span class="lab-tag">עמ׳<b>462–464</b></span>
+      <div>
+        <h2 id="g-h">מכ״ם ריבוי סוגי המשכל של גרדנר</h2>
+        <p>גרדנר טען שמבחן מנת משכל מכסה רק חלק קטן מהיכולות האנושיות, וזיהה שמונה סוגי משכל (טבלה 9.4). דרגו את עצמכם במחוונים או בשאלון, או גררו את הנקודות על המכ״ם. הדירוג מתחת למכ״ם מתעדכן מיד.</p>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="panel pad stack">
+        <div class="seg" role="group" aria-label="אופן הדירוג">
+          <button type="button" id="modeSl" aria-pressed="true">דירוג מהיר</button>
+          <button type="button" id="modeQ" aria-pressed="false">שאלון (16 היגדים)</button>
+        </div>
+        <p class="live-top" id="liveTop" aria-live="polite"></p>
+        <div class="sliders" id="sliders"></div>
+        <div id="questWrap" class="stack" hidden>
+          <p class="qprog" id="qprog"></p>
+          <div class="likert-legend"><span>1 = בכלל לא נכון לגביי</span><span>5 = נכון מאוד</span></div>
+          <div class="quest" id="quest"></div>
+        </div>
+        <div class="row">
+          <button class="btn ghost sm" type="button" id="gRandom">פרופיל לדוגמה אחר</button>
+          <button class="btn ghost sm" type="button" id="gReset">התחלה מאפס</button>
+        </div>
+      </div>
+      <div class="panel g-display">
+        <div class="g-toolbar">
+          <span class="pill ex" id="exPill">פרופיל לדוגמה. שנו ערך כדי להתחיל.</span>
+          <label class="toggle"><input type="checkbox" id="schoolOverlay"> הדגשים טיפוסיים בבית הספר (המחשה)</label>
+        </div>
+        <svg id="radar" viewBox="-250 -185 500 370" role="img" aria-label="תרשים מכ״ם של שמונה סוגי המשכל"></svg>
+        <div class="result" aria-live="polite">
+          <div class="result-h"><h3 id="resTitle">הפרופיל לדוגמה</h3><span class="cite">לחצו על שורה לפרטים</span></div>
+          <p class="result-lead" id="resLead"></p>
+          <div class="rank" id="rank"></div>
+          <div class="detail" id="gDetail"></div>
+        </div>
+      </div>
+    </div>
+    <div class="notes">
+      <div class="note"><h3>תרבות קובעת מה נחשב ״חכם״</h3><p>בחברה המערבית מעריכים בעיקר משכל לוגי־מתמטי ולשוני. באיי קרוליין שבמיקרונזיה נווטים מרחקים ארוכים בלי מפות, בעזרת משכל מרחבי וגופני־קינסתטי. בבאלי משכל מוסיקלי ותיאום תנועה הם חלק מחיי היום־יום.</p></div>
+      <div class="note"><h3>משכל רגשי</h3><p>ארבעה רכיבים: לתפוס ולבטא רגשות בדייקנות, להשתמש ברגשות כדי לסייע לחשיבה, להבין ולנתח רגשות, ולווסת רגשות לטובת צמיחה רגשית ושכלית. מנהלים בעלי משכל רגשי גבוה דיווחו על פחות מצוקה, והממונים דירגו אותם כמנהלים טובים יותר.</p></div>
+      <div class="note"><h3>חשוב לזכור</h3><p>זהו כלי לימוד ולא מבחן תקף. דיווח עצמי מושפע מהדימוי העצמי, ובדיוק לכן מבחן אמיתי צריך מהימנות, תוקף ונורמות. קו ״בית הספר״ במכ״ם הוא הערכה להמחשה ולא נתון מהספר.</p></div>
+    </div>
+  </section>
+
+  <!-- 7 POLITICS -->
+  <section class="lab" id="politics" aria-labelledby="p-h">
+    <div class="lab-head">
+      <span class="lab-tag">עמ׳<b>465–476</b></span>
+      <div>
+        <h2 id="p-h">הפוליטיקה של המשכל: תורשה, סביבה ומבחנים</h2>
+        <p>מבחני משכל שימשו לא פעם כדי לטעון לנחיתות של קבוצות שלמות. שתי הסימולציות כאן מראות למה הטענות האלה לא מחזיקות.</p>
+      </div>
+    </div>
+    <div class="grid-2e">
+      <div class="panel pad stack">
+        <h3 class="sub-h">אומדן תורשתיות: למה הוא לא מסביר הבדלים בין קבוצות</h3>
+        <p class="muted" style="font-size:.9rem">זרעים מאותה שקית נשתלו בשני עציצים. בתוך כל עציץ, ההבדלים בגובה נובעים מהגנים. אבל ההבדל בין העציצים נובע רק מהאדמה. (המחשה של טיעון הספר, לא נתונים.)</p>
+        <svg id="pots" viewBox="0 0 520 300" role="img" aria-label="שני עציצים עם צמחים"></svg>
+        <div class="big-sl" style="--c:var(--pr)">
+          <div class="top"><label for="slSoil">הבדל באיכות האדמה בין העציצים</label><output id="outSoil">60%</output></div>
+          <input type="range" id="slSoil" min="0" max="100" value="60" style="--c:var(--pr)">
+        </div>
+        <label class="toggle"><input type="checkbox" id="waterVar"> השקיה לא אחידה גם בתוך כל עציץ</label>
+        <div class="readouts" id="potRO"></div>
+        <p class="explain" id="potOut"></p>
+      </div>
+      <div class="panel pad stack">
+        <h3 class="sub-h">איום הסטריאוטיפ (תרשים 9.8)</h3>
+        <p class="muted" style="font-size:.9rem">אותו מבחן, ניסוח אחר של מטרתו. בחרו מחקר ושנו את מה שנאמר לנבחנים.</p>
+        <div class="seg" role="group" aria-label="מחקר">
+          <button type="button" data-study="0" aria-pressed="true">סטודנטים שחורים ולבנים</button>
+          <button type="button" data-study="1" aria-pressed="false">נשים וגברים במתמטיקה</button>
+        </div>
+        <div class="seg" role="group" aria-label="מה נאמר לנבחנים" id="frameSeg"></div>
+        <svg id="stbars" viewBox="0 0 440 260" role="img" aria-label="ציוני מבחן לפי קבוצה"></svg>
+        <p class="explain" id="stOut"></p>
+        <p class="cite">הערכים בגרף מקורבים, לפי תרשים 9.8 בספר (Steele &amp; Aronson, 1995; Steele, 1997).</p>
+      </div>
+    </div>
+    <div class="grid-2e" style="margin-top:20px">
+      <div class="panel pad stack">
+        <h3 class="sub-h">התורשתיות של מנת המשכל עולה עם הגיל</h3>
+        <div class="age-steps" id="ageSteps">
+          <button type="button" data-i="0" aria-pressed="false"><b>40%</b><span>גיל 4–6</span></button>
+          <button type="button" data-i="1" aria-pressed="false"><b>60%</b><span>שנות ההתבגרות</span></button>
+          <button type="button" data-i="2" aria-pressed="true"><b>80%</b><span>מבוגרים</span></button>
+        </div>
+        <p class="explain" id="ageOut"></p>
+      </div>
+      <div class="panel pad stack">
+        <h3 class="sub-h">מה ידוע על הסביבה</h3>
+        <div class="note"><h3>מעמד חברתי־כלכלי</h3><p>במחקר על יותר מ־26,000 ילדים, המנבאים הטובים ביותר למנת המשכל בגיל 4 היו המעמד החברתי־כלכלי של המשפחה ורמת ההשכלה של האם. עוני משפיע דרך בריאות, תזונה, הריון, זמן הורים וגישה לספרים.</p></div>
+        <div class="note"><h3>התערבות מוקדמת</h3><p>תוכניות כמו Head Start (1965) ו־Perry High/Scope (1962) שיפרו לא רק את מנת המשכל בגיל 5, אלא גם את הסיכוי לסיים תיכון ואת ההכנסה בגיל 40.</p></div>
+        <div class="note"><h3>תרבות ולמידה</h3><p>סטיבנסון מצא שהורים ומורים אסייתים מדגישים מאמץ, ואילו אמריקאים מדגישים יכולת מולדת. ההבדל בהישגים במתמטיקה קשור גם לתפיסות האלה.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 CREATIVITY -->
+  <section class="lab" id="creativity" aria-labelledby="c-h">
+    <div class="lab-head">
+      <span class="lab-tag">עמ׳<b>477–479</b></span>
+      <div>
+        <h2 id="c-h">יצירתיות</h2>
+        <p>יצירתיות היא היכולת לייצר רעיונות או תוצרים חדשים והולמים. אחת הדרכים למדוד אותה היא חשיבה מסתעפת: כמה פתרונות לא שגרתיים אפשר להעלות לבעיה אחת.</p>
+      </div>
+    </div>
+    <div class="grid-2e">
+      <div class="panel pad stack">
+        <div class="row" style="justify-content:space-between">
+          <h3 class="sub-h">משימה: כל השימושים בלבֵנה</h3>
+          <span class="timer" id="timer">1:30</span>
+        </div>
+        <p class="muted" style="font-size:.9rem">יש לכם 90 שניות. כתבו כל שימוש שעולה בדעתכם ולחצו Enter אחרי כל אחד.</p>
+        <form class="brick-in" id="brickForm" autocomplete="off">
+          <input id="brickInput" type="text" placeholder="למשל: מעצור לדלת" aria-label="שימוש בלבנה" maxlength="60">
+          <button class="btn sm" type="submit" id="brickAdd">הוספה</button>
+        </form>
+        <div class="row"><button class="btn ghost sm" type="button" id="brickStart">התחלת הטיימר</button><button class="btn ghost sm" type="button" id="brickDone">סיום ובדיקה</button></div>
+        <div class="ideas" id="ideas" aria-live="polite"></div>
+        <div class="readouts" id="brickRO"></div>
+        <p class="explain" id="brickOut">כך מנקדים חשיבה מסתעפת: <b>שטף</b> הוא מספר הרעיונות, <b>ייחודיות</b> היא רעיונות שאיש אחר במדגם לא העלה, ו<b>נדירות</b> היא רעיונות שהעלו פחות מ־5% מהמשתתפים.</p>
+      </div>
+      <div class="panel pad stack">
+        <h3 class="sub-h">הקשר בין מנת משכל ליצירתיות</h3>
+        <svg id="thresh" viewBox="0 0 460 260" role="img" aria-label="הקשר בין מנת משכל ליצירתיות"></svg>
+        <p class="explain">עד מנת משכל של כ־120 יש מתאם בין המשכל ליצירתיות. מעל 120 הקשר נחלש או נעלם. כלומר, רמה מסוימת של משכל מאפשרת יצירתיות, אבל לא מבטיחה אותה. (צורת העקומה היא המחשה.)</p>
+        <div class="note"><h3>מה מאפיין יוצרים יוצאי דופן?</h3><p>נטילת סיכונים, הכנה של שנים ארוכות בתחום, ומוטיבציה פנימית. מנת משכל גבוהה במיוחד אינה ברשימה.</p></div>
+        <div class="note"><h3>יצירתיות ושיגעון</h3><p>יש מתאם בין צורות מסוימות של מחלות נפש (כמו הפרעה דו־קוטבית) לבין יצירתיות, אבל קשר סיבתי לא הוכח.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 SOCIETY -->
+  <section class="lab" id="society" aria-labelledby="so-h">
+    <div class="lab-head">
+      <span class="lab-tag">עמ׳<b>480–482</b></span>
+      <div>
+        <h2 id="so-h">הערכה וחברה</h2>
+        <p>מטרת ההערכה היא להחליף רשמים סובייקטיביים במדדים אובייקטיביים. שלוש סוגיות מעוררות מחלוקת. חשבו על כל שאלה, ואז לחצו כדי לראות מה הספר אומר.</p>
+      </div>
+    </div>
+    <div class="flips" id="flips"></div>
+    <blockquote>
+      זימברדו קיבל ציון של 60 בלבד בקורס מבוא לפסיכולוגיה, והתקבל ללימודי תואר שני רק לאחר כמה דחיות. בהמשך התברר שאחד הגורמים לדחייה היה הנחה שגויה לגבי הרקע שלו. הוא הפך לאחד הפסיכולוגים המוכרים בעולם.
+      <footer>על־פי הסיפור האישי שבסוף הפרק. המסר: חשוב לדעת מתי להאמין בעצמכם יותר מאשר בתוצאות המבחנים.</footer>
+    </blockquote>
+  </section>
+
+  <!-- 10 QUIZ -->
   <section class="lab" id="quiz" aria-labelledby="q-h">
     <div class="lab-head">
-      <span class="lab-tag">תרגול</span>
+      <span class="lab-tag">עמ׳<b>485–486</b></span>
       <div>
-        <h2 id="q-h">מבחן קצר לתרגול עצמי</h2>
-        <p>שש שאלות על מושגי המפתח של הפרק. אחרי כל תשובה מופיע הסבר.</p>
+        <h2 id="q-h">מבחן לתרגול עצמי</h2>
+        <p>18 שאלות על כל הפרק, בסדר הנושאים. אחרי כל תשובה מופיע הסבר, ובסוף רשימה של הנושאים שכדאי לחזור אליהם.</p>
       </div>
     </div>
     <div class="panel quiz" id="quizBox" aria-live="polite"></div>
   </section>
 
-  <footer>
+  <footer class="site-foot">
     <span>מבוסס על פרק 9, ״משכל והערכת משכל״, בספר מבוא לפסיכולוגיה (Gerrig &amp; Zimbardo, Psychology and Life), מהדורה עברית של האוניברסיטה הפתוחה.</span>
     <span>כלי לימוד בלבד. אינו מבחן פסיכולוגי.</span>
   </footer>
@@ -459,352 +803,158 @@ const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
 const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 const NS="http://www.w3.org/2000/svg";
 const el=(tag,attrs={},parent)=>{const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e};
+const txt=(parent,attrs,t)=>{const e=el("text",attrs,parent);e.textContent=t;return e};
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 function gauss(rng){let u=0,v=0;while(!u)u=rng();while(!v)v=rng();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
 function erf(x){const s=Math.sign(x);x=Math.abs(x);const t=1/(1+0.3275911*x);const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return s*y}
 const ncdf=z=>0.5*(1+erf(z/Math.SQRT2));
 const npdf=z=>Math.exp(-z*z/2)/Math.sqrt(2*Math.PI);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const letter=n=>"אבגדה"[n];
+const setP=(inp)=>inp.style.setProperty("--p",((inp.value-inp.min)/(inp.max-inp.min)*100)+"%");
+const MONO="IBM Plex Mono, monospace";
 
 /* ---------- theme ---------- */
 const root=document.documentElement;
 const savedTheme=store.get("ch9-theme",null);
 if(savedTheme)root.setAttribute("data-theme",savedTheme);
-const listeners=[];
-$("#themeBtn").addEventListener("click",()=>{
-  const dark=root.getAttribute("data-theme")?root.getAttribute("data-theme")==="dark":matchMedia("(prefers-color-scheme: dark)").matches;
-  const next=dark?"light":"dark";root.setAttribute("data-theme",next);store.set("ch9-theme",next);listeners.forEach(f=>f());
-});
-matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>listeners.forEach(f=>f()));
+const themeListeners=[];
+const isDark=()=>root.getAttribute("data-theme")?root.getAttribute("data-theme")==="dark":matchMedia("(prefers-color-scheme: dark)").matches;
+$("#themeBtn").addEventListener("click",()=>{const next=isDark()?"light":"dark";root.setAttribute("data-theme",next);store.set("ch9-theme",next);themeListeners.forEach(f=>f())});
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>themeListeners.forEach(f=>f()));
 
-/* ---------- nav highlight ---------- */
-const navLinks=$$(".nav-links a");
-const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){navLinks.forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+e.target.id))}}),{rootMargin:"-40% 0px -55% 0px"});
+/* ---------- chapter map + progress ---------- */
+const SECTIONS=[
+ ["history","היסטוריה","תולדות ההערכה","441–443"],
+ ["assessment","מהימנות ותוקף","מהימנות, תוקף ותקנון","443–448"],
+ ["iq","מנת משכל","מבחני מנת משכל","448–456"],
+ ["theories","תיאוריות","ספירמן, קאטל, גילפורד","457–459"],
+ ["sternberg","סטרנברג","שלושת רכיבי המשכל","460–462"],
+ ["gardner","גרדנר","ריבוי סוגי המשכל","462–464"],
+ ["politics","תורשה וסביבה","הפוליטיקה של המשכל","465–476"],
+ ["creativity","יצירתיות","יצירתיות","477–479"],
+ ["society","הערכה וחברה","הערכה וחברה","480–482"],
+ ["quiz","תרגול","מבחן לתרגול עצמי","485–486"]];
+let done=store.get("ch9-done",{});
+$("#navLinks").innerHTML=SECTIONS.map(([id,short])=>`<a href="#${id}" data-id="${id}">${short}</a>`).join("");
+$("#map").innerHTML=SECTIONS.map(([id,,long,pg])=>`<a href="#${id}" data-id="${id}"><span class="pg">עמ׳ ${pg}</span><b>${long}</b><span class="ok" aria-hidden="true">✓</span></a>`).join("");
+function renderProgress(){
+  const n=SECTIONS.filter(s=>done[s[0]]).length,N=SECTIONS.length;
+  $$("#navLinks a,#map a").forEach(a=>{a.classList.toggle("done",!!done[a.dataset.id]);if(a.closest("#map"))a.setAttribute("aria-label",a.textContent.replace("✓","")+(done[a.dataset.id]?" (הושלם)":""))});
+  const r=11,c=2*Math.PI*r;
+  $("#prog").innerHTML=`<svg viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="${r}" fill="none" stroke="var(--line)" stroke-width="3"/><circle cx="14" cy="14" r="${r}" fill="none" stroke="var(--good)" stroke-width="3" stroke-linecap="round" stroke-dasharray="${c*n/N} ${c}" transform="rotate(-90 14 14)"/></svg><span>${n}/${N}</span>`;
+  $("#prog").setAttribute("aria-label",`הושלמו ${n} מתוך ${N} נושאים`);
+  $("#mapCount").textContent=n?`השלמתם ${n} מתוך ${N} נושאים`:"נקודה ירוקה מסמנת נושא שהשלמתם בו פעילות";
+}
+function markDone(id){if(done[id])return;done[id]=true;store.set("ch9-done",done);renderProgress()}
+renderProgress();
+const navLinks=$$("#navLinks a");
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){navLinks.forEach(a=>{const on=a.dataset.id===e.target.id;a.classList.toggle("on",on);if(on){const c=a.parentElement.getBoundingClientRect(),r=a.getBoundingClientRect();if(r.left<c.left||r.right>c.right)a.scrollIntoView({block:"nearest",inline:"center",behavior:"auto"})}})}}),{rootMargin:"-40% 0px -55% 0px"});
 $$(".lab").forEach(s=>io.observe(s));
 
 /* =========================================================
-   HERO: IQ bell curve
+   HERO bell
    ========================================================= */
+function iqCategory(iq){return iq<70?"טווח הפיגור השכלי*":iq<80?"גבולי":iq<90?"נורמלי נמוך":iq<=110?"נורמלי":iq<=120?"נורמלי גבוה":iq<=130?"גבוה":"גבוה מאוד"}
 (function bell(){
-  const svg=$("#bell"),W=520,H=250,L=20,R=500,B=210,T=20;
+  const svg=$("#bell"),W=520,L=20,R=500,B=210,T=20;
   const x=iq=>L+(iq-40)/(160-40)*(R-L), y=d=>B-d/npdf(0)*(B-T-10);
   function pathFor(a,b){let d=`M${x(a)},${B}`;for(let i=a;i<=b;i+=1)d+=` L${x(i).toFixed(1)},${y(npdf((i-100)/15)).toFixed(1)}`;return d+` L${x(b)},${B} Z`}
-  const bands=[[40,55,.06],[55,70,.1],[70,85,.18],[85,115,.3],[115,130,.18],[130,145,.1],[145,160,.06]];
   const g=el("g",{},svg);
-  bands.forEach(([a,b,o])=>el("path",{d:pathFor(a,b),fill:"var(--accent)","fill-opacity":o},g));
+  [[40,55,.06],[55,70,.1],[70,85,.18],[85,115,.3],[115,130,.18],[130,145,.1],[145,160,.06]].forEach(([a,b,o])=>el("path",{d:pathFor(a,b),fill:"var(--accent)","fill-opacity":o},g));
   el("path",{d:pathFor(40,160).replace(/ Z$/,""),fill:"none",stroke:"var(--accent)","stroke-width":2.2},g);
-  const pct=[[62.5,"2%"],[77.5,"14%"],[92.5,"34%"],[107.5,"34%"],[122.5,"14%"],[137.5,"2%"]];
-  pct.forEach(([iq,t])=>{const tx=el("text",{x:x(iq),y:B-8,"text-anchor":"middle","font-size":12,fill:"var(--ink)","font-family":"IBM Plex Mono, monospace","fill-opacity":.75},g);tx.textContent=t});
+  [[62.5,"2%"],[77.5,"14%"],[92.5,"34%"],[107.5,"34%"],[122.5,"14%"],[137.5,"2%"]].forEach(([iq,t])=>txt(g,{x:x(iq),y:B-8,"text-anchor":"middle","font-size":12,fill:"var(--ink)","font-family":MONO,"fill-opacity":.75},t));
   el("line",{x1:L,x2:R,y1:B,y2:B,stroke:"var(--line)","stroke-width":1.5},g);
-  [55,70,85,100,115,130,145].forEach(v=>{el("line",{x1:x(v),x2:x(v),y1:B,y2:B+5,stroke:"var(--muted)"},g);const t=el("text",{x:x(v),y:B+20,"text-anchor":"middle","font-size":12,fill:"var(--muted)","font-family":"IBM Plex Mono, monospace"},g);t.textContent=v});
+  [55,70,85,100,115,130,145].forEach(v=>{el("line",{x1:x(v),x2:x(v),y1:B,y2:B+5,stroke:"var(--muted)"},g);txt(g,{x:x(v),y:B+20,"text-anchor":"middle","font-size":12,fill:"var(--muted)","font-family":MONO},v)});
   const shade=el("path",{fill:"var(--mark)","fill-opacity":.35},svg);
   const line=el("line",{y1:T,y2:B,stroke:"var(--ink)","stroke-width":1.5,"stroke-dasharray":"3 3"},svg);
   const dot=el("circle",{r:7,fill:"var(--mark)",stroke:"var(--ink)","stroke-width":2},svg);
   let iq=115;
-  function set(v){iq=Math.max(45,Math.min(155,Math.round(v)));const z=(iq-100)/15;
+  function set(v){iq=clamp(Math.round(v),45,155);const z=(iq-100)/15;
     shade.setAttribute("d",pathFor(40,iq));line.setAttribute("x1",x(iq));line.setAttribute("x2",x(iq));
     dot.setAttribute("cx",x(iq));dot.setAttribute("cy",y(npdf(z)));
-    $("#bellIQ").textContent=iq;const p=ncdf(z)*100;$("#bellPct").textContent=(p<1?p.toFixed(1):p>99?p.toFixed(1):Math.round(p))+"%";}
+    $("#bellIQ").textContent=iq;const p=ncdf(z)*100;$("#bellPct").textContent=(p<1||p>99?p.toFixed(1):Math.round(p))+"%";
+    $("#bellCat").textContent=iqCategory(iq);$("#bellCat").title=iq<70?"* אבחנה של פיגור שכלי דורשת גם קשיים בהסתגלות והופעה לפני גיל 18":"";
+    svg.setAttribute("aria-valuenow",iq);svg.setAttribute("aria-valuetext",`${iq}, ${iqCategory(iq)}`)}
   set(iq);
   let drag=false;
-  const toIQ=e=>{const r=svg.getBoundingClientRect();const px=(e.clientX-r.left)/r.width*W;return 40+(px-L)/(R-L)*120};
+  const toIQ=e=>{const r=svg.getBoundingClientRect();return 40+((e.clientX-r.left)/r.width*W-L)/(R-L)*120};
   svg.addEventListener("pointerdown",e=>{drag=true;svg.setPointerCapture(e.pointerId);set(toIQ(e))});
   svg.addEventListener("pointermove",e=>{if(drag||e.pointerType==="mouse")set(toIQ(e))});
-  svg.addEventListener("pointerup",()=>drag=false);
+  svg.addEventListener("pointerup",()=>drag=false);svg.addEventListener("pointercancel",()=>drag=false);
   svg.setAttribute("tabindex","0");
-  svg.addEventListener("keydown",e=>{if(e.key==="ArrowLeft"){set(iq-1);e.preventDefault()}if(e.key==="ArrowRight"){set(iq+1);e.preventDefault()}});
+  svg.addEventListener("keydown",e=>{const k={ArrowLeft:-1,ArrowDown:-1,ArrowRight:1,ArrowUp:1}[e.key];if(k){set(iq+k);e.preventDefault()}});
 })();
 
 /* =========================================================
-   LAB A: Gardner radar
+   1. HISTORY timeline
    ========================================================= */
-const INT=[
- {k:"log",n:"לוגי־מתמטי",c:"#2F64B0",end:"מדען, מתמטיקאי",core:"רגישות לתבניות הגיוניות או מספריות והיכולת להבחין בהן; יכולת לעסוק בשרשראות ארוכות של היסק.",
-   q:["אני נהנה/ית לפתור חידות היגיון ובעיות מספריות.","כשמשהו לא עובד, אני מחפש/ת את הסיבה צעד אחר צעד."]},
- {k:"lin",n:"לשוני",c:"#8A4FBF",end:"משורר, עיתונאי",core:"רגישות לצלילי מילים, למקצב שלהן ולמשמעותן; רגישות לפונקציות השונות של שפה.",
-   q:["קל לי להסביר רעיון מסובך במילים פשוטות.","אני שם/ה לב לבחירת מילים ולניסוח של אחרים."]},
- {k:"nat",n:"נטורליסטי",c:"#3D8B47",end:"ביולוג, איש איכות הסביבה",core:"רגישות להבדלים בין מגוון המינים; תקשורת טובה עם יצורים חיים.",
-   q:["אני מזהה בקלות סוגי צמחים, ציפורים או בעלי חיים.","בטבע אני מרגיש/ה בבית ושם לב לפרטים קטנים."]},
- {k:"mus",n:"מוסיקלי",c:"#C0407A",end:"מלחין, כנר",core:"יכולת להפיק ולהעריך קצב, גובה צליל וגוון קול; הערכת צורות של הבעה מוסיקלית.",
-   q:["אני קולט/ת מנגינה אחרי שמיעה אחת או שתיים.","אני שומע/ת מיד כשמישהו שר או מנגן לא בדיוק."]},
- {k:"spa",n:"מרחבי",c:"#D9822B",end:"נווט, פסל",core:"יכולת לתפוס את העולם החזותי־מרחבי בדייקנות ולערוך שינויים בתפיסות הראשוניות.",
-   q:["אני מתמצא/ת בקלות במקום חדש גם בלי מפה.","קל לי לדמיין איך חפץ ייראה אם יסובבו אותו."]},
- {k:"bod",n:"גופני־קינסתטי",c:"#0E7C86",end:"רקדן, אתלט",core:"יכולת לשלוט בתנועות הגוף ולטפל בעצמים במיומנות.",
-   q:["אני לומד/ת תנועה חדשה (ריקוד, ספורט) מהר.","אני חושב/ת טוב יותר כשאני בתנועה או עושה משהו בידיים."]},
- {k:"inter",n:"בין־אישי",c:"#B5483C",end:"מטפל, איש מכירות",core:"יכולת להבין מצבי רוח, מזג, מוטיבציה ותשוקה של אנשים אחרים ולהגיב עליהם כראוי.",
-   q:["אנשים פונים אליי כשהם צריכים עצה או אוזן קשבת.","אני מרגיש/ה מהר כשמשהו לא בסדר אצל מישהו."]},
- {k:"intra",n:"תוך־אישי",c:"#5B6BA8",end:"אדם בעל מודעות עצמית מדויקת",core:"גישה לרגשות העצמי והיכולת להבחין ביניהם ולהיעזר בהם להכוונת ההתנהגות; הכרת הכוחות, החולשות והתשוקות של עצמך.",
-   q:["אני יודע/ת בדיוק מה מניע אותי ולמה.","אני מזהה את החוזקות והחולשות שלי בלי לייפות."]}
-];
-const SCHOOL=[9,9,3,2.5,3.5,2.5,3,3]; // relative emphasis in typical Western schooling (illustrative)
-const N=INT.length;
-let gVals=store.get("ch9-gardner",null)||[7,6,4,5,7,5,8,6];
-let gLik=store.get("ch9-likert",null)||INT.map(()=>[0,0]);
-let disp=gVals.slice(), focusIdx=6;
-const RAD=125, ang=i=>-Math.PI/2+i*2*Math.PI/N, pt=(i,v)=>[Math.cos(ang(i))*RAD*v/10,Math.sin(ang(i))*RAD*v/10];
-
-const radar=$("#radar");
-const rings=el("g",{},radar);
-[2,4,6,8,10].forEach(v=>{let d="";for(let i=0;i<N;i++){const[x,y]=pt(i,v);d+=(i?"L":"M")+x.toFixed(1)+","+y.toFixed(1)}el("path",{d:d+"Z",fill:v===10?"var(--surface-2)":"none",stroke:"var(--line)","stroke-width":1},rings)});
-for(let i=0;i<N;i++){const[x,y]=pt(i,10);el("line",{x1:0,y1:0,x2:x,y2:y,stroke:"var(--line)"},rings)}
-[2,4,6,8,10].forEach(v=>{const a=-Math.PI/2+Math.PI/N;const t=el("text",{x:Math.cos(a)*RAD*v/10,y:Math.sin(a)*RAD*v/10+3,"text-anchor":"middle","font-size":10,fill:"var(--muted)","font-family":"IBM Plex Mono, monospace",stroke:"var(--surface-2)","stroke-width":3,"paint-order":"stroke"},rings);t.textContent=v});
-const schoolPath=el("path",{fill:"var(--muted)","fill-opacity":.08,stroke:"var(--muted)","stroke-width":2,"stroke-dasharray":"6 5",visibility:"hidden"},radar);
-const shape=el("path",{fill:"var(--accent)","fill-opacity":.2,stroke:"var(--accent)","stroke-width":2.5,"stroke-linejoin":"round"},radar);
-const dots=[],labels=[];
-INT.forEach((it,i)=>{
-  const d=el("circle",{r:6,fill:it.c,stroke:"var(--surface)","stroke-width":2,style:"cursor:grab"},radar);dots.push(d);
-  const[lx,ly]=pt(i,12.6);const c=Math.cos(ang(i));
-  const g=el("g",{class:"radar-axis-label",tabindex:0,role:"button","aria-label":it.n},radar);
-  const t=el("text",{x:lx,y:ly+4,"text-anchor":Math.abs(c)<.2?"middle":c>0?"start":"end","font-size":14,"font-weight":600,fill:"var(--ink)"},g);t.textContent=it.n;
-  const v=el("text",{x:lx,y:ly+20,"text-anchor":Math.abs(c)<.2?"middle":c>0?"start":"end","font-size":12,fill:it.c,"font-family":"IBM Plex Mono, monospace","font-weight":600},g);
-  labels.push({g,t,v});
-  g.addEventListener("click",()=>setFocus(i));g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setFocus(i)}});
-  // drag dots directly on the radar
-  let dragging=false;
-  d.addEventListener("pointerdown",e=>{dragging=true;d.setPointerCapture(e.pointerId);setFocus(i)});
-  d.addEventListener("pointermove",e=>{if(!dragging)return;const m=radar.getScreenCTM().inverse();const p=new DOMPoint(e.clientX,e.clientY).matrixTransform(m);
-    const proj=(p.x*Math.cos(ang(i))+p.y*Math.sin(ang(i)))/RAD*10;setVal(i,Math.round(Math.max(0,Math.min(10,proj))))});
-  d.addEventListener("pointerup",()=>dragging=false);
-});
-schoolPath.setAttribute("d",SCHOOL.map((v,i)=>{const[x,y]=pt(i,v);return(i?"L":"M")+x+","+y}).join("")+"Z");
-
-// sliders
-const slWrap=$("#sliders");
-INT.forEach((it,i)=>{
-  const d=document.createElement("div");d.className="sl";d.style.setProperty("--c",it.c);
-  d.innerHTML=`<label for="g-${it.k}"><i></i>${it.n}</label><output id="go-${it.k}">${gVals[i]}</output><input type="range" id="g-${it.k}" min="0" max="10" step="1" value="${gVals[i]}" aria-label="${it.n}">`;
-  slWrap.appendChild(d);
-  const inp=$("input",d);inp.style.setProperty("--c",it.c);
-  inp.addEventListener("input",()=>setVal(i,+inp.value));
-  inp.addEventListener("focus",()=>setFocus(i));
-});
-// questionnaire
-const qWrap=$("#quest");
-const qOrder=[];INT.forEach((it,i)=>it.q.forEach((s,j)=>qOrder.push([i,j])));
-// interleave so the same intelligence is not adjacent
-qOrder.sort((a,b)=>a[1]-b[1]||((a[0]*3)%8)-((b[0]*3)%8));
-qOrder.forEach(([i,j])=>{
-  const it=INT[i];const d=document.createElement("div");d.className="q-item";d.style.setProperty("--c",it.c);
-  d.innerHTML=`<p><small>${it.n}</small>${it.q[j]}</p><div class="likert" role="group" aria-label="${it.q[j]}">${[1,2,3,4,5].map(n=>`<button type="button" data-n="${n}" aria-pressed="${gLik[i][j]===n}">${n}</button>`).join("")}</div>`;
-  qWrap.appendChild(d);
-  $$("button",d).forEach(b=>b.addEventListener("click",()=>{
-    gLik[i][j]=+b.dataset.n;$$("button",d).forEach(x=>x.setAttribute("aria-pressed",x===b));store.set("ch9-likert",gLik);
-    const [a,c]=gLik[i];const filled=[a,c].filter(Boolean);const avg=filled.reduce((s,v)=>s+v,0)/filled.length;
-    setVal(i,Math.round((avg-1)/4*10));setFocus(i);
-  }));
-});
-$("#modeSl").addEventListener("click",()=>{$("#modeSl").setAttribute("aria-pressed",true);$("#modeQ").setAttribute("aria-pressed",false);slWrap.hidden=false;$("#questWrap").hidden=true});
-$("#modeQ").addEventListener("click",()=>{$("#modeQ").setAttribute("aria-pressed",true);$("#modeSl").setAttribute("aria-pressed",false);slWrap.hidden=true;$("#questWrap").hidden=false});
-$("#gRandom").addEventListener("click",()=>{const profiles=[[4,9,3,8,5,4,8,9],[9,5,6,3,9,4,3,5],[3,4,8,6,7,10,6,5],[6,7,5,9,6,7,9,7]];const p=profiles[Math.floor(Math.random()*profiles.length)];p.forEach((v,i)=>setVal(i,v,true));renderG()});
-$("#gReset").addEventListener("click",()=>{gLik=INT.map(()=>[0,0]);store.set("ch9-likert",gLik);$$(".likert button").forEach(b=>b.setAttribute("aria-pressed",false));INT.forEach((_,i)=>setVal(i,5,true));renderG()});
-$("#schoolOverlay").addEventListener("change",e=>schoolPath.setAttribute("visibility",e.target.checked?"visible":"hidden"));
-
-function setVal(i,v,silent){gVals[i]=v;const inp=$("#g-"+INT[i].k);inp.value=v;$("#go-"+INT[i].k).textContent=v;inp.style.setProperty("--p",(v*10)+"%");store.set("ch9-gardner",gVals);if(!silent)renderG();kick()}
-function setFocus(i){focusIdx=i;$$(".sl").forEach((s,j)=>s.classList.toggle("hl",j===i));renderG()}
-function renderG(){
-  const it=INT[focusIdx];
-  const info=$("#gInfo");info.style.setProperty("--c",it.c);
-  info.innerHTML=`<div class="big">${it.n}<div class="mono" style="font-size:1rem;color:var(--muted)">${gVals[focusIdx]}/10</div></div><p class="core">${it.core}</p><p class="end">מצב סופי מייצג: <b>${it.end}</b></p>`;
-  const order=gVals.map((v,i)=>[v,i]).sort((a,b)=>b[0]-a[0]);
-  $("#top2").innerHTML=`<span class="pill" style="background:transparent;border:0;padding-inline:0">החזקים שלכם:</span>`+order.slice(0,2).map(([v,i])=>`<span class="pill" style="--c:${INT[i].c}"><i></i>${INT[i].n}</span>`).join("");
-  labels.forEach((l,i)=>{l.v.textContent=gVals[i];l.t.setAttribute("fill",i===focusIdx?INT[i].c:"var(--ink)")});
-  INT.forEach((_,i)=>$("#g-"+INT[i].k).style.setProperty("--p",(gVals[i]*10)+"%"));
+const TL=[
+ {y:"לפני 4,000 שנה",n:"סין העתיקה",t:"בחינות לפקידים",p:"סין השתמשה בתוכנית משוכללת לבחינת פקידים. כל שלוש שנים נדרשו הפקידים להוכיח את כישוריהם בבחינה בעל־פה."},
+ {y:"לפני 2,000 שנה",n:"שושלת האן",t:"מבחנים בכתב",p:"בשירות המדינה בסין השתמשו במבחנים כתובים שבדקו כישורים במשפט, בצבא, בחקלאות ובגאוגרפיה."},
+ {y:"1368–1644",n:"שושלת מינג",t:"מיון בשלושה שלבים",p:"בחינות מקומיות; ארבעה אחוזים עברו לבחינה של תשעה ימים ולילות בכתבים הקלאסיים; חמישה אחוזים מהם נבחנו בבירה. במאה ה־19 דיפלומטים בריטים העתיקו את השיטה, ואחריהם גם שירות המדינה האמריקאי."},
+ {y:"1869",n:"פרנסיס גלטון",t:"״התבונה התורשתית״",p:"גלטון ניסח ארבעה עקרונות יסוד להערכת משכל שהוכחו כבני־קיימא. מנגד, הוא היה אבי תנועת האאוגניקה, שביקשה ״לשפר״ את המין האנושי באמצעות רבייה סלקטיבית.",chips:["הבדלים במשכל ניתנים לכימות","הציונים יוצרים עקומת פעמון","אפשר למדוד משכל במבחנים אובייקטיביים","מידת הקשר בין ציונים נמדדת במתאם"]},
+ {y:"1905",n:"בינה וסימון",t:"מבחן המשכל הראשון",p:"אלפרד בינה נענה לבקשת משרד החינוך הצרפתי לזהות ילדים שזקוקים לעזרה. הוא בנה מבחן של בעיות מותאמות גיל, והגדיר את הגיל השכלי: הגיל שבו ילדים רגילים מגיעים בממוצע לציון מסוים."},
+ {y:"1916",n:"לואיס טרמן",t:"סולם סטנפורד־בינה",p:"טרמן התאים את המבחן לתלמידים אמריקאים, תִקנן את אופן העברתו ופיתח נורמות לכל גיל. הוא אימץ את מושג מנת המשכל (שטרן, 1914): גיל שכלי חלקי גיל כרונולוגי, כפול 100."},
+ {y:"1917–1924",n:"מבחנים צבאיים",t:"מיון המוני והגירה",p:"במלחמת העולם הראשונה נבחנו יותר מ־1.7 מיליון מגויסים. הנרי גודרד בחן מהגרים באליס איילנד, וב־1924 נחקק חוק הגבלת ההגירה. ״הנחותים״ לכאורה פשוט לא הכירו את השפה והתרבות של המבחן."},
+ {y:"1921",n:"מחקר המחוננים",t:"טרמן עוקב אחרי 1,500 ילדים",p:"מחקר אורך על ילדים בעשירון העליון. בניגוד למיתוס, הם הסתגלו טוב יותר מבני גילם, ורובם הצליחו מאוד בחייהם."},
+ {y:"1939",n:"דייוויד וקסלר",t:"וקסלר־בלוויו ו־WAIS",p:"וקסלר שילב תת־מבחנים ביצועיים לצד המילוליים, כדי למדוד גם אנשים עם יכולת מילולית מוגבלת. ב־1955 הפך המבחן לסולם וקסלר למבוגרים (WAIS). בגרסה השלישית יש 14 תת־מבחנים, ולילדים יש WISC ו־WPPSI."},
+ {y:"1995",n:"סטיל וארונסון",t:"איום הסטריאוטיפ",p:"אותו מבחן, מטרה מוצהרת אחרת, תוצאות אחרות. המחקר הראה שהקשר המבחן עצמו יכול לייצר הבדלים בין קבוצות."}];
+let tlSeen=new Set();
+$("#tl").innerHTML=TL.map((d,i)=>`<button type="button" data-i="${i}" aria-pressed="false"><span class="dot"></span><span class="yr">${d.y}</span><span class="nm">${d.n}</span></button>`).join("");
+function showTL(i){const d=TL[i];tlSeen.add(i);
+  $$("#tl button").forEach((b,j)=>{b.setAttribute("aria-pressed",j===i);b.classList.toggle("seen",tlSeen.has(j))});
+  $("#tlCard").innerHTML=`<span class="y">${d.y}</span><p class="eyebrow">${d.n}</p><h3>${d.t}</h3><p>${d.p}</p>${d.chips?`<div class="chips">${d.chips.map((c,k)=>`<span class="chip"><b>${k+1}</b> ${c}</span>`).join("")}</div>`:""}
+   <div class="row" style="grid-column:1/-1;justify-content:space-between;margin-top:6px"><span class="cite">תחנה ${i+1} מתוך ${TL.length}</span><span class="row">${i>0?`<button class="btn ghost sm" type="button" data-go="${i-1}">הקודמת</button>`:""}${i<TL.length-1?`<button class="btn sm" type="button" data-go="${i+1}">התחנה הבאה</button>`:""}</span></div>`;
+  $$("#tlCard [data-go]").forEach(b=>b.addEventListener("click",()=>showTL(+b.dataset.go)));
+  if(tlSeen.size>=5)markDone("history");
 }
-let raf=0;
-function kick(){if(!raf)raf=requestAnimationFrame(tick)}
-function tick(){raf=0;let moving=false;
-  for(let i=0;i<N;i++){const d=gVals[i]-disp[i];if(Math.abs(d)>.01){disp[i]+=reduce?d:d*.18;moving=true}else disp[i]=gVals[i]}
-  let p="";for(let i=0;i<N;i++){const[x,y]=pt(i,disp[i]);p+=(i?"L":"M")+x.toFixed(2)+","+y.toFixed(2);dots[i].setAttribute("cx",x);dots[i].setAttribute("cy",y)}
-  shape.setAttribute("d",p+"Z");if(moving)kick()}
-renderG();setFocus(focusIdx);kick();
+$$("#tl button").forEach(b=>b.addEventListener("click",()=>showTL(+b.dataset.i)));
+showTL(0);
 
 /* =========================================================
-   LAB B: Sternberg scenario game
-   ========================================================= */
-const K={A:{n:"אנליטי",c:"var(--an)"},C:{n:"יצירתי",c:"var(--cr)"},P:{n:"מעשי",c:"var(--pr)"}};
-const SC=[
- {t:"שתי חבילות סלולר",type:"A",
-  text:"חבילה א: 49 ₪ לחודש כולל 20GB. חבילה ב: 29 ₪ לחודש כולל 5GB, ועוד 5 ₪ לכל GB נוסף. בחודש רגיל אתם צורכים 9GB, ובחודשי חופשה עד 15GB.",
-  opts:[
-   {t:"לבדוק כמה צרכתם בחודשים האחרונים ולחשב את העלות של כל חבילה לפי הצריכה בפועל.",k:"A",ok:true,why:"בחודש רגיל שתי החבילות עולות 49 ₪, אבל בחודש חופשה חבילה ב עולה 79 ₪. חבילה א משתלמת."},
-   {t:"לשאול חבר איזו חבילה הוא לקח ולעשות אותו דבר.",k:"P",why:"פתרון מהיר, אבל הצריכה של החבר שונה משלכם."},
-   {t:"להציע לבן משפחה לפתוח יחד חבילה משפחתית ולחלק את הנפח.",k:"C",why:"רעיון מקורי, אבל הוא לא עונה על השאלה שלפניכם: איזו משתי החבילות זולה יותר."}],
-  lesson:"פירקתם את הבעיה, השוויתם נתונים והערכתם תוצאות. אלה רכיבי ביצוע של משכל אנליטי."},
- {t:"האנגרמה התקועה",type:"A",
-  text:"אתם פותרים אנגרמות באנגלית, כמו בתרגיל של סטרנברג. את <code>T-R-H-O-S</code> פתרתם מהר (SHORT), אבל על <code>T-N-K-H-G-I</code> אתם תקועים כבר חמש דקות.",
-  opts:[
-   {t:"להמשיך לנסות מילים שמתחילות ב־TH, כי ככה מתחילות הרבה מילים באנגלית.",k:"A",why:"זו בדיוק המלכודת שסטרנברג מתאר: אסטרטגיה טובה בדרך כלל, שנכשלת כאן."},
-   {t:"לעצור ולהחליף אסטרטגיה: לבדוק צירופים פחות שכיחים בתחילת מילה, כמו KN.",k:"A",ok:true,why:"KNIGHT. הבחירה באסטרטגיה ומעקב אחר ההצלחה שלה הם רכיבים מטה־קוגניטיביים."},
-   {t:"לדלג ולחפש את התשובה בסוף הפרק.",k:"P",why:"זה יפתור את הדף, אבל לא את הבעיה."}],
-  lesson:"הרכיבים המטה־קוגניטיביים בוחרים אסטרטגיה ומנטרים את ההתקדמות. כשהאסטרטגיה הרגילה נכשלת, הם אלה שמחליפים אותה."},
- {t:"מסיבת הפתעה בלי מקום",type:"C",
-  text:"שעתיים לפני מסיבת ההפתעה לחברה הכי טובה שלכם, המסעדה מבטלת את ההזמנה. חמישה־עשר אורחים כבר בדרך, וכל המקומות באזור מלאים.",
-  opts:[
-   {t:"להתקשר לעשר מסעדות ברצף ולקוות שתתפנה טבלה.",k:"P",why:"ניסיון סביר, אבל כבר ידוע שהכול מלא."},
-   {t:"להפוך את הביטול לחלק מההפתעה: פיקניק לילי בפארק הקרוב, משלוח אוכל, שמיכות ופנסים.",k:"C",ok:true,why:"מצב חדש לגמרי דורש פתרון חדש. זה משכל יצירתי."},
-   {t:"לבטל ולדחות את המסיבה לשבוע הבא.",k:"A",why:"שקלתם את המצב, אבל ויתרתם על האירוע."}],
-  lesson:"משכל יצירתי הוא היכולת להתמודד עם בעיות חדשות: למצוא דרך כשהמסלולים המוכרים חסומים."},
- {t:"שבוע ראשון עם מערכת חדשה",type:"C",
-  text:"התחלתם עבודה חדשה עם תוכנה מסובכת. אחרי שבוע אתם עדיין מבזבזים כשעה ביום על אותן פעולות שגרתיות, ואין לכם פנאי לבעיות האמיתיות.",
-  opts:[
-   {t:"להכין דף קיצורים ותבנית עבודה קבועה, ולתרגל עד שהפעולות נעשות אוטומטיות.",k:"C",ok:true,why:"הפיכת משימות שגרתיות לאוטומטיות מפנה קשב לבעיות חדשות."},
-   {t:"לבקש מעמית ותיק שיעשה את הפעולות האלה במקומכם.",k:"P",why:"עובד היום, אבל מחר תצטרכו אותו שוב."},
-   {t:"להמשיך כרגיל. בעוד חודש זה יסתדר מעצמו.",k:"A",why:"אולי, אבל בינתיים אתם משלמים שעה ביום."}],
-  lesson:"מפתיע? לפי סטרנברג, משכל יצירתי כולל גם את הצד ההפוך לחדשנות: ביצוע אוטומטי של משימות מוכרות, כדי שהמשאבים יתפנו לחדש."},
- {t:"שותפים רועשים בתקופת מבחנים",type:"P",all:true,
-  text:"השותפים בדירה מארחים חברים בדיוק בשעות שבהן אתם לומדים למבחן. כל אחד מהפתרונות כאן סביר. בחרו את מה שהייתם עושים.",
-  opts:[
-   {t:"ללמוד בשעות הבוקר המוקדמות ולקנות אטמי אוזניים.",k:"P",ok:true,why:"הסתגלות: אתם משנים את עצמכם כדי להתאים לסביבה."},
-   {t:"לעבור ללמוד בספרייה בתקופת המבחנים.",k:"P",ok:true,why:"בחירת סביבה: אתם עוברים להקשר שמתאים לכם יותר."},
-   {t:"לקבוע עם השותפים ״שעות שקט״ קבועות בלוח במטבח.",k:"P",ok:true,why:"עיצוב הסביבה: אתם משנים את ההקשר כך שיתאים לצרכים שלכם."}],
-  lesson:"שלוש הדרכים של משכל מעשי: להסתגל להקשר, לבחור הקשר אחר, או לעצב את ההקשר הקיים. אין כאן תשובה אחת נכונה."},
- {t:"טעות במצגת של המנהלת",type:"P",
-  text:"יום שני שלכם בעבודה. בישיבת צוות המנהלת מציגה תוכנית תקציב, ואתם בטוחים שיש בה טעות בחישוב.",
-  opts:[
-   {t:"להצביע על הטעות מיד, מול כל הצוות.",k:"A",why:"החישוב שלכם אולי נכון, אבל ביום השני בעבודה זה עלול לעלות ביוקר."},
-   {t:"לחכות לסוף הישיבה, לגשת אליה בשקט ולהראות את החישוב.",k:"P",ok:true,why:"הטעות מתוקנת, ואתם מכבדים את הנורמות הלא־כתובות של המקום."},
-   {t:"לא להגיד כלום. אתם חדשים, וזה לא התפקיד שלכם.",k:"C",why:"שקט חברתי, אבל הטעות נשארת בתוכנית."}],
-  lesson:"משכל מעשי הוא ידע על ההקשר: לא רק מה נכון, אלא איך ומתי לפעול. ידע כזה כמעט אף פעם לא נמדד במבחני מנת משכל."}
-];
-let gs;
-function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function newGame(){SC.forEach(s=>shuffle(s.opts));gs={i:0,phase:"act",act:0,tag:0,picks:{A:0,C:0,P:0},correctBy:{A:[0,0],C:[0,0],P:[0,0]}};renderStage();renderTri()}
-function letter(n){return"אבגד"[n]}
-function renderStage(){
-  const st=$("#stage");
-  $("#scAct").textContent=gs.act+"/"+Math.min(gs.i+(gs.phase!=="act"?1:0),SC.length);
-  $("#scTag").textContent=gs.tag+"/"+Math.min(gs.i+(gs.phase==="done"?1:0),SC.length);
-  if(gs.i>=SC.length)return renderEnd();
-  const s=SC[gs.i];
-  st.innerHTML=`<div class="progress">${SC.map((_,j)=>`<span class="${j<gs.i?"done":j===gs.i?"now":""}"></span>`).join("")}</div>
-   <div class="scn-meta"><span class="mono">תרחיש ${gs.i+1} מתוך ${SC.length}</span><span>${gs.phase==="act"?"שלב 1: בחרו פתרון":gs.phase==="tag"?"שלב 2: איזה רכיב משכל זה?":"סיכום התרחיש"}</span></div>
-   <h3 class="scn-title">${s.t}</h3><p class="scn-text">${s.text}</p>
-   <div class="opts">${s.opts.map((o,j)=>`<button type="button" class="opt" data-j="${j}"><span class="bub">${letter(j)}</span><span>${o.t}<span class="why" hidden>${o.why}</span></span></button>`).join("")}</div>
-   <div id="after"></div>`;
-  $$(".opt",st).forEach(b=>b.addEventListener("click",()=>chooseAct(+b.dataset.j)));
-  if(gs.phase!=="act"){paintOpts();renderTagger()}
-}
-function paintOpts(){
-  const s=SC[gs.i];
-  $$("#stage .opt").forEach((b,j)=>{b.disabled=true;const o=s.opts[j];$(".why",b).hidden=false;
-    if(s.all){b.classList.toggle("right",j===gs.chosen);b.classList.toggle("dim",j!==gs.chosen)}
-    else if(o.ok)b.classList.add("right");else if(j===gs.chosen)b.classList.add("wrong");else b.classList.add("dim")});
-}
-function chooseAct(j){
-  const s=SC[gs.i];gs.chosen=j;const o=s.opts[j];
-  gs.picks[o.k]++; if(o.ok){gs.act++;gs.correctBy[s.type][0]++} gs.correctBy[s.type][1]++;
-  gs.phase="tag";paintOpts();renderTagger();renderTri();
-  $("#scAct").textContent=gs.act+"/"+(gs.i+1);
-}
-function renderTagger(){
-  const s=SC[gs.i],a=$("#after");
-  const o=s.opts[gs.chosen];
-  const head=s.all?`<div class="feedback" style="--c:var(--pr)">${o.why}</div>`:o.ok?`<div class="feedback" style="--c:var(--good)"><b>פתרון מצוין.</b> ${o.why}</div>`:`<div class="feedback" style="--c:var(--bad)"><b>לא הפעם.</b> ${o.why}</div>`;
-  a.innerHTML=head+`<div class="tagger" style="margin-top:12px"><p>איזה רכיב משכל מפעיל הפתרון ${s.all?"שבחרתם":"הטוב ביותר"}?</p><div class="tag-btns">${Object.keys(K).map(k=>`<button type="button" class="tag-btn" data-k="${k}" style="--c:${K[k].c}">${K[k].n}</button>`).join("")}</div></div><div id="lesson"></div>`;
-  $$(".tag-btn",a).forEach(b=>b.addEventListener("click",()=>chooseTag(b.dataset.k)));
-  if(gs.phase==="done")showLesson();
-}
-function chooseTag(k){
-  const s=SC[gs.i];gs.tagPick=k;if(k===s.type)gs.tag++;gs.phase="done";showLesson();
-  $("#scTag").textContent=gs.tag+"/"+(gs.i+1);
-}
-function showLesson(){
-  const s=SC[gs.i];
-  $$("#stage .tag-btn").forEach(b=>{b.disabled=true;if(b.dataset.k===s.type)b.classList.add("picked")});
-  const right=gs.tagPick===s.type;
-  $("#lesson").innerHTML=`<div class="feedback" style="--c:${K[s.type].c};margin-top:12px"><b>${right?"נכון: ":"התשובה: "}משכל ${K[s.type].n}.</b> ${s.lesson}</div>
-   <button class="btn" type="button" id="nextBtn" style="margin-top:12px">${gs.i<SC.length-1?"לתרחיש הבא":"לתוצאות"}</button>`;
-  $("#nextBtn").addEventListener("click",()=>{gs.i++;gs.phase="act";renderStage();$("#stage").scrollIntoView({behavior:reduce?"auto":"smooth",block:"nearest"})});
-  $("#nextBtn").focus({preventScroll:true});
-}
-function renderEnd(){
-  const st=$("#stage");const tot=gs.picks.A+gs.picks.C+gs.picks.P||1;
-  const lean=Object.keys(gs.picks).sort((a,b)=>gs.picks[b]-gs.picks[a])[0];
-  const msg={A:"אתם נוטים לפרק בעיות ולחשב. זה כוח גדול בבעיות מוגדרות היטב, אבל בחיים לא תמיד יש נתונים מלאים.",
-             C:"אתם נוטים לחפש פתרונות לא שגרתיים. זה כוח במצבים חדשים, וכדאי לבדוק מתי דווקא שגרה אוטומטית תחסוך לכם משאבים.",
-             P:"אתם נוטים לקרוא את ההקשר ולפעול בהתאם לו. זה המשכל שמבחני מנת משכל מודדים הכי פחות, ואחד החשובים בחיי היום־יום."}[lean];
-  st.innerHTML=`<div class="progress">${SC.map(()=>`<span class="done"></span>`).join("")}</div>
-   <p class="eyebrow">סיום המשחק</p><h3 class="scn-title">פתרתם ${gs.act} מתוך ${SC.length} תרחישים, וזיהיתם נכון ${gs.tag} רכיבים</h3>
-   <div class="feedback" style="--c:${K[lean].c}"><b>הנטייה הבולטת שלכם: משכל ${K[lean].n}.</b> ${msg}</div>
-   <p class="scn-text">לפי סטרנברג, אדם אינטליגנטי אינו מי שחזק בכל שלושת הרכיבים, אלא מי שמזהה איזה רכיב המצב דורש ומשתמש בו. המשולש בצד מראה איך התפלגו הבחירות שלכם.</p>
-   <button class="btn" type="button" id="againBtn">משחק חדש</button><canvas class="confetti" id="conf"></canvas>`;
-  $("#againBtn").addEventListener("click",newGame);renderTri(true);
-  if(!reduce)confetti($("#conf"));
-}
-function renderTri(final){
-  const svg=$("#tri");svg.innerHTML="";const R=105;const keys=["A","C","P"];
-  const a=i=>-Math.PI/2+i*2*Math.PI/3, p=(i,v)=>[Math.cos(a(i))*R*v,Math.sin(a(i))*R*v];
-  [1,.66,.33].forEach(v=>el("path",{d:keys.map((_,i)=>{const[x,y]=p(i,v);return(i?"L":"M")+x+","+y}).join("")+"Z",fill:v===1?"var(--surface-2)":"none",stroke:"var(--line)"},svg));
-  keys.forEach((k,i)=>{const[x,y]=p(i,1);el("line",{x1:0,y1:0,x2:x,y2:y,stroke:"var(--line)"},svg);
-    const[lx,ly]=p(i,1.2);const t=el("text",{x:lx,y:ly+(i===0?-2:14),"text-anchor":"middle","font-size":14,"font-weight":700,fill:K[k].c},svg);t.textContent=K[k].n;});
-  const tot=Math.max(1,gs.picks.A+gs.picks.C+gs.picks.P);const mx=Math.max(1,...keys.map(k=>gs.picks[k]));
-  const vals=keys.map(k=>.12+.88*gs.picks[k]/mx*(tot>0?1:0));
-  el("path",{d:keys.map((k,i)=>{const[x,y]=p(i,gs.picks[k]?vals[i]:.08);return(i?"L":"M")+x+","+y}).join("")+"Z",fill:"var(--mark)","fill-opacity":.35,stroke:"var(--mark)","stroke-width":2.5,"stroke-linejoin":"round"},svg);
-  keys.forEach((k,i)=>{const[x,y]=p(i,gs.picks[k]?vals[i]:.08);el("circle",{cx:x,cy:y,r:5,fill:K[k].c,stroke:"var(--surface)","stroke-width":2},svg)});
-  const cap=el("text",{x:0,y:126,"text-anchor":"middle","font-size":12,fill:"var(--muted)"},svg);cap.textContent=gs.i===0&&gs.phase==="act"?"המשולש יתמלא לפי הבחירות שלכם":"התפלגות הבחירות שלכם";
-}
-function confetti(cv){const r=cv.getBoundingClientRect();cv.width=r.width;cv.height=r.height;const ctx=cv.getContext("2d");
-  const cols=[css("--an"),css("--cr"),css("--pr"),css("--mark")];const ps=Array.from({length:90},()=>({x:Math.random()*cv.width,y:-20-Math.random()*cv.height*.5,vx:(Math.random()-.5)*2,vy:2+Math.random()*3,r:Math.random()*6,c:cols[Math.floor(Math.random()*4)],a:Math.random()*6}));
-  let f=0;(function loop(){ctx.clearRect(0,0,cv.width,cv.height);ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.a+=.1;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.a);ctx.fillStyle=p.c;ctx.fillRect(-4,-2,8,4);ctx.restore()});if(++f<160)requestAnimationFrame(loop);else ctx.clearRect(0,0,cv.width,cv.height)})()}
-newGame();
-
-/* =========================================================
-   LAB C: Reliability / Validity / Standardization
+   2. ASSESSMENT lab
    ========================================================= */
 const S={rel:.9,val:.9,noStd:false,tab:"board",norm:0,raw:18,seed:7};
-const ND=10, NP=60;
-let base,people;
-function sample(){const rng=mulberry32(S.seed);base=Array.from({length:ND},()=>[gauss(rng),gauss(rng)]);
-  people=Array.from({length:NP},()=>({t:gauss(rng),e1:gauss(rng),e2:gauss(rng)}))}
+const ND=10,NP=60;let base,people;
+function sample(){const rng=mulberry32(S.seed);base=Array.from({length:ND},()=>[gauss(rng),gauss(rng)]);people=Array.from({length:NP},()=>({t:gauss(rng),e1:gauss(rng),e2:gauss(rng)}))}
 sample();
-const EX=[[-.42,.12],[.28,.36],[.18,-.4]]; // examiner condition shifts (fraction of board radius)
-const BIAS_ANG=-2.35;
-let darts=[]; // display state
-function targets(){
-  const R=1, sigma=.04+(1-S.rel)*.36, bias=(1-S.val)*.62;
-  return base.map(([gx,gy],i)=>{let x=Math.cos(BIAS_ANG)*bias+gx*sigma, y=Math.sin(BIAS_ANG)*bias+gy*sigma;
-    if(S.noStd){x+=EX[i%3][0];y+=EX[i%3][1]}return{x,y,g:i%3}});
-}
-function throwDarts(){const now=performance.now();const tg=targets();darts=tg.map((t,i)=>({x:t.x,y:t.y,tx:t.x,ty:t.y,g:t.g,born:now+i*(reduce?0:110)}));loopC()}
-function retarget(){const tg=targets();tg.forEach((t,i)=>{if(darts[i]){darts[i].tx=t.x;darts[i].ty=t.y;darts[i].g=t.g}});loopC()}
-
+const EX=[[-.42,.12],[.28,.36],[.18,-.4]], BIAS_ANG=-2.35;
+let darts=[];
+const sigmaOf=()=>.04+(1-S.rel)*.36, biasOf=()=>(1-S.val)*.62;
+function targets(){const sigma=sigmaOf(),bias=biasOf();
+  return base.map(([gx,gy],i)=>{let x=Math.cos(BIAS_ANG)*bias+gx*sigma,y=Math.sin(BIAS_ANG)*bias+gy*sigma;if(S.noStd){x+=EX[i%3][0];y+=EX[i%3][1]}return{x,y,g:i%3}})}
+function throwDarts(){const now=performance.now();darts=targets().map((t,i)=>({x:t.x,y:t.y,tx:t.x,ty:t.y,g:t.g,born:now+i*(reduce?0:110)}));loopC()}
+function retarget(){targets().forEach((t,i)=>{if(darts[i]){darts[i].tx=t.x;darts[i].ty=t.y;darts[i].g=t.g}});loopC()}
 const cvB=$("#cvBoard"),cvR=$("#cvRetest"),cvN=$("#cvNorms");
-function fit(cv){const dpr=Math.min(2,window.devicePixelRatio||1);const w=+cv.getAttribute("width"),h=+cv.getAttribute("height");
-  if(cv._dpr!==dpr){cv._dpr=dpr;cv.width=w*dpr;cv.height=h*dpr;cv._w=w;cv._h=h}const ctx=cv.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);return ctx}
+function fit(cv){const dpr=Math.min(2,window.devicePixelRatio||1);if(cv._dpr!==dpr){cv._w=+cv.getAttribute("width");cv._h=+cv.getAttribute("height");cv._dpr=dpr;cv.width=cv._w*dpr;cv.height=cv._h*dpr}const ctx=cv.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);return ctx}
 let cRaf=0;function loopC(){if(!cRaf)cRaf=requestAnimationFrame(drawC)}
-function drawC(){cRaf=0;let again=false;
-  if(S.tab==="board")again=drawBoard();else if(S.tab==="retest")drawRetest();else drawNorms();
-  if(again)loopC()}
+function drawC(){cRaf=0;let again=false;if(S.tab==="board")again=drawBoard();else if(S.tab==="retest")drawRetest();else drawNorms();if(again)loopC()}
 function drawBoard(){
   const ctx=fit(cvB),W=cvB._w,H=cvB._h,cx=W/2,cy=H/2,R=170;ctx.clearRect(0,0,W,H);
   const surf=css("--surface"),s2=css("--surface-2"),line=css("--line"),ink=css("--ink"),mark=css("--mark"),acc=css("--accent"),muted=css("--muted");
-  const rings=[[1,s2],[.8,surf],[.6,s2],[.4,surf],[.2,mark]];
-  rings.forEach(([f,c],k)=>{ctx.beginPath();ctx.arc(cx,cy,R*f,0,7);ctx.fillStyle=c;ctx.fill();ctx.lineWidth=1.2;ctx.strokeStyle=line;ctx.stroke()});
+  [[1,s2],[.8,surf],[.6,s2],[.4,surf],[.2,mark]].forEach(([f,c])=>{ctx.beginPath();ctx.arc(cx,cy,R*f,0,7);ctx.fillStyle=c;ctx.fill();ctx.lineWidth=1.2;ctx.strokeStyle=line;ctx.stroke()});
   ctx.beginPath();ctx.arc(cx,cy,R*.07,0,7);ctx.fillStyle=ink;ctx.fill();
   ctx.strokeStyle=line;ctx.setLineDash([3,4]);ctx.beginPath();ctx.moveTo(cx-R,cy);ctx.lineTo(cx+R,cy);ctx.moveTo(cx,cy-R);ctx.lineTo(cx,cy+R);ctx.stroke();ctx.setLineDash([]);
-  ctx.fillStyle=muted;ctx.font="12px 'IBM Plex Sans Hebrew', sans-serif";ctx.textAlign="center";ctx.direction="rtl";
-  ctx.fillText("התכונה האמיתית",cx,cy+R*.2+16);
-  const now=performance.now();let again=false;const gc=[css("--an"),css("--cr"),css("--pr")];
-  const landed=[];
+  ctx.fillStyle=muted;ctx.font="12px 'IBM Plex Sans Hebrew', sans-serif";ctx.textAlign="center";ctx.direction="rtl";ctx.fillText("התכונה האמיתית",cx,cy+R*.2+16);
+  const now=performance.now();let again=false;const gc=[css("--an"),css("--cr"),css("--pr")];const landed=[];
   darts.forEach(d=>{const dx=d.tx-d.x,dy=d.ty-d.y;if(Math.abs(dx)+Math.abs(dy)>.001){d.x+=reduce?dx:dx*.16;d.y+=reduce?dy:dy*.16;again=true}else{d.x=d.tx;d.y=d.ty}
     const age=now-d.born;if(age<0){again=true;return}
     const p=Math.min(1,age/320);if(p<1)again=true;const e=1-Math.pow(1-p,3);
-    const px=cx+d.x*R,py=cy+d.y*R;const sc=1+(1-e)*2.2;
-    if(p<1){ctx.globalAlpha=e;}
-    // flight tail
-    const col=S.noStd?gc[d.g]:ink;
+    const px=cx+d.x*R,py=cy+d.y*R,sc=1+(1-e)*2.2,col=S.noStd?gc[d.g]:ink;
+    ctx.globalAlpha=p<1?e:1;
     ctx.strokeStyle=col;ctx.lineWidth=2.4;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(px+14*sc,py+14*sc);ctx.stroke();
-    ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(px+14*sc,py+14*sc);ctx.lineTo(px+21*sc,py+12*sc);ctx.lineTo(px+19*sc,py+19*sc);ctx.lineTo(px+12*sc,py+21*sc);ctx.closePath();ctx.globalAlpha*=.7;ctx.fill();ctx.globalAlpha=p<1?e:1;
-    ctx.beginPath();ctx.arc(px,py,4.2*sc,0,7);ctx.fillStyle=col;ctx.fill();ctx.lineWidth=1.5;ctx.strokeStyle=surf;ctx.stroke();
-    if(p>=1&&p<1.6){}
+    ctx.fillStyle=col;ctx.globalAlpha*=.7;ctx.beginPath();ctx.moveTo(px+14*sc,py+14*sc);ctx.lineTo(px+21*sc,py+12*sc);ctx.lineTo(px+19*sc,py+19*sc);ctx.lineTo(px+12*sc,py+21*sc);ctx.closePath();ctx.fill();
+    ctx.globalAlpha=p<1?e:1;ctx.beginPath();ctx.arc(px,py,4.2*sc,0,7);ctx.fill();ctx.lineWidth=1.5;ctx.strokeStyle=surf;ctx.stroke();
     if(p<1&&p>.85){ctx.beginPath();ctx.arc(px,py,4+(p-.85)*120,0,7);ctx.strokeStyle=col;ctx.globalAlpha=.4*(1-p)/.15;ctx.stroke()}
     ctx.globalAlpha=1;if(p>=1)landed.push(d)});
-  if(landed.length===darts.length&&darts.length){
+  if(darts.length&&landed.length===darts.length){
     const mx=landed.reduce((s,d)=>s+d.x,0)/landed.length,my=landed.reduce((s,d)=>s+d.y,0)/landed.length;
     const sd=Math.sqrt(landed.reduce((s,d)=>s+(d.x-mx)**2+(d.y-my)**2,0)/landed.length);
     ctx.setLineDash([5,4]);ctx.strokeStyle=acc;ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(cx+mx*R,cy+my*R,Math.max(6,sd*R*1.2),0,7);ctx.stroke();ctx.setLineDash([]);
-    ctx.beginPath();ctx.moveTo(cx+mx*R-7,cy+my*R);ctx.lineTo(cx+mx*R+7,cy+my*R);ctx.moveTo(cx+mx*R,cy+my*R-7);ctx.lineTo(cx+mx*R,cy+my*R+7);ctx.strokeStyle=acc;ctx.lineWidth=2.5;ctx.stroke();
-    const dist=Math.hypot(mx,my);
-    if(dist>.12){ctx.setLineDash([2,4]);ctx.strokeStyle=muted;ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+mx*R,cy+my*R);ctx.stroke();ctx.setLineDash([])}
+    ctx.beginPath();ctx.moveTo(cx+mx*R-7,cy+my*R);ctx.lineTo(cx+mx*R+7,cy+my*R);ctx.moveTo(cx+mx*R,cy+my*R-7);ctx.lineTo(cx+mx*R,cy+my*R+7);ctx.lineWidth=2.5;ctx.stroke();
+    if(Math.hypot(mx,my)>.12){ctx.setLineDash([2,4]);ctx.strokeStyle=muted;ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+mx*R,cy+my*R);ctx.stroke();ctx.setLineDash([])}
   }
   return again;
 }
@@ -815,41 +965,42 @@ function drawRetest(){
   const ctx=fit(cvR),W=cvR._w,H=cvR._h;ctx.clearRect(0,0,W,H);const L=52,Rr=W-16,T=16,B=H-44;
   const ink=css("--ink"),muted=css("--muted"),line=css("--line"),acc=css("--accent"),s2=css("--surface-2");
   ctx.fillStyle=s2;ctx.fillRect(L,T,Rr-L,B-T);
-  const sx=v=>L+(v+4)/8*(Rr-L), sy=v=>B-(v+4)/8*(B-T);
+  const sx=v=>L+(v+4)/8*(Rr-L),sy=v=>B-(v+4)/8*(B-T);
   ctx.strokeStyle=line;ctx.lineWidth=1;for(let v=-4;v<=4;v+=2){ctx.beginPath();ctx.moveTo(sx(v),T);ctx.lineTo(sx(v),B);ctx.moveTo(L,sy(v));ctx.lineTo(Rr,sy(v));ctx.stroke()}
   ctx.setLineDash([4,4]);ctx.strokeStyle=muted;ctx.beginPath();ctx.moveTo(sx(-4),sy(-4));ctx.lineTo(sx(4),sy(4));ctx.stroke();ctx.setLineDash([]);
-  const {xs,ys,r}=retestR();
-  xs.forEach((x,i)=>{const X=Math.max(-3.9,Math.min(3.9,x)),Y=Math.max(-3.9,Math.min(3.9,ys[i]));ctx.beginPath();ctx.arc(sx(X),sy(Y),4.5,0,7);ctx.fillStyle=acc;ctx.globalAlpha=.75;ctx.fill();ctx.globalAlpha=1});
+  const{xs,ys,r}=retestR();
+  xs.forEach((x,i)=>{ctx.beginPath();ctx.arc(sx(clamp(x,-3.9,3.9)),sy(clamp(ys[i],-3.9,3.9)),4.5,0,7);ctx.fillStyle=acc;ctx.globalAlpha=.75;ctx.fill();ctx.globalAlpha=1});
   ctx.fillStyle=muted;ctx.font="13px 'IBM Plex Sans Hebrew', sans-serif";ctx.textAlign="center";ctx.direction="rtl";
   ctx.fillText("ציון במבחן הראשון",(L+Rr)/2,H-14);
   ctx.save();ctx.translate(18,(T+B)/2);ctx.rotate(-Math.PI/2);ctx.fillText("ציון במבחן החוזר",0,0);ctx.restore();
   ctx.direction="ltr";ctx.textAlign="left";ctx.font="600 15px 'IBM Plex Mono', monospace";ctx.fillStyle=ink;ctx.fillText("r = "+r.toFixed(2),L+10,T+22);
-  S.lastR=r;
 }
 const NORMS=[{n:"סטודנטים בני גילכם",m:12,s:5},{n:"מטופלים במרפאה",m:24,s:6}];
 function drawNorms(){
-  const ctx=fit(cvN),W=cvN._w,H=cvN._h;ctx.clearRect(0,0,W,H);const L=24,Rr=W-24,T=40,B=H-48;
+  const ctx=fit(cvN),W=cvN._w,H=cvN._h;ctx.clearRect(0,0,W,H);const L=24,Rr=W-24,T=44,B=H-48;
   const ink=css("--ink"),muted=css("--muted"),line=css("--line"),acc=css("--accent"),mark=css("--mark");
   const sx=v=>L+v/40*(Rr-L);const nm=NORMS[S.norm];
-  const groups=S.noStd?EX.map((e,i)=>({m:nm.m+[3,-3.5,2][i],s:nm.s,c:[css("--an"),css("--cr"),css("--pr")][i]})):[{m:nm.m,s:nm.s,c:acc}];
-  const peak=npdf(0)/nm.s;const sy=d=>B-d/peak*(B-T)*.92;
+  const groups=S.noStd?[3,-3.5,2].map((d,i)=>({m:nm.m+d,s:nm.s,c:[css("--an"),css("--cr"),css("--pr")][i]})):[{m:nm.m,s:nm.s,c:acc}];
+  const peak=npdf(0)/nm.s,sy=d=>B-d/peak*(B-T)*.92;
   groups.forEach(g=>{
-    ctx.beginPath();ctx.moveTo(sx(0),B);for(let v=0;v<=Math.min(S.raw,40);v+=.25)ctx.lineTo(sx(v),sy(npdf((v-g.m)/g.s)/g.s));ctx.lineTo(sx(S.raw),B);ctx.closePath();ctx.fillStyle=g.c;ctx.globalAlpha=S.noStd?.12:.22;ctx.fill();ctx.globalAlpha=1;
-    ctx.beginPath();for(let v=0;v<=40;v+=.25){const X=sx(v),Y=sy(npdf((v-g.m)/g.s)/g.s);v?ctx.lineTo(X,Y):ctx.moveTo(X,Y)}ctx.strokeStyle=g.c;ctx.lineWidth=2.4;ctx.stroke();
-  });
+    ctx.beginPath();ctx.moveTo(sx(0),B);for(let v=0;v<=S.raw;v+=.25)ctx.lineTo(sx(v),sy(npdf((v-g.m)/g.s)/g.s));ctx.lineTo(sx(S.raw),sy(npdf((S.raw-g.m)/g.s)/g.s));ctx.lineTo(sx(S.raw),B);ctx.closePath();ctx.fillStyle=g.c;ctx.globalAlpha=S.noStd?.12:.22;ctx.fill();ctx.globalAlpha=1;
+    ctx.beginPath();for(let v=0;v<=40;v+=.25){const X=sx(v),Y=sy(npdf((v-g.m)/g.s)/g.s);v?ctx.lineTo(X,Y):ctx.moveTo(X,Y)}ctx.strokeStyle=g.c;ctx.lineWidth=2.4;ctx.stroke()});
   ctx.strokeStyle=line;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(L,B);ctx.lineTo(Rr,B);ctx.stroke();
   ctx.fillStyle=muted;ctx.font="12px 'IBM Plex Mono', monospace";ctx.textAlign="center";
   for(let v=0;v<=40;v+=5){ctx.beginPath();ctx.moveTo(sx(v),B);ctx.lineTo(sx(v),B+5);ctx.stroke();ctx.fillText(v,sx(v),B+19)}
   ctx.font="13px 'IBM Plex Sans Hebrew', sans-serif";ctx.direction="rtl";ctx.fillText("ציון גולמי בשאלון",(L+Rr)/2,H-8);
-  ctx.strokeStyle=ink;ctx.lineWidth=2;ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(sx(S.raw),T-14);ctx.lineTo(sx(S.raw),B);ctx.stroke();ctx.setLineDash([]);
-  ctx.beginPath();ctx.arc(sx(S.raw),T-14,6,0,7);ctx.fillStyle=mark;ctx.fill();ctx.strokeStyle=ink;ctx.stroke();
-  ctx.fillStyle=ink;ctx.font="600 13px 'IBM Plex Sans Hebrew', sans-serif";ctx.textAlign=S.raw>30?"right":S.raw<10?"left":"center";ctx.fillText("הציון שלכם: "+S.raw,sx(S.raw)+(S.raw>30?-10:S.raw<10?10:0),T-26+ (S.raw>30||S.raw<10?12:0));
+  ctx.strokeStyle=ink;ctx.lineWidth=2;ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(sx(S.raw),T-12);ctx.lineTo(sx(S.raw),B);ctx.stroke();ctx.setLineDash([]);
+  ctx.beginPath();ctx.arc(sx(S.raw),T-12,6,0,7);ctx.fillStyle=mark;ctx.fill();ctx.strokeStyle=ink;ctx.stroke();
+  ctx.fillStyle=ink;ctx.font="600 13px 'IBM Plex Sans Hebrew', sans-serif";
+  const al=S.raw>30?"right":S.raw<10?"left":"center";ctx.textAlign=al;ctx.direction="rtl";
+  ctx.fillText("הציון שלכם: "+S.raw,sx(S.raw)+(al==="right"?-12:al==="left"?12:0),al==="center"?T-24:T-8);
 }
 function verdict(){
   const v=$("#verdict");let t,c;
-  if(S.tab==="norms"){const nm=NORMS[S.norm];const z=(S.raw-nm.m)/nm.s;const p=ncdf(z)*100;
+  if(S.tab==="norms"){const nm=NORMS[S.norm],p=ncdf((S.raw-nm.m)/nm.s)*100;
     if(S.noStd){t="ללא תקנון, לאותו ציון יש כמה פירושים";c="var(--warn)"}
-    else if(p>=90){t="גבוה מאוד ביחס לנורמה";c="var(--bad)"}else if(p>=70){t="מעל הממוצע של הקבוצה";c="var(--warn)"}else if(p>30){t="בטווח הממוצע של הקבוצה";c="var(--good)"}else{t="מתחת לממוצע הקבוצה";c="var(--good)"}}
+    else if(p>=90){t="גבוה מאוד ביחס לקבוצה";c="var(--bad)"}else if(p>=70){t="מעל הממוצע של הקבוצה";c="var(--warn)"}else if(p>30){t="בטווח הממוצע של הקבוצה";c="var(--good)"}else{t="מתחת לממוצע הקבוצה";c="var(--good)"}}
+  else if(S.tab==="retest"){const r=retestR().r;t=r>=.8?"מהימנות גבוהה":r>=.5?"מהימנות בינונית":"מהימנות נמוכה";c=r>=.8?"var(--good)":r>=.5?"var(--warn)":"var(--bad)"}
   else if(S.noStd){t="ללא תקנון: התנאים מזיזים את התוצאות";c="var(--warn)"}
   else if(S.rel>=.7&&S.val>=.7){t="מהימן ותקף";c="var(--good)"}
   else if(S.rel>=.7){t="מהימן, אבל לא תקף";c="var(--warn)"}
@@ -858,97 +1009,600 @@ function verdict(){
   v.textContent=t;v.style.setProperty("--c",c);
 }
 function readouts(){
-  const ro=$("#readouts");let items;
-  if(S.tab==="norms"){const nm=NORMS[S.norm];const z=(S.raw-nm.m)/nm.s;items=[["ממוצע הקבוצה",nm.m],["ציון תקן z",(z>=0?"+":"")+z.toFixed(2)],["אחוזון",Math.round(ncdf(z)*100)]]}
-  else if(S.tab==="retest"){const{r}=retestR();items=[["מתאם מבחן חוזר",r.toFixed(2)],["אידיאלי","+1.00"],["אין קשר","0.00"]]}
-  else{const sigma=.04+(1-S.rel)*.36,bias=(1-S.val)*.62;items=[["פיזור החצים",(sigma*100).toFixed(0)],["מרחק מהמרכז",(bias*100).toFixed(0)],["תוקף אפקטיבי",Math.min(S.val,S.rel).toFixed(2)]]}
-  ro.innerHTML=items.map(([a,b])=>`<div class="ro"><span>${a}</span><b>${b}</b></div>`).join("");
+  let items;
+  if(S.tab==="norms"){const nm=NORMS[S.norm],z=(S.raw-nm.m)/nm.s;items=[["ממוצע הקבוצה",nm.m],["ציון תקן z",(z>=0?"+":"")+z.toFixed(2)],["אחוזון",Math.round(ncdf(z)*100)]]}
+  else if(S.tab==="retest"){items=[["מתאם מבחן חוזר",retestR().r.toFixed(2)],["מהימנות מושלמת","+1.00"],["אין קשר","0.00"]]}
+  else items=[["פיזור החצים",Math.round(sigmaOf()*100)],["מרחק מהמרכז",Math.round(biasOf()*100)],["תוקף בפועל",Math.min(S.val,S.rel).toFixed(2)]];
+  $("#readouts").innerHTML=items.map(([a,b])=>`<div class="ro"><span>${a}</span><b>${b}</b></div>`).join("");
 }
 function explain(){
   const e=$("#explain");
-  if(S.tab==="norms"){const nm=NORMS[S.norm];const p=Math.round(ncdf((S.raw-nm.m)/nm.s)*100);
-    e.innerHTML=S.noStd?`כשכל בוחן מעביר את השאלון אחרת, יש לכם שלוש עקומות במקום אחת, וציון ${S.raw} מקבל אחוזון אחר בכל אחת מהן. <b>תקנון</b> פירושו שכל הנבחנים מקבלים את אותה בחינה, באותה דרך ובאותם תנאים.`
+  if(S.tab==="norms"){const nm=NORMS[S.norm],p=Math.round(ncdf((S.raw-nm.m)/nm.s)*100);
+    e.innerHTML=S.noStd?`כשכל בוחן מעביר את השאלון אחרת, יש שלוש עקומות במקום אחת, וציון ${S.raw} מקבל אחוזון אחר בכל אחת מהן. <b>תקנון</b> פירושו שכל הנבחנים מקבלים את אותה בחינה, באותה דרך ובאותם תנאים.`
       :`ציון ${S.raw} לבדו אינו אומר דבר. רק ההשוואה ל<b>אוכלוסייה נורמטיבית</b> נותנת לו משמעות: ביחס ל${nm.n} הוא גבוה מ־${p}% מהקבוצה. החליפו קבוצה וראו איך אותו ציון משנה את משמעותו.`;return}
-  if(S.tab==="retest"){e.innerHTML=`כל נקודה היא אדם שעשה את המבחן פעמיים. ככל שהמבחן <b>מהימן</b> יותר, הנקודות מתקרבות לאלכסון והמתאם מתקרב ל־1.00+. במבחן לא מהימן, מי שקיבל ציון גבוה בפעם הראשונה עשוי לקבל ציון נמוך בפעם השנייה.`;return}
-  if(S.noStd){e.innerHTML=`כל צבע הוא בוחן אחר. בוחנת אחת נותנת עוד זמן, בוחן אחר מסביר פחות טוב. גם מבחן טוב מפזר את התוצאות כשהתנאים לא אחידים. לכן מבחן פורמלי דורש <b>תקנון</b>: אותם הוראות, זמן ותנאים לכל הנבחנים.`;return}
+  if(S.tab==="retest"){e.innerHTML=`כל נקודה היא אדם שעשה את המבחן פעמיים. ככל שהמבחן <b>מהימן</b> יותר, הנקודות מתקרבות לאלכסון והמתאם מתקרב ל־1.00+. במבחן לא מהימן, מי שקיבל ציון גבוה בפעם הראשונה עשוי לקבל ציון נמוך בפעם השנייה. הזיזו את מחוון המהימנות.`;return}
+  if(S.noStd){e.innerHTML=`כל צבע הוא בוחן אחר: בוחנת אחת נותנת עוד זמן, בוחן אחר מסביר פחות טוב. גם מבחן טוב מפזר את התוצאות כשהתנאים לא אחידים. לכן מבחן פורמלי דורש <b>תקנון</b>: אותן הוראות, זמן ותנאים לכל הנבחנים.`;return}
   if(S.rel>=.7&&S.val>=.7)e.innerHTML=`החצים צפופים ופוגעים במרכז: המבחן נותן תוצאות עקביות, והוא מודד את מה שהוא אמור למדוד.`;
   else if(S.rel>=.7)e.innerHTML=`החצים צפופים, אבל במקום הלא נכון. כמו מדידת גובה כמדד למשכל: התוצאה יוצאת זהה בכל פעם, אבל היא לא מודדת משכל. <b>מבחן יכול להיות מהימן ולא תקף.</b>`;
-  else if(S.val>=.7)e.innerHTML=`הממוצע קרוב למרכז, אבל כל חץ בודד מפספס. מבחן כזה לא יכול לנבא אפילו את עצמו, ולכן בוודאי לא קריטריון חיצוני. <b>מבחן שאינו מהימן אינו יכול להיות תקף.</b>`;
-  else e.innerHTML=`החצים מפוזרים וגם רחוקים מהמרכז. המבחן לא עקבי, וגם לא מודד את התכונה. כך נראה שאלון שנכתב בלי עבודה פסיכומטרית.`;
+  else if(S.val>=.7)e.innerHTML=`הממוצע קרוב למרכז, אבל כל חץ בודד מפספס. מבחן כזה לא יכול לנבא אפילו את עצמו, ולכן גם לא קריטריון חיצוני. <b>מבחן שאינו מהימן אינו יכול להיות תקף.</b>`;
+  else e.innerHTML=`החצים מפוזרים וגם רחוקים מהמרכז. המבחן לא עקבי, וגם לא מודד את התכונה.`;
 }
-const PRESETS=[
-  {t:"המבחן האידיאלי",d:"מהימן ותקף",rel:.95,val:.95},
-  {t:"סרגל גובה כמבחן משכל",d:"מהימן, לא תקף",rel:.96,val:.12},
-  {t:"שאלון מרושל",d:"לא מהימן",rel:.18,val:.85},
-  {t:"ניחוש",d:"לא מהימן ולא תקף",rel:.15,val:.2}];
+const PRESETS=[{t:"המבחן האידיאלי",d:"מהימן ותקף",rel:.95,val:.95},{t:"סרגל גובה כמבחן משכל",d:"מהימן, לא תקף",rel:.96,val:.12},{t:"מבחן משכל ברשת",d:"ציונים 116, 117, 129, 130",rel:.25,val:.6},{t:"ניחוש",d:"לא מהימן ולא תקף",rel:.15,val:.2}];
 $("#presets").innerHTML=PRESETS.map((p,i)=>`<button type="button" class="preset" data-i="${i}">${p.t}<span>${p.d}</span></button>`).join("");
-$$("#presets .preset").forEach(b=>b.addEventListener("click",()=>{const p=PRESETS[+b.dataset.i];
-  if(S.tab==="norms")selectTab("board");$("#noStd").checked=false;S.noStd=false;
-  setRV(p.rel,p.val);S.seed++;sample();throwDarts();if(S.tab!=="board")loopC();}));
+$$("#presets .preset").forEach(b=>b.addEventListener("click",()=>{const p=PRESETS[+b.dataset.i];$("#noStd").checked=false;S.noStd=false;setRV(p.rel,p.val);S.seed++;sample();throwDarts();
+  if(+b.dataset.i===2)$("#explain").innerHTML=`אותו אדם קיבל באותו אתר ארבעה ציונים: 116 ו־117 (״נורמלי גבוה״), ואז 129 ו־130 (״גבוה״). <b>המבחן אינו מהימן, ולכן גם אי אפשר לסמוך על תוקפו.</b> חוץ מזה, אין לנו נורמות: מי שנכנס לאתר כזה אינו מדגם מייצג. (״חשיבה ביקורתית בחיינו״, עמ׳ 457)`}));
 function setRV(rel,val){S.rel=rel;S.val=val;$("#slRel").value=Math.round(rel*100);$("#slVal").value=Math.round(val*100);syncRV()}
 function syncRV(){
-  $("#outRel").textContent=S.rel.toFixed(2);$("#outVal").textContent=S.val.toFixed(2);
-  $("#slRel").style.setProperty("--p",S.rel*100+"%");$("#slVal").style.setProperty("--p",S.val*100+"%");
-  $("#exLegend").hidden=!S.noStd||S.tab==="retest";
-  verdict();readouts();explain();
+  $("#outRel").textContent=S.rel.toFixed(2);$("#outVal").textContent=S.val.toFixed(2);setP($("#slRel"));setP($("#slVal"));
+  $("#exLegend").hidden=!S.noStd||S.tab==="retest";verdict();readouts();explain();
 }
+const tabsSeen=new Set(["board"]);
 $("#slRel").addEventListener("input",e=>{S.rel=e.target.value/100;syncRV();retarget()});
 $("#slVal").addEventListener("input",e=>{S.val=e.target.value/100;syncRV();retarget()});
 $("#noStd").addEventListener("change",e=>{S.noStd=e.target.checked;syncRV();retarget()});
-$("#slRaw").addEventListener("input",e=>{S.raw=+e.target.value;$("#outRaw").textContent=S.raw;$("#slRaw").style.setProperty("--p",S.raw/40*100+"%");syncRV();loopC()});
+$("#slRaw").addEventListener("input",e=>{S.raw=+e.target.value;$("#outRaw").textContent=S.raw;setP(e.target);syncRV();loopC()});
 $$("[data-norm]").forEach(b=>b.addEventListener("click",()=>{S.norm=+b.dataset.norm;$$("[data-norm]").forEach(x=>x.setAttribute("aria-pressed",x===b));syncRV();loopC()}));
 $("#throwBtn").addEventListener("click",()=>{S.seed++;sample();if(S.tab==="board")throwDarts();else{syncRV();loopC()}});
-function selectTab(t){S.tab=t;$$(".tab").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));
+function selectTab(t){S.tab=t;tabsSeen.add(t);
+  $$(".tab").forEach(b=>{b.setAttribute("aria-selected",b.dataset.tab===t);b.classList.toggle("seen",tabsSeen.has(b.dataset.tab))});
   cvB.hidden=t!=="board";cvR.hidden=t!=="retest";cvN.hidden=t!=="norms";
-  $("#valBlock").hidden=t!=="board";$("#relBlock").hidden=t==="norms";$("#normCtrls").hidden=t!=="norms";$("#stdToggle").hidden=t==="retest";
-  $("#presets").hidden=t!=="board";
-  $("#throwBtn").textContent=t==="board"?"זריקה חוזרת":t==="retest"?"קבוצת נבחנים חדשה":"זריקה חוזרת";$("#throwBtn").hidden=t==="norms";
-  $("#stdToggle").lastChild.textContent=t==="norms"?" ללא תקנון: כל בוחן מעביר את השאלון אחרת":" ללא תקנון: כל בוחן מעביר את המבחן בתנאים אחרים";
-  syncRV();loopC()}
+  $("#valBlock").hidden=t!=="board";$("#relBlock").hidden=t==="norms";$("#normCtrls").hidden=t!=="norms";$("#stdToggle").hidden=t==="retest";$("#presets").hidden=t!=="board";
+  $("#throwBtn").textContent=t==="retest"?"קבוצת נבחנים חדשה":"זריקה חוזרת";$("#throwBtn").hidden=t==="norms";
+  $("#stdLabel").textContent=t==="norms"?"ללא תקנון: כל בוחן מעביר את השאלון אחרת":"ללא תקנון: כל בוחן מעביר את המבחן בתנאים אחרים";
+  syncRV();loopC();if(tabsSeen.size===3)markDone("assessment")}
 $$(".tab").forEach(b=>b.addEventListener("click",()=>selectTab(b.dataset.tab)));
-$("#slRaw").style.setProperty("--p",S.raw/40*100+"%");
-syncRV();throwDarts();
-listeners.push(loopC);
-window.addEventListener("resize",loopC);
+$$(".tab").forEach((b,i,all)=>b.addEventListener("keydown",e=>{const d={ArrowLeft:1,ArrowRight:-1}[e.key];if(d){const n=all[(i+d+all.length)%all.length];n.focus();n.click()}}));
+setP($("#slRaw"));syncRV();throwDarts();
+themeListeners.push(loopC);window.addEventListener("resize",loopC);
 
-// concept chips
 const TERMS={
  rel:[["מהימנות מבחן חוזר","המתאם בין הציונים של אותם אנשים, באותו מבחן, בשתי הזדמנויות שונות. מבחן מהימן לחלוטין יניב מתאם של 1.00+."],
-      ["נוסחים מקבילים","נותנים לאותם נבחנים נוסחים חלופיים של המבחן במקום אותו מבחן פעמיים. כך מנטרלים תרגול קודם וזכירת שאלות."],
+      ["נוסחים מקבילים","נותנים לאותם נבחנים נוסחים חלופיים של המבחן במקום אותו מבחן פעמיים. כך מנטרלים את השפעת התרגול, זכירת השאלות ושאיפה להיראות עקביים."],
       ["עקביות פנימית","בודקת אם החלקים של מבחן יחיד מודדים את אותו דבר, למשל השוואת ציוני הפריטים הזוגיים לאי־זוגיים (מהימנות מבחן חצוי)."],
       ["מהימנות בין שופטים","מידת ההסכמה בין צופים שמקודדים אותה התנהגות בעזרת סכמת קידוד. דורשת אימון של השופטים."]],
- val:[["תוקף נראה","המבחן נראה כאילו הוא מודד את התכונה. נוח, אבל לא מספיק: נבחנים יכולים לשלוט ברושם שהם עושים."],
+ val:[["תוקף נראה","המבחן נראה כאילו הוא מודד את התכונה. נוח, אבל לא מספיק: נבחנים יכולים לשלוט ברושם שהם יוצרים, כמו המטופלים במחקר של בראגינסקי שרצו להישאר במוסד."],
       ["תוקף קריטריון (ניבוי)","המתאם בין ציון המבחן לבין מדד חיצוני שקשור למה שהמבחן מודד, למשל ציונים באוניברסיטה עבור מבחן שנועד לנבא הצלחה בלימודים."],
-      ["תוקף מבנה","המידה שבה המבחן מודד את המבנה התאורטי, למשל חרדה או דיכאון: מתאם עם מדדים קשורים, והיעדר מתאם עם תכונות שאינן קשורות."],
+      ["תוקף מבנה","המידה שבה המבחן מודד את המבנה התאורטי, כמו חרדה או דיכאון: מתאם עם מדדים קשורים, והיעדר מתאם עם תכונות שאינן קשורות."],
       ["נורמות ותקנון","נורמות מאפשרות לפרש ציון בהשוואה לאוכלוסייה נורמטיבית. תקנון מבטיח שכל הנבחנים נבחנו באותם תנאים, כדי שההשוואה תהיה משמעותית."]]};
 $$(".cgroup").forEach(g=>{const list=TERMS[g.dataset.group],box=$(".terms",g),def=$(".term-def",g);
   list.forEach(([n,d],i)=>{const b=document.createElement("button");b.type="button";b.className="term";b.textContent=n;b.setAttribute("aria-expanded","false");
-    b.addEventListener("click",()=>{$$(".term",g).forEach(x=>x.setAttribute("aria-expanded",x===b));def.innerHTML=`<b>${n}.</b> ${d}`});box.appendChild(b);
-    if(i===0)b.click()})});
+    b.addEventListener("click",()=>{$$(".term",g).forEach(x=>x.setAttribute("aria-expanded",x===b));def.innerHTML=`<b>${n}.</b> ${d}`});box.appendChild(b);if(!i)b.click()})});
 
 /* =========================================================
-   QUIZ
+   3. IQ section
+   ========================================================= */
+function syncIQ(){
+  const ma=+$("#slMA").value,ca=+$("#slCA").value,iq=Math.round(ma/ca*100);
+  $("#outMA").textContent=ma;$("#outCA").textContent=ca;$("#fMA").textContent=ma;$("#fCA").textContent=ca;$("#iqOut").textContent=iq;setP($("#slMA"));setP($("#slCA"));
+  let t;
+  if(ca>=18)t=`מבוגר בן ${ca} עם גיל שכלי ${ma} מקבל מנת משכל ${iq}. התוצאה אבסורדית: הביצוע במבחן מפסיק לעלות בסביבות גיל 16, אבל הגיל ממשיך לעלות. לכן <b>היום מנת משכל אינה מחושבת כחלוקה</b>: משווים את הציון ישירות לבני אותו גיל, כך ש־100 הוא ממוצע הגיל.`;
+  else if(iq===100)t=`הגיל השכלי שווה לגיל הכרונולוגי, ולכן מנת המשכל היא 100, כלומר ממוצעת.`;
+  else if(iq>100)t=`הילד מבצע כמו ילד ממוצע בגיל ${ma}, למרות שהוא בן ${ca}. מנת המשכל שלו ${iq}, גבוהה מהממוצע.`;
+  else t=`הילד מבצע כמו ילד ממוצע בגיל ${ma}, למרות שהוא בן ${ca}. מנת המשכל שלו ${iq}, נמוכה מהממוצע.`;
+  $("#iqExplain").innerHTML=t;
+}
+["#slMA","#slCA"].forEach(s=>$(s).addEventListener("input",()=>{syncIQ();iqUsed.calc=true;checkIQ()}));
+$$("[data-ma]").forEach(b=>b.addEventListener("click",()=>{$("#slMA").value=b.dataset.ma;$("#slCA").value=b.dataset.ca;syncIQ();iqUsed.calc=true;checkIQ()}));
+const iqUsed={calc:false,sort:false,venn:false};
+function checkIQ(){if(iqUsed.calc&&iqUsed.sort)markDone("iq")}
+syncIQ();
+
+// generic sorter
+function makeSorter(host,cats,items,onDone){
+  let order,i,score,placed;
+  function start(){order=shuffle(items.slice());i=0;score=0;placed=cats.map(()=>[]);render()}
+  function render(){
+    const bins=`<div class="bins">${cats.map((c,k)=>`<div class="bin" style="--c:${c.c}"><h4>${c.n} (${placed[k].length})</h4><div class="chips">${placed[k].map(p=>`<span class="chip${p.ok?"":" no"}" title="${p.ok?"":"שייך ל"+cats[p.a].n}">${p.t}</span>`).join("")}</div></div>`).join("")}</div>`;
+    if(i>=order.length){
+      host.innerHTML=`<div class="feedback" style="--c:${score===order.length?"var(--good)":"var(--warn)"}"><b>${score} מתוך ${order.length} נכונות.</b> ${score===order.length?"מיון מושלם.":"פריטים עם קו חוצה היו שייכים לקבוצה השנייה."}</div>${bins}<button class="btn ghost sm" type="button">מיון חוזר</button>`;
+      $("button",host).addEventListener("click",start);onDone&&onDone();return}
+    const it=order[i];
+    host.innerHTML=`<div class="progress">${order.map((_,j)=>`<span class="${j<i?"done":j===i?"now":""}"></span>`).join("")}</div>
+      <div class="sort-card"><b>${it.t}</b><p>${it.s}</p></div>
+      <div class="sort-btns">${cats.map((c,k)=>`<button type="button" class="tag-btn" data-k="${k}" style="--c:${c.c}">${c.n}</button>`).join("")}</div>
+      <div class="fb" aria-live="polite"></div>${bins}`;
+    $$(".sort-btns button",host).forEach(b=>b.addEventListener("click",()=>{
+      const k=+b.dataset.k,ok=k===it.a;if(ok)score++;placed[it.a].push({t:it.t,ok,a:it.a});
+      $$(".sort-btns button",host).forEach(x=>{x.disabled=true;if(+x.dataset.k===it.a)x.classList.add("picked")});
+      $(".fb",host).innerHTML=`<div class="feedback" style="--c:${ok?"var(--good)":"var(--bad)"}"><b>${ok?"נכון.":"לא בדיוק."}</b> ${it.w}</div>`;
+      setTimeout(()=>{i++;render();const f=$(".sort-btns button",host);if(f)f.focus({preventScroll:true})},ok?900:2200);
+    }));
+  }
+  start();
+}
+makeSorter($("#sortWais"),[{n:"מילולי",c:"var(--an)"},{n:"ביצועי",c:"var(--pr)"}],[
+ {t:"ידע",s:"״מי כתב את ׳תמול שלשום׳?״",a:0,w:"תת־מבחן מילולי: ידע כללי שנרכש."},
+ {t:"הבנה",s:"״למה מתכוונים כשאומרים ׳הלך זרזיר אצל עורב׳?״",a:0,w:"תת־מבחן מילולי: הבנת משמעות והיגיון חברתי."},
+ {t:"חשבון",s:"״שילמת 28.50 שקלים לכרטיס ו־9.75 לפופקורן. כמה עודף תקבל מ־50 שקלים?״",a:0,w:"תת־מבחן מילולי, למרות שיש בו מספרים: השאלה מוצגת בעל־פה."},
+ {t:"צד שווה",s:"״מה משותף למטוסים ולצוללות?״",a:0,w:"תת־מבחן מילולי: חשיבה מופשטת על מושגים."},
+ {t:"זכירת ספרות",s:"״חזור על המספרים 3 2 7 5 9.״",a:0,w:"תת־מבחן מילולי: זיכרון שמיעתי לטווח קצר."},
+ {t:"קידוד ספרה־סימן",s:"הנבחן משתמש במפתח של ספרות וסימנים כדי להשלים לוח שבו יש רק ספרות.",a:1,w:"תת־מבחן ביצועי: מהירות עיבוד חזותי."},
+ {t:"השלמת תמונות",s:"הנבחן אומר מה חסר בתמונה, למשל סוס בלי רעמה.",a:1,w:"תת־מבחן ביצועי: אין בו תוכן מילולי."},
+ {t:"סידור קוביות",s:"שימוש בקוביות כדי לשחזר צורה שהבוחן מציג.",a:1,w:"תת־מבחן ביצועי, ולפי קאטל גם מדד למשכל נזיל."},
+ {t:"הרכבת עצמים",s:"סידור גזרי פסיפס מקרטון כך שייצרו תמונה של עצם מוכר.",a:1,w:"תת־מבחן ביצועי: ארגון חזותי־מרחבי."}],()=>{iqUsed.sort=true;checkIQ()});
+
+// Renzulli venn
+(function venn(){
+  const svg=$("#venn");const C=[[180,110],[130,190],[230,190]],r=82;const names=["יכולת","יצירתיות","מחויבות"];const cols=["var(--an)","var(--cr)","var(--pr)"];
+  const circles=C.map(([x,y],i)=>el("circle",{cx:x,cy:y,r,fill:cols[i],"fill-opacity":.08,stroke:cols[i],"stroke-width":2.5},svg));
+  const lbl=[[180,60],[88,232],[272,232]];names.forEach((n,i)=>txt(svg,{x:lbl[i][0],y:lbl[i][1],"text-anchor":"middle","font-size":15,"font-weight":700,fill:cols[i]},n));
+  const center=el("circle",{cx:180,cy:164,r:20,fill:"var(--mark)","fill-opacity":0,stroke:"var(--ink)","stroke-width":0},svg);
+  const star=txt(svg,{x:180,y:170,"text-anchor":"middle","font-size":16,"font-weight":700,fill:"var(--ink)","fill-opacity":0},"מחונן");
+  function upd(){const on=$$("#vennCtl input").map(i=>i.checked);
+    circles.forEach((c,i)=>{c.setAttribute("fill-opacity",on[i]?.22:.04);c.setAttribute("stroke-opacity",on[i]?1:.3)});
+    const all=on.every(Boolean);center.setAttribute("fill-opacity",all?1:0);center.setAttribute("r",all?34:20);star.setAttribute("fill-opacity",all?1:0);
+    const n=on.filter(Boolean).length;
+    $("#vennOut").innerHTML=all?`<b>מחוננת לפי רנזולי.</b> יכולת מעל הממוצע (לא בהכרח גבוהה מאוד), יצירתיות גבוהה ומחויבות גבוהה למשימה, יחד.`
+      :on[0]&&n===1?`יכולת גבוהה לבדה אינה מספיקה לפי רנזולי. חסרות ${!on[1]&&!on[2]?"יצירתיות ומחויבות למשימה":!on[1]?"יצירתיות":"מחויבות למשימה"}.`
+      :`עדיין לא בהגדרה. רנזולי דורש את שלושת המאפיינים יחד: אדם יכול להיחשב מחונן גם אם מנת המשכל שלו רק מעל הממוצע, בתנאי שיש לו גם יצירתיות ומחויבות גבוהות.`;
+    if(all){iqUsed.venn=true}}
+  $$("#vennCtl input").forEach(i=>i.addEventListener("change",upd));upd();
+})();
+
+/* =========================================================
+   4. THEORIES
+   ========================================================= */
+(function gfactor(){
+  const svg=$("#gmat");const tests=["אוצר מילים","חשבון","סידור קוביות","זכירת ספרות","השלמת תמונות"];
+  const spec=[.08,.1,.05,.12,.06];const N=tests.length,x0=150,y0=20,cs=42;
+  const cells=[];
+  tests.forEach((t,i)=>{txt(svg,{x:x0-8,y:y0+i*cs+cs/2+5,"text-anchor":"end","font-size":13,fill:"var(--ink)"},t);
+    txt(svg,{x:0,y:0,"text-anchor":"end","font-size":12,fill:"var(--muted)",transform:`translate(${x0+i*cs+cs/2+4},${y0+N*cs+8}) rotate(-45)`},t);
+    for(let j=0;j<N;j++){const r=el("rect",{x:x0+j*cs+1,y:y0+i*cs+1,width:cs-2,height:cs-2,rx:5},svg);const v=txt(svg,{x:x0+j*cs+cs/2,y:y0+i*cs+cs/2+4,"text-anchor":"middle","font-size":11,"font-family":MONO},"");cells.push({i,j,r,v})}});
+  function upd(){const g=$("#slG").value/100;$("#outG").textContent=g.toFixed(2);setP($("#slG"));
+    let sum=0,cnt=0;
+    cells.forEach(c=>{const r=c.i===c.j?1:clamp(g*g+spec[c.i]*spec[c.j]*2,0,.99);if(c.i!==c.j){sum+=r;cnt++}
+      c.r.setAttribute("fill","var(--accent)");c.r.setAttribute("fill-opacity",c.i===c.j?.12:(.08+r*.85).toFixed(2));
+      c.v.textContent=c.i===c.j?"—":r.toFixed(2).replace("0.",".");c.v.setAttribute("fill",r>.5&&c.i!==c.j?"var(--surface)":"var(--ink)")});
+    const avg=sum/cnt;
+    $("#gOut").innerHTML=avg>.45?`כל המבחנים מתואמים זה עם זה (ממוצע <span class="mono">${avg.toFixed(2)}</span>). זו התופעה שהובילה את ספירמן להסיק שקיים <b>משכל כללי, g</b>, שעומד בבסיס כל ביצוע שכלי. מעבר לו יש לכל מבחן גם יכולת ספציפית, <b class="ltr">s</b>.`
+      :avg>.15?`המתאמים בינוניים (ממוצע <span class="mono">${avg.toFixed(2)}</span>): יש גורם משותף, אבל חלק גדול מהביצוע תלוי ביכולות ספציפיות.`
+      :`כמעט אין מתאמים (ממוצע <span class="mono">${avg.toFixed(2)}</span>). אילו זה היה המצב, לא היה בסיס לדבר על משכל כללי, וכל מבחן היה מודד יכולת נפרדת.`}
+  $("#slG").addEventListener("input",()=>{upd();thUsed.g=true;checkTh()});upd();
+})();
+const thUsed={g:false,sort:false,cube:false};
+function checkTh(){if(thUsed.sort||(thUsed.g&&thUsed.cube))markDone("theories")}
+makeSorter($("#sortCattell"),[{n:"מגובש",c:"var(--an)"},{n:"נזיל",c:"var(--cr)"}],[
+ {t:"אוצר מילים",s:"״מה פירוש המילה להתחקות?״",a:0,w:"ידע שכבר נרכש: משכל מגובש."},
+ {t:"חשבון",s:"פתרון בעיה מילולית במספרים",a:0,w:"לפי הספר, משכל מגובש נמדד במבחני אוצר מילים, חשבון וידע כללי."},
+ {t:"ידע כללי",s:"״מהי בירת צרפת?״",a:0,w:"ידע מצטבר מניסיון והשכלה: משכל מגובש."},
+ {t:"סידור קוביות",s:"בניית צורה מקוביות לפי דגם, בזמן מוגבל",a:1,w:"משכל נזיל נמדד במבחני סידור קוביות וויזואליזציה מרחבית."},
+ {t:"ויזואליזציה מרחבית",s:"לדמיין איך צורה תיראה אחרי סיבוב",a:1,w:"תפיסת יחסים מורכבים בלי ידע קודם: משכל נזיל."},
+ {t:"בעיה מופשטת חדשה",s:"להשלים סדרת צורות שלא ראיתם מעולם",a:1,w:"משכל נזיל מסייע להתמודד עם בעיות מופשטות חדשות."},
+ {t:"ניהול חשבון בנק",s:"משימה מוכרת שחוזרת על עצמה בחיים",a:0,w:"משכל מגובש מאפשר להתמודד עם אתגרים מוכרים שחוזרים ונשנים."}],()=>{thUsed.sort=true;checkTh()});
+
+(function guilford(){
+  const CON=["חזותי","שמיעתי","סמלי","סמנטי","התנהגותי"],PRO=["יחידות","קבוצות","יחסים","מערכות","טרנספורמציות","השתמעויות"],OPE=["הערכה","חשיבה מתכנסת","חשיבה מסתעפת","זיכרון","קוגניציה"];
+  const fill=(s,a)=>{s.innerHTML=a.map((n,i)=>`<option value="${i}">${n}</option>`).join("")};
+  fill($("#gcC"),CON);fill($("#gcP"),PRO);fill($("#gcO"),OPE);
+  const svg=$("#cube");const s=40,ox=200,oy=150,dx=.6*s,dy=-.42*s;
+  const P=(i,j,k)=>[ox+i*s+k*dx,oy+j*s+k*dy];
+  const poly=(pts,attrs)=>el("path",Object.assign({d:"M"+pts.map(p=>p.map(v=>v.toFixed(1)).join(",")).join("L")+"Z"},attrs),svg);
+  const front=[],top=[],right=[];
+  for(let i=0;i<5;i++)for(let j=0;j<6;j++)front.push({i,j,e:poly([P(i,j,0),P(i+1,j,0),P(i+1,j+1,0),P(i,j+1,0)],{fill:"var(--surface-2)",stroke:"var(--muted)","stroke-width":1})});
+  for(let i=0;i<5;i++)for(let k=0;k<5;k++)top.push({i,k,e:poly([P(i,0,k),P(i+1,0,k),P(i+1,0,k+1),P(i,0,k+1)],{fill:"var(--surface)",stroke:"var(--muted)","stroke-width":1})});
+  for(let j=0;j<6;j++)for(let k=0;k<5;k++)right.push({j,k,e:poly([P(5,j,k),P(5,j,k+1),P(5,j+1,k+1),P(5,j+1,k)],{fill:"var(--line)",stroke:"var(--muted)","stroke-width":1})});
+  const ghost=el("g",{},svg);
+  const lc=[],lp=[],lo=[];
+  CON.forEach((n,i)=>{const[x,y]=P(i+.5,6,0);lc.push(txt(svg,{x:0,y:0,"text-anchor":"end","font-size":12,fill:"var(--ink)",transform:`translate(${x+4},${y+10}) rotate(-35)`},n))});
+  txt(svg,{x:P(5,6,0)[0]+10,y:P(5,6,0)[1]+26,"text-anchor":"start","font-size":14,"font-weight":700,fill:"var(--an)"},"תוכן");
+  PRO.forEach((n,j)=>{const[x,y]=P(0,j+.5,0);lp.push(txt(svg,{x:x-8,y:y+4,"text-anchor":"end","font-size":12,fill:"var(--ink)"},n))});
+  txt(svg,{x:0,y:0,"text-anchor":"middle","font-size":14,"font-weight":700,fill:"var(--pr)",transform:`translate(${ox-104},${oy+3*s}) rotate(-90)`},"תוצר");
+  OPE.forEach((n,k)=>{const[x,y]=P(0,0,k+.5);lo.push(txt(svg,{x:x-8,y:y-2,"text-anchor":"end","font-size":12,fill:"var(--ink)"},n))});
+  txt(svg,{x:P(0,0,5)[0]-8,y:P(0,0,5)[1]-22,"text-anchor":"end","font-size":14,"font-weight":700,fill:"var(--cr)"},"פעולה");
+  function upd(){const c=+$("#gcC").value,p=+$("#gcP").value,o=+$("#gcO").value;
+    front.forEach(f=>{const on=f.i===c&&f.j===p;f.e.setAttribute("fill",on?"var(--an)":f.i===c||f.j===p?"var(--accent-soft)":"var(--surface-2)")});
+    top.forEach(f=>{const on=f.i===c&&f.k===o;f.e.setAttribute("fill",on?"var(--cr)":f.i===c||f.k===o?"var(--accent-soft)":"var(--surface)")});
+    right.forEach(f=>{const on=f.j===p&&f.k===o;f.e.setAttribute("fill",on?"var(--pr)":f.j===p||f.k===o?"var(--accent-soft)":"var(--line)")});
+    ghost.innerHTML="";
+    const g=(pts)=>{const e=el("path",{d:"M"+pts.map(q=>q.join(",")).join("L")+"Z",fill:"var(--mark)","fill-opacity":.85,stroke:"var(--ink)","stroke-width":1.5},ghost)};
+    // floating cell drawn just above the cube at its (c,o) column, at product row p, offset upward for visibility
+    const off=-(p+1)*0; g([P(c,p,o),P(c+1,p,o),P(c+1,p+1,o),P(c,p+1,o)].map(([x,y])=>[x,y+off]));
+    g([P(c,p,o),P(c+1,p,o),P(c+1,p,o+1),P(c,p,o+1)]);g([P(c+1,p,o),P(c+1,p,o+1),P(c+1,p+1,o+1),P(c+1,p+1,o)]);
+    ghost.setAttribute("opacity",.55);
+    lc.forEach((t,i)=>{t.setAttribute("font-weight",i===c?700:400);t.setAttribute("fill",i===c?"var(--an)":"var(--ink)")});
+    lp.forEach((t,i)=>{t.setAttribute("font-weight",i===p?700:400);t.setAttribute("fill",i===p?"var(--pr)":"var(--ink)")});
+    lo.forEach((t,i)=>{t.setAttribute("font-weight",i===o?700:400);t.setAttribute("fill",i===o?"var(--cr)":"var(--ink)")});
+    $("#gcOut").innerHTML=`<b>${OPE[o]}</b> (פעולה) של <b>${PRO[p]}</b> (תוצר) בעלי תוכן <b>${CON[c]}</b>. זו אחת מ־150 הקוביות במודל. ב־1961 זוהו כ־40 כשרים כאלה, ומאז דווח על יותר מ־100. הקובייה הצהובה מסומנת בתוך המבנה, והפסים הצבעוניים מראים את שלושת הממדים שלה על הפאות.`};
+  ["#gcC","#gcP","#gcO"].forEach(s=>$(s).addEventListener("change",()=>{upd();thUsed.cube=true;checkTh()}));
+  $("#gcEx1").addEventListener("click",()=>{$("#gcC").value=3;$("#gcP").value=0;$("#gcO").value=4;upd();thUsed.cube=true;checkTh();$("#gcOut").innerHTML=`<b>מבחן אוצר מילים</b> מעריך קוגניציה (הפעולה) של יחידות (התוצר) בעלות תוכן סמנטי (התוכן). זו הדוגמה מתרשים 9.4.`});
+  $("#gcEx2").addEventListener("click",()=>{$("#gcC").value=4;$("#gcP").value=3;$("#gcO").value=3;upd();thUsed.cube=true;checkTh();$("#gcOut").innerHTML=`<b>לימוד צעדי ריקוד</b> מצריך זיכרון (הפעולה) של מערכות (התוצר) התנהגותיות (התוכן). כך מתאר זאת הספר.`});
+  $("#gcC").value=3;$("#gcP").value=0;$("#gcO").value=4;upd();
+})();
+
+/* =========================================================
+   5. STERNBERG
+   ========================================================= */
+const K={A:{n:"אנליטי",c:"var(--an)"},C:{n:"יצירתי",c:"var(--cr)"},P:{n:"מעשי",c:"var(--pr)"}};
+const SC=[
+ {t:"שתי חבילות סלולר",type:"A",text:"חבילה א: 49 ₪ לחודש כולל 20GB. חבילה ב: 29 ₪ לחודש כולל 5GB, ועוד 5 ₪ לכל GB נוסף. בחודש רגיל אתם צורכים 9GB, ובחודשי חופשה עד 15GB.",
+  opts:[{t:"לבדוק כמה צרכתם בחודשים האחרונים ולחשב את העלות של כל חבילה לפי הצריכה בפועל.",ok:true,why:"בחודש רגיל שתי החבילות עולות 49 ₪, אבל בחודש חופשה חבילה ב עולה 79 ₪. חבילה א משתלמת."},
+   {t:"לשאול חבר איזו חבילה הוא לקח ולעשות אותו דבר.",why:"פתרון מהיר, אבל הצריכה של החבר שונה משלכם."},
+   {t:"להציע לבן משפחה לפתוח יחד חבילה משפחתית ולחלק את הנפח.",why:"רעיון מקורי, אבל הוא לא עונה על השאלה: איזו משתי החבילות זולה יותר."}],
+  lesson:"פירקתם את הבעיה, השוויתם נתונים והערכתם תוצאות. אלה רכיבי ביצוע של משכל אנליטי."},
+ {t:"האנגרמה התקועה",type:"A",text:"אתם פותרים אנגרמות באנגלית, כמו בטבלה 9.3. את <code>T-R-H-O-S</code> פתרתם מהר (SHORT), אבל על <code>T-N-K-H-G-I</code> אתם תקועים כבר חמש דקות.",
+  opts:[{t:"להמשיך לנסות מילים שמתחילות ב־TH, כי כך מתחילות הרבה מילים באנגלית.",why:"זו המלכודת שסטרנברג מתאר: אסטרטגיה שבדרך כלל טובה, ונכשלת כאן."},
+   {t:"לעצור ולהחליף אסטרטגיה: לבדוק צירופים פחות שכיחים בתחילת מילה, כמו KN.",ok:true,why:"KNIGHT. הבחירה באסטרטגיה ומעקב אחר ההצלחה שלה הם רכיבים מטה־קוגניטיביים."},
+   {t:"לדלג ולחפש את התשובה בסוף הפרק.",why:"זה יפתור את הדף, אבל לא את הבעיה."}],
+  lesson:"הרכיבים המטה־קוגניטיביים בוחרים אסטרטגיה ומנטרים את ההתקדמות. כשהאסטרטגיה הרגילה נכשלת, הם אלה שמחליפים אותה."},
+ {t:"מילה לא מוכרת",type:"A",text:"אתם קוראים מאמר לקורס ונתקלים במילה שלא הכרתם. אין לכם מילון בהישג יד, והמילה חוזרת שלוש פעמים בפסקה.",
+  opts:[{t:"להסיק את המשמעות מתוך ההקשר: מה נאמר לפני המילה ואחריה, ובאילו מצבים היא מופיעה.",ok:true,why:"זה רכיב רכישת ידע: לבודד את המידע הרלוונטי מתוך הטקסט ולצרף אותו לכלל משמעות."},
+   {t:"לדלג על המילה ולהמשיך לקרוא.",why:"המילה חוזרת שלוש פעמים, ובלעדיה תפספסו את הטיעון."},
+   {t:"לשלוח הודעה לחבר מהקורס ולחכות לתשובה.",why:"יעבוד בסוף, אבל לא מפתח את היכולת שלכם."}],
+  lesson:"רכיבי רכישת ידע הם חלק מהמשכל האנליטי: הדרך שבה אנו לומדים עובדות חדשות מתוך המידע שלפנינו."},
+ {t:"מסיבת הפתעה בלי מקום",type:"C",text:"שעתיים לפני מסיבת ההפתעה לחברה הכי טובה שלכם, המסעדה מבטלת את ההזמנה. חמישה־עשר אורחים כבר בדרך, וכל המקומות באזור מלאים.",
+  opts:[{t:"להתקשר לעשר מסעדות ברצף ולקוות שתתפנה טבלה.",why:"ניסיון סביר, אבל כבר ידוע שהכול מלא."},
+   {t:"להפוך את הביטול לחלק מההפתעה: פיקניק לילי בפארק הקרוב, משלוח אוכל, שמיכות ופנסים.",ok:true,why:"מצב חדש לגמרי דורש פתרון חדש. זה משכל יצירתי."},
+   {t:"לבטל ולדחות את המסיבה לשבוע הבא.",why:"שקלתם את המצב, אבל ויתרתם על האירוע."}],
+  lesson:"משכל יצירתי הוא היכולת להתמודד עם בעיות חדשות: למצוא דרך כשהמסלולים המוכרים חסומים."},
+ {t:"שבוע ראשון עם מערכת חדשה",type:"C",text:"התחלתם עבודה חדשה עם תוכנה מסובכת. אחרי שבוע אתם עדיין מבזבזים כשעה ביום על אותן פעולות שגרתיות, ואין לכם פנאי לבעיות האמיתיות.",
+  opts:[{t:"להכין דף קיצורים ותבנית עבודה קבועה, ולתרגל עד שהפעולות נעשות אוטומטיות.",ok:true,why:"הפיכת משימות שגרתיות לאוטומטיות מפנה קשב לבעיות חדשות."},
+   {t:"לבקש מעמית ותיק שיעשה את הפעולות האלה במקומכם.",why:"עובד היום, אבל מחר תצטרכו אותו שוב."},
+   {t:"להמשיך כרגיל. בעוד חודש זה יסתדר מעצמו.",why:"אולי, אבל בינתיים אתם משלמים שעה ביום."}],
+  lesson:"מפתיע? לפי סטרנברג, משכל יצירתי כולל גם את הצד ההפוך לחדשנות: ביצוע אוטומטי של משימות מוכרות, כדי שהמשאבים יתפנו לחדש."},
+ {t:"המקרן לא עובד",type:"C",text:"אתם מציגים עבודה מול הכיתה. דקה לפני ההצגה המקרן מת, וכל המצגת שלכם בנויה על גרפים.",
+  opts:[{t:"להקריא את השקפים מהטלפון, אחד אחרי השני.",why:"תשרדו, אבל הגרפים, שהם עיקר העבודה, ייעלמו."},
+   {t:"לשרטט על הלוח את הגרף המרכזי בשלוש תנועות, ולהפוך את ההצגה לדיון: לבקש מהכיתה לנחש מה הנתונים יראו.",ok:true,why:"הפכתם מגבלה לחוויה חדשה. זו התמודדות יצירתית עם מצב לא צפוי."},
+   {t:"לבקש מהמרצה לדחות את ההצגה לשבוע הבא.",why:"ייתכן שיסכים, אבל הבעיה לא נפתרה."}],
+  lesson:"כשהכלים הרגילים נעלמים, משכל יצירתי מוצא דרך אחרת להשיג את אותה מטרה."},
+ {t:"שותפים רועשים בתקופת מבחנים",type:"P",all:true,text:"השותפים בדירה מארחים חברים בדיוק בשעות שבהן אתם לומדים למבחן. כל אחד מהפתרונות כאן סביר. בחרו את מה שהייתם עושים.",
+  opts:[{t:"ללמוד בשעות הבוקר המוקדמות ולקנות אטמי אוזניים.",ok:true,why:"הסתגלות: אתם משנים את עצמכם כדי להתאים לסביבה."},
+   {t:"לעבור ללמוד בספרייה בתקופת המבחנים.",ok:true,why:"בחירת סביבה: אתם עוברים להקשר שמתאים לכם יותר."},
+   {t:"לקבוע עם השותפים ״שעות שקט״ קבועות בלוח במטבח.",ok:true,why:"עיצוב הסביבה: אתם משנים את ההקשר כך שיתאים לצרכים שלכם."}],
+  lesson:"שלוש הדרכים של משכל מעשי: להסתגל להקשר, לבחור הקשר אחר, או לעצב את ההקשר הקיים. אין כאן תשובה אחת נכונה."},
+ {t:"טעות במצגת של המנהלת",type:"P",text:"יום שני שלכם בעבודה. בישיבת צוות המנהלת מציגה תוכנית תקציב, ואתם בטוחים שיש בה טעות בחישוב.",
+  opts:[{t:"להצביע על הטעות מיד, מול כל הצוות.",why:"החישוב שלכם אולי נכון, אבל ביום השני בעבודה זה עלול לעלות ביוקר."},
+   {t:"לחכות לסוף הישיבה, לגשת אליה בשקט ולהראות את החישוב.",ok:true,why:"הטעות מתוקנת, ואתם מכבדים את הנורמות הלא־כתובות של המקום."},
+   {t:"לא להגיד כלום. אתם חדשים, וזה לא התפקיד שלכם.",why:"שקט חברתי, אבל הטעות נשארת בתוכנית."}],
+  lesson:"משכל מעשי הוא ידע על ההקשר: לא רק מה נכון, אלא איך ומתי לפעול. ידע כזה כמעט אף פעם לא נמדד במבחני מנת משכל."},
+ {t:"עיר חדשה, אף אחד לא מוכר",type:"P",text:"עברתם לעיר חדשה בגלל הלימודים. עברו שלושה שבועות ואתם עדיין לא מכירים אף אחד מחוץ לכיתה.",
+  opts:[{t:"לקרוא מחקרים על בדידות אצל סטודנטים.",why:"מעניין, אבל לא משנה את המצב בשטח."},
+   {t:"לבדוק אילו חוגים, קבוצות ריצה או התנדבויות פועלים בשכונה, ולהצטרף לאחת השבוע.",ok:true,why:"בחרתם הקשר חדש שבו קל להכיר אנשים. זה משכל מעשי."},
+   {t:"לפתח אפליקציה שתחבר בין סטודנטים חדשים.",why:"רעיון יצירתי, אבל ייקח חודשים עד שיעזור לכם."}],
+  lesson:"משכל מעשי מתבטא בניהול ענייני היום־יום: לזהות מה הסביבה מציעה ולהשתמש בזה כדי להשיג את מה שאתם צריכים."}];
+let gs;
+function newGame(){const order=shuffle(SC.map((_,i)=>i));order.forEach(i=>shuffle(SC[i].opts));
+  gs={order,i:0,phase:"act",act:0,tag:0,per:{A:[0,0],C:[0,0],P:[0,0]}};renderStage();renderTri()}
+const cur=()=>SC[gs.order[gs.i]];
+function scores(){$("#scAct").textContent=gs.act+"/"+(gs.i+(gs.phase!=="act"?1:0));$("#scTag").textContent=gs.tag+"/"+(gs.i+(gs.phase==="done"?1:0))}
+function renderStage(){
+  const st=$("#stage");scores();
+  if(gs.i>=SC.length)return renderEnd();
+  const s=cur();
+  st.innerHTML=`<div class="progress">${SC.map((_,j)=>`<span class="${j<gs.i?"done":j===gs.i?"now":""}"></span>`).join("")}</div>
+   <div class="scn-meta"><span class="mono">תרחיש ${gs.i+1} מתוך ${SC.length}</span><span>${gs.phase==="act"?"שלב 1: בחרו פתרון":gs.phase==="tag"?"שלב 2: איזה רכיב משכל זה?":"סיכום התרחיש"}</span></div>
+   <h3 class="scn-title">${s.t}</h3><p class="scn-text">${s.text}</p>
+   <div class="opts">${s.opts.map((o,j)=>`<button type="button" class="opt" data-j="${j}"><span class="bub">${letter(j)}</span><span>${o.t}<span class="why" hidden>${o.why}</span></span></button>`).join("")}</div>
+   <div id="after"></div>`;
+  $$(".opt",st).forEach(b=>b.addEventListener("click",()=>chooseAct(+b.dataset.j)));
+}
+function paintOpts(){const s=cur();
+  $$("#stage .opt").forEach((b,j)=>{b.disabled=true;const o=s.opts[j];$(".why",b).hidden=false;
+    if(s.all){b.classList.toggle("right",j===gs.chosen);b.classList.toggle("dim",j!==gs.chosen)}
+    else if(o.ok)b.classList.add("right");else if(j===gs.chosen)b.classList.add("wrong");else b.classList.add("dim")})}
+function chooseAct(j){const s=cur();gs.chosen=j;const ok=!!s.opts[j].ok;
+  if(ok)gs.act++;gs.per[s.type][0]+=ok?1:0;gs.per[s.type][1]+=1;
+  gs.phase="tag";paintOpts();renderTagger();renderTri();scores()}
+function renderTagger(){const s=cur(),o=s.opts[gs.chosen];
+  const head=s.all?`<div class="feedback" style="--c:var(--pr)">${o.why}</div>`:o.ok?`<div class="feedback" style="--c:var(--good)"><b>פתרון מצוין.</b> ${o.why}</div>`:`<div class="feedback" style="--c:var(--bad)"><b>לא הפעם.</b> ${o.why}</div>`;
+  $("#after").innerHTML=head+`<div class="tagger" style="margin-top:12px"><p>איזה רכיב משכל מפעיל הפתרון ${s.all?"שבחרתם":"הטוב ביותר"}?</p><div class="tag-btns">${Object.keys(K).map(k=>`<button type="button" class="tag-btn" data-k="${k}" style="--c:${K[k].c}">${K[k].n}</button>`).join("")}</div></div><div id="lesson"></div>`;
+  $$("#after .tag-btn").forEach(b=>b.addEventListener("click",()=>chooseTag(b.dataset.k)));
+  $("#after .tag-btn").focus({preventScroll:true})}
+function chooseTag(k){const s=cur();gs.tagPick=k;const ok=k===s.type;if(ok)gs.tag++;gs.per[s.type][0]+=ok?1:0;gs.per[s.type][1]+=1;gs.phase="done";showLesson();renderTri();scores()}
+function showLesson(){const s=cur(),right=gs.tagPick===s.type;
+  $$("#stage .tag-btn").forEach(b=>{b.disabled=true;if(b.dataset.k===s.type)b.classList.add("picked");else if(b.dataset.k===gs.tagPick)b.classList.add("miss")});
+  $("#lesson").innerHTML=`<div class="feedback" style="--c:${K[s.type].c};margin-top:12px"><b>${right?"נכון: ":"התשובה: "}משכל ${K[s.type].n}.</b> ${s.lesson}</div>
+   <button class="btn" type="button" id="nextBtn" style="margin-top:12px">${gs.i<SC.length-1?"לתרחיש הבא":"לתוצאות"}</button>`;
+  $("#nextBtn").addEventListener("click",()=>{gs.i++;gs.phase="act";renderStage();const st=$("#stage");const r=st.getBoundingClientRect();if(r.top<0)st.scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"});const f=$("#stage .opt");f&&f.focus({preventScroll:true})});
+  $("#nextBtn").focus({preventScroll:true})}
+function pct(k){const[a,b]=gs.per[k];return b?a/b:0}
+function renderEnd(){
+  const st=$("#stage");const ks=["A","C","P"];const best=ks.slice().sort((a,b)=>pct(b)-pct(a));
+  const strong=best[0],weak=best[2];const flat=pct(strong)-pct(weak)<.2;
+  st.innerHTML=`<div class="progress">${SC.map(()=>`<span class="done"></span>`).join("")}</div>
+   <p class="eyebrow">סיום המשחק</p><h3 class="scn-title">פתרתם ${gs.act} מתוך ${SC.length} תרחישים, וזיהיתם נכון ${gs.tag} רכיבים</h3>
+   ${flat?`<div class="feedback" style="--c:var(--accent)"><b>הצלחה מאוזנת בשלושת הרכיבים.</b> לא היה רכיב אחד שבלט אצלכם לטובה או לרעה.</div>`
+     :`<div class="feedback" style="--c:${K[strong].c}"><b>הכי טוב: תרחישים של משכל ${K[strong].n} (${Math.round(pct(strong)*100)}%).</b> הכי מאתגר: משכל ${K[weak].n} (${Math.round(pct(weak)*100)}%). כדאי לחזור להגדרה שלו בצד.</div>`}
+   <p class="scn-text">לפי סטרנברג, אדם אינטליגנטי אינו מי שחזק בכל שלושת הרכיבים, אלא מי שמזהה איזה רכיב המצב דורש ומשתמש בו. המשולש מראה את אחוז ההצלחה שלכם בכל רכיב, כולל בחירת הפתרון וזיהוי הרכיב.</p>
+   <button class="btn" type="button" id="againBtn">משחק חדש</button><canvas class="confetti" id="conf"></canvas>`;
+  $("#againBtn").addEventListener("click",newGame);renderTri();markDone("sternberg");
+  if(!reduce)confetti($("#conf"));
+}
+function renderTri(){
+  const svg=$("#tri");svg.innerHTML="";const R=105,keys=["A","C","P"];
+  const a=i=>-Math.PI/2+i*2*Math.PI/3,p=(i,v)=>[Math.cos(a(i))*R*v,Math.sin(a(i))*R*v];
+  [1,.66,.33].forEach(v=>el("path",{d:keys.map((_,i)=>{const[x,y]=p(i,v);return(i?"L":"M")+x+","+y}).join("")+"Z",fill:v===1?"var(--surface-2)":"none",stroke:"var(--line)"},svg));
+  keys.forEach((k,i)=>{const[x,y]=p(i,1);el("line",{x1:0,y1:0,x2:x,y2:y,stroke:"var(--line)"},svg);
+    const[lx,ly]=p(i,1.22);const has=gs.per[k][1]>0;
+    txt(svg,{x:lx,y:ly+(i===0?-6:12),"text-anchor":"middle","font-size":14,"font-weight":700,fill:K[k].c},K[k].n);
+    txt(svg,{x:lx,y:ly+(i===0?10:28),"text-anchor":"middle","font-size":12,fill:"var(--muted)","font-family":MONO},has?Math.round(pct(k)*100)+"%":"–")});
+  const vals=keys.map(k=>gs.per[k][1]?Math.max(.06,pct(k)):.06);
+  el("path",{d:keys.map((k,i)=>{const[x,y]=p(i,vals[i]);return(i?"L":"M")+x+","+y}).join("")+"Z",fill:"var(--mark)","fill-opacity":.35,stroke:"var(--mark)","stroke-width":2.5,"stroke-linejoin":"round"},svg);
+  keys.forEach((k,i)=>{const[x,y]=p(i,vals[i]);el("circle",{cx:x,cy:y,r:5,fill:K[k].c,stroke:"var(--surface)","stroke-width":2},svg)});
+  txt(svg,{x:0,y:132,"text-anchor":"middle","font-size":12,fill:"var(--muted)"},gs.i===0&&gs.phase==="act"?"המשולש יתמלא לפי ההצלחה שלכם":"אחוז הצלחה לפי רכיב");
+}
+function confetti(cv){const r=cv.getBoundingClientRect();cv.width=r.width;cv.height=r.height;const ctx=cv.getContext("2d");
+  const cols=[css("--an"),css("--cr"),css("--pr"),css("--mark")];const ps=Array.from({length:90},()=>({x:Math.random()*cv.width,y:-20-Math.random()*cv.height*.5,vx:(Math.random()-.5)*2,vy:2+Math.random()*3,c:cols[Math.floor(Math.random()*4)],a:Math.random()*6}));
+  let f=0;(function loop(){ctx.clearRect(0,0,cv.width,cv.height);ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.a+=.1;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.a);ctx.fillStyle=p.c;ctx.fillRect(-4,-2,8,4);ctx.restore()});if(++f<160)requestAnimationFrame(loop);else ctx.clearRect(0,0,cv.width,cv.height)})()}
+newGame();
+
+/* =========================================================
+   6. GARDNER
+   ========================================================= */
+const INT=[
+ {k:"log",n:"לוגי־מתמטי",c:"#2F64B0",end:"מדען, מתמטיקאי",core:"רגישות לתבניות הגיוניות או מספריות והיכולת להבחין בהן; יכולת לעסוק בשרשראות ארוכות של היסק.",q:["אני נהנה/ית לפתור חידות היגיון ובעיות מספריות.","כשמשהו לא עובד, אני מחפש/ת את הסיבה צעד אחר צעד."]},
+ {k:"lin",n:"לשוני",c:"#8A4FBF",end:"משורר, עיתונאי",core:"רגישות לצלילי מילים, למקצב שלהן ולמשמעותן; רגישות לפונקציות השונות של שפה.",q:["קל לי להסביר רעיון מסובך במילים פשוטות.","אני שם/ה לב לבחירת מילים ולניסוח של אחרים."]},
+ {k:"nat",n:"נטורליסטי",c:"#3D8B47",end:"ביולוג, איש איכות הסביבה",core:"רגישות להבדלים בין מגוון המינים; תקשורת טובה עם יצורים חיים.",q:["אני מזהה בקלות סוגי צמחים, ציפורים או בעלי חיים.","בטבע אני מרגיש/ה בבית ושם/ה לב לפרטים קטנים."]},
+ {k:"mus",n:"מוסיקלי",c:"#C0407A",end:"מלחין, כנר",core:"יכולת להפיק ולהעריך קצב, גובה צליל וגוון קול; הערכת צורות של הבעה מוסיקלית.",q:["אני קולט/ת מנגינה אחרי שמיעה אחת או שתיים.","אני שומע/ת מיד כשמישהו שר או מנגן לא בדיוק."]},
+ {k:"spa",n:"מרחבי",c:"#D9822B",end:"נווט, פסל",core:"יכולת לתפוס את העולם החזותי־מרחבי בדייקנות ולערוך שינויים בתפיסות הראשוניות.",q:["אני מתמצא/ת בקלות במקום חדש גם בלי מפה.","קל לי לדמיין איך חפץ ייראה אם יסובבו אותו."]},
+ {k:"bod",n:"גופני־קינסתטי",c:"#0E7C86",end:"רקדן, אתלט",core:"יכולת לשלוט בתנועות הגוף ולטפל בעצמים במיומנות.",q:["אני לומד/ת תנועה חדשה (ריקוד, ספורט) מהר.","אני חושב/ת טוב יותר כשאני בתנועה או עושה משהו בידיים."]},
+ {k:"inter",n:"בין־אישי",c:"#B5483C",end:"מטפל, איש מכירות",core:"יכולת להבין מצבי רוח, מזג, מוטיבציה ותשוקה של אנשים אחרים ולהגיב עליהם כראוי.",q:["אנשים פונים אליי כשהם צריכים עצה או אוזן קשבת.","אני מרגיש/ה מהר כשמשהו לא בסדר אצל מישהו."]},
+ {k:"intra",n:"תוך־אישי",c:"#5B6BA8",end:"אדם בעל מודעות עצמית מדויקת",core:"גישה לרגשות העצמי והיכולת להבחין ביניהם ולהיעזר בהם להכוונת ההתנהגות; הכרת הכוחות, החולשות והתשוקות של עצמך.",q:["אני יודע/ת בדיוק מה מניע אותי ולמה.","אני מזהה את החוזקות והחולשות שלי בלי לייפות."]}];
+const SCHOOL=[9,9,3,2.5,3.5,2.5,3,3];
+const SAMPLES=[[7,6,4,5,7,5,8,6],[4,9,3,8,5,4,8,9],[9,5,6,3,9,4,3,5],[3,4,8,6,7,10,6,5],[6,7,5,9,6,7,9,7]];
+const N=INT.length;
+let gState=store.get("ch9-g2",null)||{vals:SAMPLES[0].slice(),lik:INT.map(()=>[0,0]),touched:false};
+let gVals=gState.vals,gLik=gState.lik,sampleIdx=0;
+let disp=gVals.slice(),selIdx=null;
+const saveG=()=>store.set("ch9-g2",{vals:gVals,lik:gLik,touched:gState.touched});
+const RAD=125,ang=i=>-Math.PI/2+i*2*Math.PI/N,pt=(i,v)=>[Math.cos(ang(i))*RAD*v/10,Math.sin(ang(i))*RAD*v/10];
+const radar=$("#radar");
+const rings=el("g",{},radar);
+[2,4,6,8,10].forEach(v=>{let d="";for(let i=0;i<N;i++){const[x,y]=pt(i,v);d+=(i?"L":"M")+x.toFixed(1)+","+y.toFixed(1)}el("path",{d:d+"Z",fill:v===10?"var(--surface-2)":"none",stroke:"var(--line)","stroke-width":1},rings)});
+for(let i=0;i<N;i++){const[x,y]=pt(i,10);el("line",{x1:0,y1:0,x2:x,y2:y,stroke:"var(--line)"},rings)}
+[2,4,6,8,10].forEach(v=>{const a=-Math.PI/2+Math.PI/N;txt(rings,{x:Math.cos(a)*RAD*v/10,y:Math.sin(a)*RAD*v/10+3,"text-anchor":"middle","font-size":10,fill:"var(--muted)","font-family":MONO,stroke:"var(--surface-2)","stroke-width":3,"paint-order":"stroke"},v)});
+const schoolPath=el("path",{fill:"var(--muted)","fill-opacity":.08,stroke:"var(--muted)","stroke-width":2,"stroke-dasharray":"6 5",visibility:"hidden"},radar);
+schoolPath.setAttribute("d",SCHOOL.map((v,i)=>{const[x,y]=pt(i,v);return(i?"L":"M")+x+","+y}).join("")+"Z");
+const shape=el("path",{fill:"var(--accent)","fill-opacity":.2,stroke:"var(--accent)","stroke-width":2.5,"stroke-linejoin":"round"},radar);
+const dots=[],labels=[];
+INT.forEach((it,i)=>{
+  const hit=el("circle",{r:16,fill:"transparent",class:"dragdot"},radar);
+  const d=el("circle",{r:6.5,fill:it.c,stroke:"var(--surface)","stroke-width":2,"pointer-events":"none"},radar);dots.push([d,hit]);
+  const[lx,ly]=pt(i,12.6);const c=Math.cos(ang(i)),anchor=Math.abs(c)<.2?"middle":c>0?"start":"end";
+  const g=el("g",{class:"radar-axis-label",tabindex:0,role:"button","aria-label":"פרטים על "+it.n},radar);
+  const t=txt(g,{x:lx,y:ly+4,"text-anchor":anchor,"font-size":14,"font-weight":600,fill:"var(--ink)"},it.n);
+  const v=txt(g,{class:"rv-val",x:lx,y:ly+20,"text-anchor":anchor,"font-size":12,fill:it.c,"font-family":MONO,"font-weight":600},"");
+  labels.push({t,v});
+  g.addEventListener("click",()=>select(i));g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();select(i)}});
+});
+// Dragging: pick the dot under the pointer; when several dots are stacked (e.g. all at 0), choose the axis by drag direction.
+let drag=null;
+const toSvg=e=>new DOMPoint(e.clientX,e.clientY).matrixTransform(radar.getScreenCTM().inverse());
+radar.addEventListener("touchstart",e=>{if(e.target.classList&&e.target.classList.contains("dragdot"))e.preventDefault()},{passive:false});
+radar.addEventListener("pointerdown",e=>{
+  if(!(e.target.classList&&e.target.classList.contains("dragdot")))return;
+  const p0=toSvg(e),c=[];for(let i=0;i<N;i++){const[x,y]=pt(i,disp[i]);if(Math.hypot(x-p0.x,y-p0.y)<=18)c.push(i)}
+  if(!c.length)return;
+  drag={id:e.pointerId,c,axis:c.length===1?c[0]:null,x0:p0.x,y0:p0.y};
+  try{radar.setPointerCapture(e.pointerId)}catch(_){}
+  e.preventDefault();if(drag.axis!==null)select(drag.axis);
+});
+radar.addEventListener("pointermove",e=>{
+  if(!drag||e.pointerId!==drag.id)return;const p=toSvg(e);
+  if(drag.axis===null){const dx=p.x-drag.x0,dy=p.y-drag.y0;if(Math.hypot(dx,dy)<6)return;const a=Math.atan2(dy,dx);let best=drag.c[0],bd=9;
+    for(const i of drag.c){const d=Math.abs(((a-ang(i))%(2*Math.PI)+3*Math.PI)%(2*Math.PI)-Math.PI);if(d<bd){bd=d;best=i}}drag.axis=best;select(best)}
+  setVal(drag.axis,Math.round(clamp((p.x*Math.cos(ang(drag.axis))+p.y*Math.sin(ang(drag.axis)))/RAD*10,0,10)));
+});
+const endDrag=()=>{drag=null};radar.addEventListener("pointerup",endDrag);radar.addEventListener("pointercancel",endDrag);
+// sliders
+INT.forEach((it,i)=>{
+  const d=document.createElement("div");d.className="sl";d.style.setProperty("--c",it.c);
+  d.innerHTML=`<label for="g-${it.k}"><i></i>${it.n}</label><output id="go-${it.k}"></output><input type="range" id="g-${it.k}" min="0" max="10" step="1" style="--c:${it.c}">`;
+  $("#sliders").appendChild(d);
+  const inp=$("input",d);inp.addEventListener("input",()=>{setVal(i,+inp.value);select(i)});
+});
+// questionnaire
+const qOrder=[];INT.forEach((it,i)=>it.q.forEach((s,j)=>qOrder.push([i,j])));
+qOrder.sort((a,b)=>a[1]-b[1]||((a[0]*3)%8)-((b[0]*3)%8));
+qOrder.forEach(([i,j])=>{
+  const it=INT[i],d=document.createElement("div");d.className="q-item";d.style.setProperty("--c",it.c);d.dataset.i=i;d.dataset.j=j;
+  d.innerHTML=`<p><small>${it.n}</small>${it.q[j]}</p><div class="likert" role="group" aria-label="${it.q[j]}">${[1,2,3,4,5].map(n=>`<button type="button" data-n="${n}" aria-label="${n}">${n}</button>`).join("")}</div>`;
+  $("#quest").appendChild(d);
+  $$("button",d).forEach(b=>b.addEventListener("click",()=>{
+    gLik[i][j]=+b.dataset.n;const filled=gLik[i].filter(Boolean);const avg=filled.reduce((s,v)=>s+v,0)/filled.length;
+    setVal(i,Math.round((avg-1)/4*10));select(i);syncQuest();
+  }));
+});
+function syncQuest(){
+  $$("#quest .q-item").forEach(d=>{const v=gLik[d.dataset.i][d.dataset.j];d.classList.toggle("answered",!!v);$$("button",d).forEach(b=>b.setAttribute("aria-pressed",+b.dataset.n===v))});
+  const n=gLik.flat().filter(Boolean).length;
+  $("#qprog").innerHTML=n===16?`<b>16/16</b> ענית על כל ההיגדים. הדירוג מתחת למכ״ם מבוסס עכשיו על השאלון.`:`<b>${n}/16</b> היגדים. כל תשובה מעדכנת מיד את סוג המשכל שלה.`;
+}
+$("#modeSl").addEventListener("click",()=>{$("#modeSl").setAttribute("aria-pressed",true);$("#modeQ").setAttribute("aria-pressed",false);$("#sliders").hidden=false;$("#questWrap").hidden=true});
+$("#modeQ").addEventListener("click",()=>{$("#modeQ").setAttribute("aria-pressed",true);$("#modeSl").setAttribute("aria-pressed",false);$("#sliders").hidden=true;$("#questWrap").hidden=false});
+$("#gRandom").addEventListener("click",()=>{sampleIdx=(sampleIdx+1)%SAMPLES.length;gLik=INT.map(()=>[0,0]);gState.touched=false;SAMPLES[sampleIdx].forEach((v,i)=>gVals[i]=v);selIdx=null;syncAll()});
+$("#gReset").addEventListener("click",()=>{gLik=INT.map(()=>[0,0]);gState.touched=true;gVals.fill(5);selIdx=null;syncAll()});
+$("#schoolOverlay").addEventListener("change",e=>schoolPath.setAttribute("visibility",e.target.checked?"visible":"hidden"));
+
+function setVal(i,v){if(gVals[i]===v&&gState.touched)return;gVals[i]=v;gState.touched=true;syncAll()}
+function select(i){selIdx=i;renderResult()}
+function syncAll(){
+  INT.forEach((it,i)=>{const inp=$("#g-"+it.k);inp.value=gVals[i];setP(inp);$("#go-"+it.k).textContent=gVals[i];labels[i].v.textContent=gVals[i]});
+  saveG();syncQuest();renderResult();kick();
+  if(gState.touched)markDone("gardner");
+}
+function renderResult(){
+  const ranked=gVals.map((v,i)=>({v,i})).sort((a,b)=>b.v-a.v||a.i-b.i);
+  const max=ranked[0].v,min=ranked[N-1].v,tops=ranked.filter(r=>r.v===max);
+  $("#exPill").hidden=gState.touched;
+  $("#resTitle").textContent=gState.touched?"התוצאה שלכם":"התוצאה בפרופיל לדוגמה";
+  let lead;
+  if(max-min<=1)lead=`הפרופיל כמעט שטוח: כל סוגי המשכל מדורגים בערך באותה רמה (${min}–${max}). הזיזו מחוונים כדי לראות במה אתם בולטים.`;
+  else if(tops.length===1){const t=INT[tops[0].i];lead=`סוג המשכל הבולט ביותר: <b style="--c:${t.c};color:${t.c}">${t.n}</b> (${max}/10). מצב סופי מייצג: ${t.end}. אחריו: ${ranked.slice(1,3).map(r=>INT[r.i].n+" ("+r.v+")").join(" ו")}.`}
+  else lead=`יש תיקו בראש, ב־${max}/10: ${tops.map(r=>`<b style="color:${INT[r.i].c}">${INT[r.i].n}</b>`).join(", ")}.`;
+  lead+=` הנמוך ביותר: ${INT[ranked[N-1].i].n} (${min}).`;
+  $("#resLead").innerHTML=lead;
+  const lt=INT[ranked[0].i];
+  $("#liveTop").innerHTML=max-min<=1?`הפרופיל כרגע שטוח (${min}–${max}).`:tops.length>1?`בולטים כרגע (תיקו, ${max}): ${tops.map(r=>`<b style="--c:${INT[r.i].c}">${INT[r.i].n}</b>`).join(", ")}`:`הבולט ביותר כרגע: <b style="--c:${lt.c}">${lt.n}</b> (${max}/10). הדירוג המלא מתחת למכ״ם.`;
+  const rank=$("#rank");
+  if(!rank.children.length){rank.style.height=(N*34)+"px";INT.forEach((it,i)=>{const b=document.createElement("button");b.type="button";b.className="rank-row";b.dataset.i=i;b.style.setProperty("--c",it.c);
+    b.innerHTML=`<span class="nm">${it.n}</span><span class="bar"><i></i></span><span class="v"></span>`;b.addEventListener("click",()=>select(i));rank.appendChild(b)})}
+  ranked.forEach((r,pos)=>{const b=rank.children[r.i];b.style.transform=`translateY(${pos*34}px)`;$("i",b).style.width=(r.v*10)+"%";$(".v",b).textContent=r.v;
+    b.classList.toggle("top",r.v===max&&max-min>1);b.classList.toggle("sel",r.i===selIdx);b.setAttribute("aria-label",`${INT[r.i].n}: ${r.v} מתוך 10, מקום ${pos+1}`)});
+  const di=selIdx??ranked[0].i,it=INT[di];
+  $("#gDetail").style.setProperty("--c",it.c);
+  $("#gDetail").innerHTML=`<b>${it.n}${selIdx===null?" (הבולט ביותר)":""}.</b> ${it.core} <span class="muted">מצב סופי מייצג: ${it.end}.</span>`;
+  labels.forEach((l,i)=>l.t.setAttribute("fill",i===di?INT[i].c:"var(--ink)"));
+  $$(".sl").forEach((s,j)=>s.classList.toggle("hl",j===selIdx));
+}
+let raf=0;function kick(){if(!raf)raf=requestAnimationFrame(tick)}
+function tick(){raf=0;let moving=false;
+  for(let i=0;i<N;i++){const d=gVals[i]-disp[i];if(Math.abs(d)>.01){disp[i]+=reduce?d:d*.2;moving=true}else disp[i]=gVals[i]}
+  let p="";for(let i=0;i<N;i++){const[x,y]=pt(i,disp[i]);p+=(i?"L":"M")+x.toFixed(2)+","+y.toFixed(2);dots[i].forEach(c=>{c.setAttribute("cx",x);c.setAttribute("cy",y)})}
+  shape.setAttribute("d",p+"Z");if(moving)kick()}
+syncAll();
+
+/* =========================================================
+   7. POLITICS
+   ========================================================= */
+(function pots(){
+  const svg=$("#pots");const rng=mulberry32(42);const G=Array.from({length:7},()=>gauss(rng)),W=Array.from({length:14},()=>gauss(rng));
+  const potX=[390,130],baseY=230;const plants=[];
+  potX.forEach((px,p)=>{
+    el("path",{d:`M${px-95},${baseY} L${px+95},${baseY} L${px+75},${baseY+50} L${px-75},${baseY+50}Z`,fill:"var(--surface-2)",stroke:"var(--muted)","stroke-width":2},svg);
+    const soil=el("rect",{x:px-95,y:baseY-8,width:190,height:12,rx:4},svg);
+    txt(svg,{x:px,y:baseY+32,"text-anchor":"middle","font-size":13,"font-weight":700,fill:"var(--ink)"},p?"עציץ ב":"עציץ א");
+    G.forEach((g,i)=>{const x=px-72+i*24;const stem=el("line",{x1:x,x2:x,y1:baseY-8,stroke:"var(--pr)","stroke-width":3,"stroke-linecap":"round"},svg);
+      const leaf=el("ellipse",{cx:x,rx:7,ry:4.5,fill:"var(--pr)"},svg);plants.push({p,i,x,stem,leaf,soil,h:0,th:0})});
+    plants.filter(q=>q.p===p)[0].soilEl=soil;
+  });
+  const meanLine=[0,1].map(p=>el("line",{x1:potX[p]-95,x2:potX[p]+95,stroke:"var(--ink)","stroke-width":1.5,"stroke-dasharray":"5 4"},svg));
+  const brace=el("line",{x1:260,x2:260,stroke:"var(--mark)","stroke-width":3},svg);
+  const braceT=txt(svg,{x:260,y:0,"text-anchor":"middle","font-size":12,"font-weight":700,fill:"var(--ink)"},"");
+  function upd(){const soil=$("#slSoil").value/100,wv=$("#waterVar").checked;$("#outSoil").textContent=Math.round(soil*100)+"%";setP($("#slSoil"));
+    const means=[0,0];const vg=1,ve=wv?1.2:0;
+    plants.forEach(q=>{const env=(q.p===0?1:1-soil)*70;const noise=wv?W[q.p*7+q.i]*14:0;q.th=Math.max(14,40+env+G[q.i]*16+noise);means[q.p]+=q.th/7});
+    [0,1].forEach(p=>{const s=plants.find(q=>q.p===p&&q.soilEl).soilEl;s.style.fill=p===0?"#6B4A2B":`color-mix(in srgb,#6B4A2B ${Math.round((1-soil)*100)}%,#C9B79C)`});
+    meanLine.forEach((l,p)=>{l.setAttribute("y1",baseY-8-means[p]);l.setAttribute("y2",baseY-8-means[p])});
+    brace.setAttribute("y1",baseY-8-means[0]);brace.setAttribute("y2",baseY-8-means[1]);braceT.setAttribute("y",baseY-8-(means[0]+means[1])/2+4);
+    const diff=Math.round(means[0]-means[1]);braceT.textContent=diff>2?diff+" ס״מ":"";
+    const h2=Math.round(vg/(vg+ve)*100);
+    $("#potRO").innerHTML=`<div class="ro"><span>תורשתיות בתוך עציץ</span><b>${h2}%</b></div><div class="ro"><span>הפרש בין העציצים</span><b>${diff} ס״מ</b></div><div class="ro"><span>חלק הגנים בהפרש</span><b>0%</b></div>`;
+    $("#potOut").innerHTML=diff>2?`בתוך כל עציץ התורשתיות ${h2===100?"מלאה":"גבוהה"}, ובכל זאת <b>ההבדל בין העציצים נובע כולו מהאדמה</b>. כך גם במנת משכל: אומדן תורשתיות גבוה בתוך קבוצה אינו אומר דבר על מקור ההבדל בין קבוצות.`:`כשהאדמה זהה, אין הבדל ממוצע בין העציצים. ההבדלים בתוך כל עציץ עדיין קיימים, והם נובעים מהגנים.`;
+    if(!reduce)animate();else plants.forEach(q=>{q.h=q.th;draw(q)});}
+  function draw(q){q.stem.setAttribute("y2",baseY-8-q.h);q.leaf.setAttribute("cy",baseY-8-q.h);}
+  let ar=0;function animate(){if(ar)return;ar=requestAnimationFrame(function f(){ar=0;let m=false;plants.forEach(q=>{const d=q.th-q.h;if(Math.abs(d)>.3){q.h+=d*.15;m=true}else q.h=q.th;draw(q)});if(m)ar=requestAnimationFrame(f)})}
+  $("#slSoil").addEventListener("input",()=>{upd();markDone("politics")});$("#waterVar").addEventListener("change",()=>{upd();markDone("politics")});upd();
+})();
+(function stereo(){
+  const DATA=[{groups:["משתתפים שחורים","משתתפים לבנים"],frames:["המבחן מאבחן יכולת","המבחן לא מאבחן"],vals:[[6,11.5],[10.5,10.8]],max:20,unit:"בעיות שנפתרו",
+     msg:["כשנאמר שהמבחן בודק יכולת אינטלקטואלית, הסטודנטים השחורים פתרו פחות בעיות. הסטריאוטיפ הפך לרלוונטי למצב, והחשש לחזק אותו פגע בביצוע.","כשנאמר שהניסוי עוסק בתהליכים פסיכולוגיים ולא ביכולת, הפער כמעט נעלם."]},
+    {groups:["נשים","גברים"],frames:["המבחן הראה בעבר הבדל בין המגדרים","המבחן לא הראה הבדל"],vals:[[5,25],[17,19]],max:30,unit:"ציון במבחן",
+     msg:["כשנאמר שהמבחן מראה הבדל בין גברים לנשים, הנשים קיבלו ציונים נמוכים בהרבה.","כשנאמר שהמבחן לא מראה הבדל בין המגדרים, אותו מבחן מתמטיקה קשה לא הניב הבדל משמעותי."]}];
+  let st=0,fr=0;const svg=$("#stbars");const cur={a:0,b:0};
+  const L=60,R=420,T=20,B=210;
+  function frameBtns(){$("#frameSeg").innerHTML=DATA[st].frames.map((f,i)=>`<button type="button" data-f="${i}" aria-pressed="${i===fr}">${f}</button>`).join("");
+    $$("#frameSeg button").forEach(b=>b.addEventListener("click",()=>{fr=+b.dataset.f;frameBtns();draw();markDone("politics")}))}
+  function draw(){const d=DATA[st];svg.innerHTML="";const sy=v=>B-v/d.max*(B-T);
+    for(let v=0;v<=d.max;v+=d.max/4){el("line",{x1:L,x2:R,y1:sy(v),y2:sy(v),stroke:"var(--line)"},svg);txt(svg,{x:L-8,y:sy(v)+4,"text-anchor":"end","font-size":11,fill:"var(--muted)","font-family":MONO},v)}
+    txt(svg,{x:14,y:(T+B)/2,"text-anchor":"middle","font-size":12,fill:"var(--muted)",transform:`rotate(-90 14 ${(T+B)/2})`},d.unit);
+    const cols=["var(--cr)","var(--an)"];const bw=90;
+    d.groups.forEach((g,i)=>{const v=d.vals[fr][i];const x=L+60+i*170;
+      el("rect",{x,y:sy(v),width:bw,height:B-sy(v),rx:6,fill:cols[i],"fill-opacity":.85},svg);
+      txt(svg,{x:x+bw/2,y:sy(v)-8,"text-anchor":"middle","font-size":14,"font-weight":700,"font-family":MONO,fill:"var(--ink)"},"~"+v);
+      txt(svg,{x:x+bw/2,y:B+22,"text-anchor":"middle","font-size":13,"font-weight":600,fill:"var(--ink)"},g)});
+    el("line",{x1:L,x2:R,y1:B,y2:B,stroke:"var(--muted)","stroke-width":1.5},svg);
+    $("#stOut").innerHTML=d.msg[fr]+(fr===0?" <b>זהו איום הסטריאוטיפ.</b>":" <b>אותו מבחן, ניסוח אחר.</b>");
+  }
+  $$("[data-study]").forEach(b=>b.addEventListener("click",()=>{st=+b.dataset.study;fr=0;$$("[data-study]").forEach(x=>x.setAttribute("aria-pressed",x===b));frameBtns();draw()}));
+  frameBtns();draw();
+})();
+(function ages(){
+  const T=["בגיל 4–6 התורשה מסבירה כ־40% מהשונות במנת המשכל. הסביבה המשפחתית משחקת תפקיד גדול יחסית.","בשנות ההתבגרות התורשתיות עולה לכ־60%.","אצל מבוגרים היא מגיעה לכ־80%. ההסבר המוצע: ככל שאנשים מתבגרים, הם בוחרים בעצמם סביבות שמתאימות לנטיות הגנטיות שלהם, וכך ההשפעה הגנטית מתעצמת."];
+  function set(i){$$("#ageSteps button").forEach((b,j)=>b.setAttribute("aria-pressed",j===i));$("#ageOut").innerHTML=T[i]+" שימו לב: גם 80% אינו 100%, ואומדן תורשתיות תקף רק לאוכלוסייה שבה נמדד, לא לאדם יחיד.";}
+  $$("#ageSteps button").forEach(b=>b.addEventListener("click",()=>set(+b.dataset.i)));set(2);
+})();
+
+/* =========================================================
+   8. CREATIVITY
+   ========================================================= */
+(function brick(){
+  const COMMON=["בני","בית","קיר","גדר","מעצור","דלת","משקול","משקל","לזרוק","זריק","לשבור","חלון","נשק","מדרגה","לעמוד","שרפרף","לשבת","כיסא","גלגל","לחסום","ערוג","גינה","מנגל","תנור","מדף","פטיש","מסמר","לדפוק","קישוט","לקשט","עוגן","מרצפ","שביל","לחמם","דף","ניירות","משקולת"];
+  let ideas=[],t=90,timer=null,finished=false;
+  const isCommon=s=>COMMON.some(k=>s.includes(k));
+  function render(){
+    $("#ideas").innerHTML=ideas.map(s=>`<span class="chip ${finished?(isCommon(s)?"common":"rare"):""}">${s.replace(/[<>&]/g,"")}</span>`).join("")||`<span class="muted" style="font-size:.88rem">הרעיונות שלכם יופיעו כאן.</span>`;
+    const rare=ideas.filter(s=>!isCommon(s)).length;
+    $("#brickRO").innerHTML=`<div class="ro"><span>שטף (מספר רעיונות)</span><b>${ideas.length}</b></div><div class="ro"><span>רעיונות שגרתיים</span><b>${finished?ideas.length-rare:"–"}</b></div><div class="ro"><span>רעיונות פחות שכיחים</span><b>${finished?rare:"–"}</b></div>`;
+  }
+  function tickT(){t--;$("#timer").textContent=`${Math.floor(t/60)}:${String(t%60).padStart(2,"0")}`;$("#timer").classList.toggle("low",t<=10);if(t<=0)finish()}
+  function start(){if(timer)return;finished=false;t=90;$("#timer").textContent="1:30";timer=setInterval(tickT,1000);$("#brickStart").textContent="הטיימר רץ…";$("#brickInput").focus();render()}
+  function finish(){clearInterval(timer);timer=null;finished=true;$("#brickStart").textContent="ניסיון חדש";render();
+    const rare=ideas.filter(s=>!isCommon(s)).length;
+    $("#brickOut").innerHTML=ideas.length?`העליתם <b>${ideas.length}</b> רעיונות (שטף). ${rare} מהם לא מופיעים ברשימת התשובות הנפוצות שלנו, ולכן מסומנים בצבע. במחקר אמיתי, <b>ייחודיות</b> נקבעת לפי רעיונות שאף משתתף אחר במדגם לא העלה, ו<b>נדירות</b> לפי רעיונות שהעלו פחות מ־5% מהמשתתפים. כאן ההשוואה היא לרשימה קבועה, ולכן זו המחשה בלבד.`:`לא נרשמו רעיונות. נסו שוב: אין תשובות לא נכונות בחשיבה מסתעפת.`;
+    if(ideas.length)markDone("creativity")}
+  $("#brickStart").addEventListener("click",()=>{if(finished){ideas=[];render()}start()});
+  $("#brickDone").addEventListener("click",finish);
+  $("#brickForm").addEventListener("submit",e=>{e.preventDefault();const v=$("#brickInput").value.trim();if(!v)return;if(finished){ideas=[];finished=false}if(!timer)start();
+    if(!ideas.includes(v))ideas.push(v);$("#brickInput").value="";render()});
+  render();
+})();
+(function thresh(){
+  const svg=$("#thresh");const L=50,R=440,T=16,B=210;const sx=v=>L+(v-70)/(150-70)*(R-L),sy=v=>B-v*(B-T);
+  el("rect",{x:sx(120),y:T,width:R-sx(120),height:B-T,fill:"var(--mark-soft)"},svg);
+  txt(svg,{x:(sx(120)+R)/2,y:T+18,"text-anchor":"middle","font-size":12,fill:"var(--ink)","font-weight":600},"הקשר נחלש");
+  [70,90,110,120,130,150].forEach(v=>{el("line",{x1:sx(v),x2:sx(v),y1:B,y2:B+5,stroke:"var(--muted)"},svg);txt(svg,{x:sx(v),y:B+19,"text-anchor":"middle","font-size":11,fill:"var(--muted)","font-family":MONO},v)});
+  el("line",{x1:L,x2:R,y1:B,y2:B,stroke:"var(--muted)","stroke-width":1.5},svg);el("line",{x1:L,x2:L,y1:T,y2:B,stroke:"var(--muted)","stroke-width":1.5},svg);
+  txt(svg,{x:(L+R)/2,y:B+40,"text-anchor":"middle","font-size":12,fill:"var(--muted)"},"מנת משכל");
+  txt(svg,{x:16,y:(T+B)/2,"text-anchor":"middle","font-size":12,fill:"var(--muted)",transform:`rotate(-90 16 ${(T+B)/2})`},"יצירתיות אפשרית");
+  let d="";for(let v=70;v<=150;v+=1){const y=v<=120?.12+(v-70)/50*.58:.7+(1-Math.exp(-(v-120)/25))*.06;d+=(v===70?"M":"L")+sx(v).toFixed(1)+","+sy(y).toFixed(1)}
+  el("path",{d,fill:"none",stroke:"var(--cr)","stroke-width":3},svg);
+  el("line",{x1:sx(120),x2:sx(120),y1:T,y2:B,stroke:"var(--ink)","stroke-dasharray":"4 4"},svg);
+})();
+
+/* =========================================================
+   9. SOCIETY
+   ========================================================= */
+const FLIPS=[
+ {q:"האם מבחנים הוגנים כלפי כל הקבוצות?",a:"מבקרים טוענים שהמחיר של טעויות במבחן נופל על קבוצות מסוימות יותר מאחרות. למשל, כשמבחן מילולי מחליף מבחן מעשי לתפקיד שבו העבודה היא ידנית, מועמדים מקבוצות מיעוט עלולים להיפסל בלי קשר ליכולת שלהם לבצע את העבודה."},
+ {q:"מה קורה כשבתי ספר נמדדים לפי ציוני מבחנים?",a:"כשמבחנים מתוקננים קובעים תקציבים ומשכורות, בתי ספר עלולים ״ללמד לקראת המבחן״ ואף לרמות. בבית ספר במרילנד התגלה שתלמידים קיבלו עזרה מסוגים שונים, כולל הארכת זמן ושאלות חוזרות, כדי לשפר את ציוניהם."},
+ {q:"מה עושה תווית לאדם?",a:"ציון במבחן עלול להפוך לתווית שמלווה אדם שנים, ולהפוך לנבואה שמגשימה את עצמה: מי שתויג כ״לא מוכשר״ עלול לאבד מוטיבציה ולהפסיק להשקיע. בנוסף, תוויות גורמות לנו לייחס הצלחה וכישלון לתכונות של האדם ולהזניח את השפעת הסביבה."}];
+$("#flips").innerHTML=FLIPS.map((f,i)=>`<button type="button" class="flip" data-i="${i}" aria-expanded="false"><span class="eyebrow">סוגיה ${["ראשונה","שנייה","שלישית"][i]}</span><span class="q">${f.q}</span><span class="a" hidden>${f.a}</span><span class="hint">חשבו על תשובה, ולחצו כדי לראות מה הספר אומר</span></button>`).join("");
+const flipped=new Set();
+$$("#flips .flip").forEach(b=>b.addEventListener("click",()=>{const open=b.getAttribute("aria-expanded")!=="true";b.setAttribute("aria-expanded",open);$(".a",b).hidden=!open;$(".hint",b).textContent=open?"לחצו שוב כדי להסתיר":"חשבו על תשובה, ולחצו כדי לראות מה הספר אומר";if(open)flipped.add(b.dataset.i);if(flipped.size===3)markDone("society")}));
+
+/* =========================================================
+   10. QUIZ
    ========================================================= */
 const QZ=[
- {q:"חוקרת מעבירה מבחן לאותם אנשים פעמיים, בהפרש של חודש, ומקבלת מתאם של 0.92. מה היא בדקה?",o:["תוקף ניבוי","מהימנות מבחן חוזר","תוקף נראה","תקנון"],a:1,e:"המתאם בין שתי העברות של אותו מבחן לאותם אנשים הוא מהימנות מבחן חוזר."},
- {q:"מבחן שמודד גובה כדי להעריך משכל יהיה ככל הנראה:",o:["תקף אך לא מהימן","מהימן ותקף","מהימן אך לא תקף","לא מהימן ולא תקף"],a:2,e:"הגובה נמדד בעקביות רבה (מהימן), אבל אינו מודד משכל (לא תקף)."},
- {q:"מה נכון לגבי הקשר בין מהימנות לתוקף?",o:["מבחן לא מהימן יכול להיות תקף מאוד","מבחן שאינו מהימן אינו יכול להיות תקף","תוקף גבוה מבטיח מהימנות נמוכה","אין קשר ביניהם"],a:1,e:"מבחן שאינו יכול לנבא את עצמו לא יכול לנבא קריטריון חיצוני."},
- {q:"לפי סטרנברג, הפיכת משימה שגרתית לאוטומטית שייכת למשכל:",o:["אנליטי","יצירתי","מעשי","בין־אישי"],a:1,e:"משכל יצירתי כולל גם התמודדות עם בעיות חדשות וגם ביצוע אוטומטי של משימות מוכרות."},
- {q:"נווט מאיי קרוליין שמנווט מרחקים ארוכים בלי מפה מפגין לפי גרדנר בעיקר משכל:",o:["לוגי־מתמטי","לשוני","מרחבי וגופני־קינסתטי","תוך־אישי"],a:2,e:"גרדנר משתמש בדוגמה הזאת כדי להראות שתרבויות שונות מעריכות סוגי משכל שונים."},
- {q:"ציון 18 בשאלון דיכאון מקבל משמעות רק כאשר:",o:["משווים אותו לנורמות של אוכלוסייה נורמטיבית","יש למבחן תוקף נראה","הנבחן עונה מהר","המבחן ארוך מספיק"],a:0,e:"נורמות מאפשרות לפרש ציון אישי בהשוואה לציונים טיפוסיים של קבוצה דומה."}];
-let qs={i:0,score:0,answered:false};
+ {s:"history",q:"איזה מההיגדים הבאים לא היה אחד מעקרונות היסוד של גלטון?",o:["הבדלים במשכל ניתנים לכימות","ציוני משכל יוצרים עקומת פעמון","אפשר למדוד משכל באמצעות מבחנים אובייקטיביים","ציוני משכל משתנים מאוד במהלך החיים"],a:3,e:"גלטון ניסח ארבעה עקרונות: כימות, עקומת פעמון, מבחנים אובייקטיביים ומתאם. העיקרון הרביעי שלו עסק במתאם, לא בשינוי לאורך החיים."},
+ {s:"assessment",q:"חוקרת משווה את הציונים בפריטים הזוגיים במבחן לציונים בפריטים האי־זוגיים. מה היא בודקת?",o:["מהימנות מבחן חוזר","עקביות פנימית (מהימנות מבחן חצוי)","תוקף נראה","תוקף קריטריון"],a:1,e:"השוואה בין חלקים של אותו מבחן היא עקביות פנימית, ובמקרה הזה מהימנות מבחן חצוי."},
+ {s:"assessment",q:"קיבלתם 72 במבחן שבודק מידת אושר. מה צריך כדי לפרש את הציון?",o:["נורמות","מהימנות מבחן חצוי","תוקף ניבוי","נוסחים מקבילים"],a:0,e:"נורמות מאפשרות להשוות את הציון האישי לציונים טיפוסיים של אוכלוסייה נורמטיבית."},
+ {s:"assessment",q:"אתר מבחני משכל נתן לאותו אדם ארבעה ציונים שונים: 116, 117, 129 ו־130. מה אפשר להסיק?",o:["המבחנים מהימנים ותקפים","המבחנים מהימנים אך לא תקפים","המבחנים לא מהימנים ולא תקפים","המבחנים תקפים אך לא מהימנים"],a:2,e:"הציונים לא עקביים, ולכן המבחן לא מהימן. מבחן שאינו מהימן אינו יכול להיות תקף."},
+ {s:"assessment",q:"מבחן שמודד גובה כדי להעריך משכל יהיה ככל הנראה:",o:["תקף אך לא מהימן","מהימן ותקף","מהימן אך לא תקף","לא מהימן ולא תקף"],a:2,e:"הגובה נמדד בעקביות רבה (מהימן), אבל אינו מודד משכל (לא תקף)."},
+ {s:"iq",q:"ילדה בת 10 מבצעת כמו ילד ממוצע בן 12. לפי השיטה המקורית, מה מנת המשכל שלה?",o:["83","100","120","150"],a:2,e:"12 חלקי 10, כפול 100, שווה 120."},
+ {s:"iq",q:"איזה מהגורמים הבאים לפיגור שכלי ניתן לטיפול יחסית בקלות?",o:["תסמונת דאון","צריכת אלכוהול של האם בזמן ההיריון","פנילקטונוריה (PKU)","חשיפה לסמים בזמן ההיריון"],a:2,e:"בפנילקטונוריה, תזונה מיוחדת שמתחילה בינקות מונעת את רוב הנזק."},
+ {s:"iq",q:"איזה מאפיין אינו חלק מתפיסת ״שלושת המעגלים״ של רנזולי?",o:["יצירתיות","מחויבות למשימה","יכולת מעל הממוצע","גאונות במתמטיקה"],a:3,e:"שלושת המעגלים הם יכולת מעל הממוצע, יצירתיות ומחויבות למשימה."},
+ {s:"theories",q:"מה הוביל את ספירמן להציע את קיומו של משכל כללי (g)?",o:["ביצוע של אדם במבחנים שונים מתואם","מבחני משכל מנבאים הצלחה בעבודה","תאומים זהים דומים במנת המשכל","מנת המשכל יציבה לאורך החיים"],a:0,e:"ספירמן מצא שמי שמצליח במבחן אחד נוטה להצליח גם באחרים, והסיק שקיים גורם משותף."},
+ {s:"theories",q:"משכל ______ מודד את הידע שאדם כבר רכש.",o:["נזיל","מגובש","אנליטי","יצירתי"],a:1,e:"לפי קאטל, משכל מגובש הוא הידע שנרכש; משכל נזיל הוא היכולת לפתור בעיות חדשות."},
+ {s:"sternberg",q:"לפי סטרנברג, הפיכת משימה שגרתית לאוטומטית שייכת למשכל:",o:["אנליטי","יצירתי","מעשי","בין־אישי"],a:1,e:"משכל יצירתי כולל גם התמודדות עם בעיות חדשות וגם ביצוע אוטומטי של משימות מוכרות."},
+ {s:"sternberg",q:"מועמד לעבודה במוסך מתבקש לאתר תקלה במנוע אמיתי. איזה משכל נבדק בעיקר?",o:["מעשי","נזיל","אנליטי","יצירתי"],a:0,e:"זהו ידע הקשור לניהול מטלות ממשיות בתחום מסוים: משכל מעשי."},
+ {s:"gardner",q:"נווט מאיי קרוליין שמנווט מרחקים ארוכים בלי מפה מפגין, לפי גרדנר, בעיקר משכל:",o:["לוגי־מתמטי","לשוני","מרחבי וגופני־קינסתטי","תוך־אישי"],a:2,e:"גרדנר משתמש בדוגמה הזאת כדי להראות שתרבויות שונות מעריכות סוגי משכל שונים."},
+ {s:"politics",q:"צמד קרובי משפחה שמנת המשכל שלהם צפויה להיות הדומה ביותר:",o:["תאומות לא זהות","תאומות זהות שגדלו יחד","אחיות שגדלו יחד בבית","אחיות מאומצות"],a:1,e:"קרבה גנטית מלאה יחד עם סביבה משותפת מניבות את המתאם הגבוה ביותר (תרשים 9.5)."},
+ {s:"politics",q:"מדוע אי אפשר להשתמש באומדן תורשתיות כדי להסביר הבדלים בין קבוצות?",o:["כי אומדני תורשתיות נמוכים מאוד","כי אומדן תורשתיות תקף רק להבדלים בתוך הקבוצה שבה נמדד","כי מנת משכל אינה מהימנה","כי לגנים אין השפעה על משכל"],a:1,e:"תורשתיות גבוהה בתוך קבוצה אינה מעידה על מקור ההבדל בין קבוצות, בדיוק כמו בשני העציצים."},
+ {s:"politics",q:"איום הסטריאוטיפ משפיע על ביצוע כאשר:",o:["הסיטואציה של המבחן הופכת את הסטריאוטיפ לרלוונטי","הסטריאוטיפ נפוץ בתרבות","המבחן אינו הוגן כלפי קבוצות מסוימות","הסטריאוטיפים משתנים לאורך זמן"],a:0,e:"רק כשהמצב מעורר את הסטריאוטיפ, למשל כשנאמר שהמבחן בודק יכולת, נפגע הביצוע."},
+ {s:"creativity",q:"מבחן שמבקש ״מנו את כל הדברים העגולים שאתם מכירים״ בודק:",o:["משכל אנליטי","משכל מגובש","חשיבה מתכנסת","חשיבה מסתעפת"],a:3,e:"חשיבה מסתעפת היא היכולת לייצר מגוון פתרונות לא שגרתיים לבעיה אחת."},
+ {s:"creativity",q:"מה אינו נחוץ כדי להסביר יצירתיות יוצאת דופן?",o:["הכנה","מוטיבציה פנימית","מנת משכל גבוהה במיוחד","נטילת סיכונים"],a:2,e:"מעל מנת משכל של כ־120 הקשר בין משכל ליצירתיות נחלש. נטילת סיכונים, הכנה ומוטיבציה פנימית הם המאפיינים."}];
+let qs;
+function newQuiz(){qs={i:0,score:0,answered:false,miss:[],order:QZ.map(q=>shuffle(q.o.map((_,k)=>k)))};renderQuiz()}
 function renderQuiz(){
   const b=$("#quizBox");
-  if(qs.i>=QZ.length){b.innerHTML=`<p class="eyebrow">סיימתם</p><p class="qtext">ענית נכון על ${qs.score} מתוך ${QZ.length} שאלות.</p><p class="cite">${qs.score===QZ.length?"שליטה מלאה בחומר.":qs.score>=4?"כמעט מושלם. עברו שוב על המושגים שטעיתם בהם.":"כדאי לחזור למעבדות ולנסות שוב."}</p><button class="btn" type="button" id="qAgain">מבחן חוזר</button>`;
-    $("#qAgain").addEventListener("click",()=>{qs={i:0,score:0};renderQuiz()});return}
-  const q=QZ[qs.i];qs.answered=false;
-  b.innerHTML=`<div class="progress">${QZ.map((_,j)=>`<span class="${j<qs.i?"done":j===qs.i?"now":""}"></span>`).join("")}</div><span class="qcount">שאלה ${qs.i+1} מתוך ${QZ.length} · ניקוד ${qs.score}</span><p class="qtext">${q.q}</p>
-   <div class="opts">${q.o.map((o,j)=>`<button type="button" class="opt" data-j="${j}"><span class="bub">${letter(j)}</span><span>${o}</span></button>`).join("")}</div><div id="qfb"></div>`;
-  $$(".opt",b).forEach(btn=>btn.addEventListener("click",()=>{if(qs.answered)return;qs.answered=true;const j=+btn.dataset.j;const ok=j===q.a;if(ok)qs.score++;
-    $$(".opt",b).forEach((x,k)=>{x.disabled=true;if(k===q.a)x.classList.add("right");else if(k===j)x.classList.add("wrong");else x.classList.add("dim")});
-    $("#qfb").innerHTML=`<div class="feedback" style="--c:${ok?"var(--good)":"var(--bad)"}"><b>${ok?"נכון.":"לא מדויק."}</b> ${q.e}</div><button class="btn" type="button" id="qNext" style="margin-top:12px">${qs.i<QZ.length-1?"לשאלה הבאה":"לתוצאה"}</button>`;
-    $("#qNext").addEventListener("click",()=>{qs.i++;renderQuiz()});$("#qNext").focus({preventScroll:true})}));
+  if(qs.i>=QZ.length){
+    const missedSecs=[...new Set(qs.miss.map(i=>QZ[i].s))];
+    b.innerHTML=`<p class="eyebrow">סיימתם</p><p class="qtext">ענית נכון על ${qs.score} מתוך ${QZ.length} שאלות (${Math.round(qs.score/QZ.length*100)}%).</p>
+      ${missedSecs.length?`<div class="review"><p class="muted">כדאי לחזור לנושאים האלה:</p>${missedSecs.map(s=>{const sec=SECTIONS.find(x=>x[0]===s);return`<a href="#${s}">${sec[2]} (עמ׳ ${sec[3]})</a>`}).join("")}</div>`:`<p class="cite">שליטה מלאה בחומר.</p>`}
+      <button class="btn" type="button" id="qAgain">מבחן חוזר</button>`;
+    $("#qAgain").addEventListener("click",newQuiz);markDone("quiz");return}
+  const q=QZ[qs.i],ord=qs.order[qs.i];qs.answered=false;
+  const sec=SECTIONS.find(x=>x[0]===q.s);
+  b.innerHTML=`<div class="progress">${QZ.map((_,j)=>`<span class="${j<qs.i?"done":j===qs.i?"now":""}"></span>`).join("")}</div>
+   <div class="qcount"><span>שאלה ${qs.i+1} מתוך ${QZ.length} · ${sec[2]}</span><span>ניקוד ${qs.score}</span></div><p class="qtext">${q.q}</p>
+   <div class="opts">${ord.map((k,j)=>`<button type="button" class="opt" data-k="${k}"><span class="bub">${letter(j)}</span><span>${q.o[k]}</span></button>`).join("")}</div><div id="qfb"></div>`;
+  $$(".opt",b).forEach(btn=>btn.addEventListener("click",()=>{if(qs.answered)return;qs.answered=true;const k=+btn.dataset.k,ok=k===q.a;if(ok)qs.score++;else qs.miss.push(qs.i);
+    $$(".opt",b).forEach(x=>{x.disabled=true;const xk=+x.dataset.k;if(xk===q.a)x.classList.add("right");else if(xk===k)x.classList.add("wrong");else x.classList.add("dim")});
+    $("#qfb").innerHTML=`<div class="feedback" style="--c:${ok?"var(--good)":"var(--bad)"}"><b>${ok?"נכון.":"לא מדויק."}</b> ${q.e}${ok?"":` <a href="#${q.s}">חזרה לנושא</a>`}</div><button class="btn" type="button" id="qNext" style="margin-top:12px">${qs.i<QZ.length-1?"לשאלה הבאה":"לתוצאה"}</button>`;
+    $("#qNext").addEventListener("click",()=>{qs.i++;renderQuiz();const f=$("#quizBox .opt,#qAgain");f&&f.focus({preventScroll:true})});$("#qNext").focus({preventScroll:true})}));
 }
-renderQuiz();
+newQuiz();
 })();
 </script>
