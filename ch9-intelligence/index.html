@@ -238,6 +238,11 @@ footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);color:v
   .concepts{grid-template-columns:minmax(0,1fr)}
 }
 @media (max-width:560px){
+  .nav .wrap{flex-wrap:nowrap}
+  .brand .bt{display:none}
+  .nav-links{flex:1;min-width:0;flex-wrap:nowrap;overflow-x:auto;margin:0;scrollbar-width:none}
+  .nav-links::-webkit-scrollbar{display:none}
+  .nav-links a{white-space:nowrap}
   .sliders{grid-template-columns:minmax(0,1fr)}
   .nav-links a{padding:5px 8px;font-size:.82rem}
   .lab-head{grid-template-columns:minmax(0,1fr)}
@@ -254,10 +259,10 @@ footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);color:v
 <div class="app" dir="rtl" lang="he">
 <nav class="nav" aria-label="ניווט">
   <div class="wrap">
-    <a class="brand" href="#top"><b>9</b>מעבדת המשכל</a>
+    <a class="brand" href="#top"><b>9</b><span class="bt">מעבדת המשכל</span></a>
     <div class="nav-links">
-      <a href="#gardner">ריבוי סוגי משכל</a>
-      <a href="#sternberg">שלושת הרכיבים</a>
+      <a href="#gardner">גרדנר</a>
+      <a href="#sternberg">סטרנברג</a>
       <a href="#assessment">מהימנות ותוקף</a>
       <a href="#quiz">תרגול</a>
     </div>
@@ -319,7 +324,7 @@ footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);color:v
       <div class="panel g-display">
         <div class="g-toolbar">
           <div class="top2" id="top2" aria-live="polite"></div>
-          <label class="toggle"><input type="checkbox" id="schoolOverlay"> השוואה להדגשים של בית הספר המערבי</label>
+          <label class="toggle"><input type="checkbox" id="schoolOverlay"> הדגשים טיפוסיים בבית הספר (הערכה להמחשה, לא נתון מהספר)</label>
         </div>
         <svg id="radar" viewBox="-250 -185 500 370" role="img" aria-label="תרשים מכ״ם של שמונה סוגי המשכל"></svg>
         <div class="g-info" id="gInfo"></div>
@@ -541,7 +546,7 @@ const radar=$("#radar");
 const rings=el("g",{},radar);
 [2,4,6,8,10].forEach(v=>{let d="";for(let i=0;i<N;i++){const[x,y]=pt(i,v);d+=(i?"L":"M")+x.toFixed(1)+","+y.toFixed(1)}el("path",{d:d+"Z",fill:v===10?"var(--surface-2)":"none",stroke:"var(--line)","stroke-width":1},rings)});
 for(let i=0;i<N;i++){const[x,y]=pt(i,10);el("line",{x1:0,y1:0,x2:x,y2:y,stroke:"var(--line)"},rings)}
-[2,4,6,8,10].forEach(v=>{const t=el("text",{x:4,y:-RAD*v/10-3,"font-size":10,fill:"var(--muted)","font-family":"IBM Plex Mono, monospace"},rings);t.textContent=v});
+[2,4,6,8,10].forEach(v=>{const a=-Math.PI/2+Math.PI/N;const t=el("text",{x:Math.cos(a)*RAD*v/10,y:Math.sin(a)*RAD*v/10+3,"text-anchor":"middle","font-size":10,fill:"var(--muted)","font-family":"IBM Plex Mono, monospace",stroke:"var(--surface-2)","stroke-width":3,"paint-order":"stroke"},rings);t.textContent=v});
 const schoolPath=el("path",{fill:"var(--muted)","fill-opacity":.08,stroke:"var(--muted)","stroke-width":2,"stroke-dasharray":"6 5",visibility:"hidden"},radar);
 const shape=el("path",{fill:"var(--accent)","fill-opacity":.2,stroke:"var(--accent)","stroke-width":2.5,"stroke-linejoin":"round"},radar);
 const dots=[],labels=[];
@@ -661,7 +666,8 @@ const SC=[
   lesson:"משכל מעשי הוא ידע על ההקשר: לא רק מה נכון, אלא איך ומתי לפעול. ידע כזה כמעט אף פעם לא נמדד במבחני מנת משכל."}
 ];
 let gs;
-function newGame(){gs={i:0,phase:"act",act:0,tag:0,picks:{A:0,C:0,P:0},correctBy:{A:[0,0],C:[0,0],P:[0,0]}};renderStage();renderTri()}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function newGame(){SC.forEach(s=>shuffle(s.opts));gs={i:0,phase:"act",act:0,tag:0,picks:{A:0,C:0,P:0},correctBy:{A:[0,0],C:[0,0],P:[0,0]}};renderStage();renderTri()}
 function letter(n){return"אבגד"[n]}
 function renderStage(){
   const st=$("#stage");
