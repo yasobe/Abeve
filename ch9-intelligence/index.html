@@ -1,0 +1,948 @@
+<title>מעבדת המשכל</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="מעבדה אינטראקטיבית לפרק 9 בספר מבוא לפסיכולוגיה: משכל והערכת משכל">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Hebrew:wght@400;500;600;700&family=Suez+One&display=swap">
+<style>
+/* Layout: a psychometric "lab notebook" — answer-sheet grid paper, one wide column of three labs, each a two-pane instrument (control panel + live display). */
+:root{
+  --paper:#EEF2F6;        /* answer-sheet blue-grey ground */
+  --surface:#FFFFFF;
+  --surface-2:#F6F8FB;
+  --ink:#152238;          /* graphite-navy ink */
+  --muted:#5A6781;
+  --line:#D5DCE7;
+  --grid:rgba(21,34,56,.045);
+  --accent:#0E7C86;       /* examiner teal */
+  --accent-soft:rgba(14,124,134,.12);
+  --mark:#F0B429;         /* highlighter / answer-sheet bubble */
+  --mark-soft:rgba(240,180,41,.22);
+  --an:#2F64B0; --cr:#C0407A; --pr:#3D8B47;  /* Sternberg: analytical / creative / practical */
+  --good:#2E8B57; --warn:#C77C0E; --bad:#C2413A;
+  --shadow:0 1px 2px rgba(21,34,56,.06),0 8px 24px rgba(21,34,56,.07);
+  --f-display:"Suez One","Rubik","Arial Hebrew",serif;
+  --f-body:"IBM Plex Sans Hebrew","Rubik","Segoe UI","Arial Hebrew",Arial,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0D1422;--surface:#141D2F;--surface-2:#192439;--ink:#E6EBF4;--muted:#9AA7BF;--line:#26334B;--grid:rgba(230,235,244,.035);
+  --accent:#3BBFC8;--accent-soft:rgba(59,191,200,.14);--mark:#F5C451;--mark-soft:rgba(245,196,81,.18);
+  --an:#6E9BE3;--cr:#E57AAB;--pr:#73C27C;--good:#5BC48A;--warn:#E9A23B;--bad:#EE6B63;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.28);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0D1422;--surface:#141D2F;--surface-2:#192439;--ink:#E6EBF4;--muted:#9AA7BF;--line:#26334B;--grid:rgba(230,235,244,.035);
+  --accent:#3BBFC8;--accent-soft:rgba(59,191,200,.14);--mark:#F5C451;--mark-soft:rgba(245,196,81,.18);
+  --an:#6E9BE3;--cr:#E57AAB;--pr:#73C27C;--good:#5BC48A;--warn:#E9A23B;--bad:#EE6B63;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.28);color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.6;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:24px 24px;-webkit-font-smoothing:antialiased}
+.app{direction:rtl;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+.wrap{max-width:1180px;margin-inline:auto}
+h1,h2,h3{font-family:var(--f-display);font-weight:400;line-height:1.15;text-wrap:balance;margin:0}
+p{margin:0}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-size:.78rem;letter-spacing:.08em;color:var(--accent);font-weight:600}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--mark);outline-offset:2px;border-radius:6px}
+
+/* ---------- top nav ---------- */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)));
+  padding:10px max(16px,env(safe-area-inset-right,0px));background:color-mix(in srgb,var(--paper) 88%,transparent);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-size:1.05rem;text-decoration:none;color:var(--ink)}
+.brand b{display:grid;place-items:center;width:30px;height:30px;border-radius:8px;background:var(--ink);color:var(--paper);font-weight:400}
+.nav-links{display:flex;gap:4px;margin-inline-start:auto;flex-wrap:wrap}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:.9rem;padding:6px 10px;border-radius:999px;font-weight:500}
+.nav-links a:hover,.nav-links a.on{color:var(--ink);background:var(--surface)}
+.theme-btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;width:36px;height:36px;display:grid;place-items:center}
+.theme-btn svg{width:18px;height:18px}
+
+/* ---------- hero ---------- */
+.hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:40px;align-items:center;padding-block:56px 40px}
+.hero-num{font-family:var(--f-display);font-size:clamp(5rem,13vw,9rem);line-height:.8;color:var(--accent);display:block;margin-bottom:10px}
+.hero h1{font-size:clamp(2.2rem,5.2vw,3.6rem)}
+.hero .lede{margin-top:16px;color:var(--muted);font-size:1.08rem;max-width:56ch}
+.hero-cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+.chip-link{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;text-decoration:none;font-weight:600;font-size:.95rem;
+  background:var(--surface);color:var(--ink);border:1px solid var(--line);transition:transform .15s,border-color .15s}
+.chip-link:hover{transform:translateY(-2px);border-color:var(--accent)}
+.chip-link i{width:10px;height:10px;border-radius:50%;background:var(--c,var(--accent))}
+.bell-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:18px 18px 12px;box-shadow:var(--shadow)}
+.bell-card .head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.bell-card .head span{font-size:.85rem;color:var(--muted)}
+.bell-read{font-size:.95rem;margin-top:2px}
+.bell-read strong{color:var(--accent)}
+#bell{width:100%;height:auto;display:block;touch-action:none;cursor:ew-resize}
+.bell-note{font-size:.8rem;color:var(--muted);margin-top:6px}
+
+/* ---------- lab sections ---------- */
+.lab{margin-top:56px;scroll-margin-top:80px}
+.lab-head{display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px;align-items:end;margin-bottom:22px}
+.lab-tag{font-family:var(--f-display);font-size:1rem;color:var(--paper);background:var(--ink);border-radius:10px;padding:8px 12px;white-space:nowrap}
+.lab-head h2{font-size:clamp(1.7rem,3.6vw,2.4rem)}
+.lab-head p{color:var(--muted);margin-top:6px;max-width:70ch}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.grid-2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:20px}
+.cite{font-size:.8rem;color:var(--muted)}
+
+/* ---------- Gardner ---------- */
+.g-controls{padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:transparent;padding:7px 14px;border-radius:999px;font-weight:600;font-size:.88rem;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.sliders{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px}
+.sl{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 8px;align-items:center;padding:8px 10px;border-radius:10px;transition:background .2s}
+.sl.hl{background:var(--mark-soft)}
+.sl label{font-weight:600;font-size:.92rem;display:flex;align-items:center;gap:7px}
+.sl label i{width:9px;height:9px;border-radius:3px;background:var(--c)}
+.sl output{font-family:var(--f-mono);font-size:.9rem;color:var(--muted);min-width:2ch;text-align:left}
+.sl input{grid-column:1/-1}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:22px;background:transparent;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:6px;background:linear-gradient(to left,var(--c,var(--accent)) var(--p,50%),var(--line) var(--p,50%))}
+input[type=range]::-moz-range-track{height:6px;border-radius:6px;background:var(--line)}
+input[type=range]::-moz-range-progress{height:6px;border-radius:6px;background:var(--c,var(--accent))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--surface);border:3px solid var(--c,var(--accent));margin-top:-7px;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--surface);border:3px solid var(--c,var(--accent))}
+.quest{display:flex;flex-direction:column;gap:6px;max-height:520px;overflow:auto;padding-inline-end:4px}
+.q-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2)}
+.q-item p{font-size:.88rem;line-height:1.45}
+.q-item p small{display:block;color:var(--c);font-weight:600;font-size:.72rem}
+.likert{display:flex;gap:4px;direction:ltr}
+.likert button{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);background:var(--surface);font-family:var(--f-mono);font-size:.75rem;color:var(--muted);transition:all .15s}
+.likert button[aria-pressed="true"]{background:var(--c);border-color:var(--c);color:#fff;transform:scale(1.08)}
+.likert-legend{display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted)}
+.g-display{padding:14px 14px 18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.g-toolbar{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.toggle{display:inline-flex;align-items:center;gap:8px;font-size:.85rem;color:var(--muted);cursor:pointer;user-select:none}
+.toggle input{accent-color:var(--accent);width:16px;height:16px}
+#radar{width:100%;height:auto;display:block;direction:ltr}
+#radar text{font-family:var(--f-body)}
+.radar-axis-label{cursor:pointer}
+.g-info{border-top:1px dashed var(--line);padding-top:12px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;min-height:96px}
+.g-info .big{font-family:var(--f-display);font-size:1.35rem;grid-row:span 2;color:var(--c,var(--accent));align-self:start;min-width:6.5em}
+.g-info .end{font-size:.85rem;color:var(--muted)}
+.g-info .core{font-size:.93rem}
+.top2{display:flex;gap:8px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:.82rem;font-weight:600;background:var(--surface-2);border:1px solid var(--line)}
+.pill i{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.g-foot{margin-top:14px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.note{padding:14px 16px;border-radius:12px;background:var(--surface);border:1px solid var(--line);font-size:.9rem}
+.note h3{font-family:var(--f-body);font-weight:700;font-size:.95rem;margin-bottom:4px}
+.note p{color:var(--muted)}
+
+/* ---------- Sternberg game ---------- */
+.game{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:20px}
+.stage{padding:22px;min-width:0;display:flex;flex-direction:column;gap:16px;position:relative;overflow:hidden}
+.progress{display:flex;gap:6px}
+.progress span{flex:1;height:6px;border-radius:6px;background:var(--line);transition:background .3s}
+.progress span.done{background:var(--accent)}
+.progress span.now{background:var(--mark)}
+.scn-meta{display:flex;justify-content:space-between;align-items:center;font-size:.85rem;color:var(--muted);gap:8px;flex-wrap:wrap}
+.scn-title{font-size:1.55rem}
+.scn-text{font-size:1.02rem;max-width:62ch}
+.scn-text code{font-family:var(--f-mono);background:var(--mark-soft);padding:1px 6px;border-radius:6px;direction:ltr;unicode-bidi:isolate}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:grid;grid-template-columns:30px minmax(0,1fr);gap:12px;align-items:start;text-align:right;padding:14px 16px;border-radius:12px;
+  border:1.5px solid var(--line);background:var(--surface-2);transition:border-color .15s,transform .15s,background .2s}
+.opt:hover:not([disabled]){border-color:var(--accent);transform:translateX(-3px)}
+.opt .bub{width:26px;height:26px;border-radius:50%;border:2px solid var(--muted);display:grid;place-items:center;font-family:var(--f-mono);font-size:.78rem;color:var(--muted);margin-top:1px}
+.opt[disabled]{cursor:default}
+.opt.right{border-color:var(--good);background:color-mix(in srgb,var(--good) 10%,var(--surface))}
+.opt.right .bub{background:var(--good);border-color:var(--good);color:#fff}
+.opt.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,var(--surface))}
+.opt.wrong .bub{background:var(--bad);border-color:var(--bad);color:#fff}
+.opt.dim{opacity:.55}
+.opt .why{display:block;font-size:.85rem;color:var(--muted);margin-top:6px}
+.tagger{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:12px;background:var(--surface-2);border:1px dashed var(--line)}
+.tagger p{font-weight:600}
+.tag-btns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.tag-btn{border:2px solid var(--c);background:var(--surface);color:var(--c);padding:10px 8px;border-radius:10px;font-weight:700;transition:all .15s}
+.tag-btn:hover:not([disabled]){background:var(--c);color:#fff}
+.tag-btn.picked{background:var(--c);color:#fff}
+.tag-btn[disabled]:not(.picked){opacity:.45}
+.feedback{padding:14px 16px;border-radius:12px;border-inline-start:4px solid var(--c,var(--accent));background:var(--surface-2);font-size:.95rem;animation:rise .35s ease}
+.feedback b{color:var(--c,var(--accent))}
+.btn{border:0;background:var(--ink);color:var(--paper);font-weight:700;padding:11px 20px;border-radius:999px;align-self:flex-start;transition:transform .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.side{padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.comp{display:grid;grid-template-columns:12px minmax(0,1fr);gap:4px 10px}
+.comp i{width:12px;height:12px;border-radius:4px;background:var(--c);margin-top:6px}
+.comp h3{font-family:var(--f-body);font-weight:700;font-size:1rem}
+.comp p{grid-column:2;font-size:.88rem;color:var(--muted)}
+.score-row{display:flex;gap:10px}
+.score-box{flex:1;padding:10px 12px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line)}
+.score-box span{display:block;font-size:.75rem;color:var(--muted)}
+.score-box b{font-family:var(--f-mono);font-size:1.3rem}
+#tri{width:100%;max-width:300px;height:auto;align-self:center;display:block;direction:ltr}
+#tri text{font-family:var(--f-body)}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.confetti{position:absolute;inset:0;pointer-events:none}
+
+/* ---------- Reliability / validity ---------- */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tab{border:1.5px solid var(--line);background:var(--surface);padding:9px 16px;border-radius:999px;font-weight:600;font-size:.92rem;color:var(--muted)}
+.tab[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.rv{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:20px}
+.board-wrap{padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px;min-width:0}
+.board-wrap canvas{width:100%;max-width:440px;aspect-ratio:1;height:auto;display:block}
+.board-wrap canvas.wide{max-width:520px;aspect-ratio:4/3}
+.verdict{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;font-weight:700;font-size:.95rem;background:color-mix(in srgb,var(--c) 14%,var(--surface));color:var(--c);border:1.5px solid var(--c);transition:all .3s}
+.rv-ctrl{padding:20px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.big-sl{display:flex;flex-direction:column;gap:4px}
+.big-sl .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.big-sl label{font-weight:700}
+.big-sl small{color:var(--muted);font-size:.83rem}
+.big-sl output{font-family:var(--f-mono);font-weight:600;color:var(--c)}
+.presets{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.preset{border:1.5px solid var(--line);background:var(--surface-2);border-radius:10px;padding:9px 10px;text-align:right;font-size:.86rem;font-weight:600;transition:border-color .15s}
+.preset span{display:block;font-weight:400;color:var(--muted);font-size:.76rem}
+.preset:hover{border-color:var(--accent)}
+.readouts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.ro{padding:10px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line)}
+.ro span{display:block;font-size:.72rem;color:var(--muted)}
+.ro b{font-family:var(--f-mono);font-size:1.15rem}
+.explain{font-size:.93rem;color:var(--ink);padding:12px 14px;border-radius:10px;background:var(--accent-soft);min-height:4.2em}
+.legend-ex{display:flex;gap:12px;flex-wrap:wrap;font-size:.8rem;color:var(--muted)}
+.legend-ex span{display:inline-flex;align-items:center;gap:6px}
+.legend-ex i{width:10px;height:10px;border-radius:50%;background:var(--c)}
+.concepts{margin-top:18px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.cgroup{padding:16px}
+.cgroup h3{font-size:1.15rem;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.cgroup h3 small{font-family:var(--f-mono);font-size:.75rem;color:var(--muted)}
+.terms{display:flex;flex-wrap:wrap;gap:6px}
+.term{border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:6px 12px;font-size:.85rem;font-weight:600}
+.term[aria-expanded="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.term-def{margin-top:10px;font-size:.9rem;color:var(--muted);min-height:3em}
+.term-def b{color:var(--ink)}
+
+/* ---------- quiz ---------- */
+.quiz{padding:22px;display:flex;flex-direction:column;gap:14px}
+.quiz .qtext{font-size:1.15rem;font-weight:600}
+.qcount{font-family:var(--f-mono);color:var(--muted);font-size:.85rem}
+
+footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:.85rem;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+@media (max-width:900px){
+  .hero,.grid-2,.game,.rv{grid-template-columns:minmax(0,1fr)}
+  .hero{padding-block:32px 16px;gap:24px}
+  .g-foot{grid-template-columns:minmax(0,1fr)}
+  .concepts{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:560px){
+  .sliders{grid-template-columns:minmax(0,1fr)}
+  .nav-links a{padding:5px 8px;font-size:.82rem}
+  .lab-head{grid-template-columns:minmax(0,1fr)}
+  .lab-tag{justify-self:start}
+  .tag-btns{grid-template-columns:minmax(0,1fr)}
+  .readouts{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .presets{grid-template-columns:minmax(0,1fr)}
+  .q-item{grid-template-columns:minmax(0,1fr)}
+  .stage{padding:16px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="app" dir="rtl" lang="he">
+<nav class="nav" aria-label="ניווט">
+  <div class="wrap">
+    <a class="brand" href="#top"><b>9</b>מעבדת המשכל</a>
+    <div class="nav-links">
+      <a href="#gardner">ריבוי סוגי משכל</a>
+      <a href="#sternberg">שלושת הרכיבים</a>
+      <a href="#assessment">מהימנות ותוקף</a>
+      <a href="#quiz">תרגול</a>
+    </div>
+    <button class="theme-btn" id="themeBtn" type="button" aria-label="החלפת ערכת צבעים">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+  </div>
+</nav>
+
+<main class="wrap" id="top">
+  <!-- HERO -->
+  <header class="hero">
+    <div>
+      <span class="hero-num" aria-hidden="true">9</span>
+      <p class="eyebrow">מבוא לפסיכולוגיה · גריג וזימברדו · פרק 9</p>
+      <h1>משכל והערכת משכל</h1>
+      <p class="lede">שלוש מעבדות במקום עמודים של טקסט. מפו את פרופיל המשכל שלכם לפי גרדנר, פתרו בעיות יומיומיות בעזרת שלושת הרכיבים של סטרנברג, וזרקו חצים כדי להבין סוף־סוף מה ההבדל בין מבחן מהימן למבחן תקף.</p>
+      <div class="hero-cta">
+        <a class="chip-link" href="#gardner" style="--c:var(--mark)"><i></i>מכ״ם המשכלים</a>
+        <a class="chip-link" href="#sternberg" style="--c:var(--cr)"><i></i>משחק התרחישים</a>
+        <a class="chip-link" href="#assessment" style="--c:var(--accent)"><i></i>לוח המטרה</a>
+      </div>
+    </div>
+    <figure class="bell-card" style="margin:0">
+      <div class="head">
+        <p class="bell-read">ציון מנת משכל <strong class="mono" id="bellIQ">115</strong> · גבוה מ־<strong class="mono" id="bellPct">84%</strong> מהאוכלוסייה</p>
+        <span>גררו לאורך העקומה</span>
+      </div>
+      <svg id="bell" viewBox="0 0 520 250" role="img" aria-label="התפלגות נורמלית של ציוני מנת משכל, ממוצע 100 וסטיית תקן 15"></svg>
+      <figcaption class="bell-note">ציוני מנת משכל בנויים כך שהממוצע הוא 100 וסטיית התקן 15. כ־68% מהאנשים נמצאים בטווח 85–115, וכ־95% בטווח 70–130.</figcaption>
+    </figure>
+  </header>
+
+  <!-- GARDNER -->
+  <section class="lab" id="gardner" aria-labelledby="g-h">
+    <div class="lab-head">
+      <span class="lab-tag">מעבדה א</span>
+      <div>
+        <h2 id="g-h">מכ״ם ריבוי סוגי המשכל של גרדנר</h2>
+        <p>הווארד גרדנר טען שמבחן מנת משכל מכסה רק חלק קטן מהיכולות האנושיות, וזיהה שמונה סוגי משכל. דרגו את עצמכם במחוונים, או ענו על השאלון הקצר, והמכ״ם יתעדכן תוך כדי.</p>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="panel g-controls">
+        <div class="seg" role="group" aria-label="אופן הדירוג">
+          <button type="button" id="modeSl" aria-pressed="true">דירוג מהיר</button>
+          <button type="button" id="modeQ" aria-pressed="false">שאלון (16 היגדים)</button>
+        </div>
+        <div class="sliders" id="sliders"></div>
+        <div id="questWrap" hidden>
+          <div class="likert-legend"><span>1 = בכלל לא נכון לגביי</span><span>5 = נכון מאוד</span></div>
+          <div class="quest" id="quest"></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn ghost" type="button" id="gRandom">פרופיל לדוגמה</button>
+          <button class="btn ghost" type="button" id="gReset">איפוס</button>
+        </div>
+      </div>
+      <div class="panel g-display">
+        <div class="g-toolbar">
+          <div class="top2" id="top2" aria-live="polite"></div>
+          <label class="toggle"><input type="checkbox" id="schoolOverlay"> השוואה להדגשים של בית הספר המערבי</label>
+        </div>
+        <svg id="radar" viewBox="-250 -185 500 370" role="img" aria-label="תרשים מכ״ם של שמונה סוגי המשכל"></svg>
+        <div class="g-info" id="gInfo"></div>
+      </div>
+    </div>
+    <div class="g-foot">
+      <div class="note"><h3>תרבות קובעת מה נחשב ״חכם״</h3><p>בחברה המערבית מעריכים בעיקר משכל לוגי־מתמטי ולשוני. באיי קרוליין שבמיקרונזיה נווטים מרחקים ארוכים בלי מפות, בעזרת משכל מרחבי וגופני־קינסתטי. בבאלי משכל מוסיקלי ותיאום תנועה הם חלק מחיי היום־יום.</p></div>
+      <div class="note"><h3>משכל רגשי</h3><p>הרחבה של המשכל הבין־אישי והתוך־אישי. ארבעה רכיבים: לתפוס ולבטא רגשות בדייקנות, להשתמש ברגשות כדי לסייע לחשיבה, להבין ולנתח רגשות, ולווסת רגשות לטובת צמיחה רגשית ושכלית.</p></div>
+      <div class="note"><h3>חשוב לזכור</h3><p>זהו כלי לימוד ולא מבחן תקף. דיווח עצמי מושפע מהדימוי העצמי, ובדיוק לכן מבחנים אמיתיים צריכים מהימנות, תוקף ונורמות. על כך במעבדה ג.</p></div>
+    </div>
+  </section>
+
+  <!-- STERNBERG -->
+  <section class="lab" id="sternberg" aria-labelledby="s-h">
+    <div class="lab-head">
+      <span class="lab-tag">מעבדה ב</span>
+      <div>
+        <h2 id="s-h">משחק התרחישים: שלושת רכיבי המשכל של סטרנברג</h2>
+        <p>רוברט סטרנברג מבחין בין משכל אנליטי, יצירתי ומעשי. בכל תרחיש בחרו את הפתרון הטוב ביותר, ואז זהו איזה רכיב משכל הוא מפעיל. בסוף תקבלו את משולש הנטיות שלכם.</p>
+      </div>
+    </div>
+    <div class="game">
+      <div class="panel stage" id="stage" aria-live="polite"></div>
+      <aside class="panel side">
+        <div class="score-row">
+          <div class="score-box"><span>פתרונות מוצלחים</span><b id="scAct">0/0</b></div>
+          <div class="score-box"><span>זיהוי רכיב</span><b id="scTag">0/0</b></div>
+        </div>
+        <svg id="tri" viewBox="-150 -140 300 270" role="img" aria-label="משולש הנטיות לפי שלושת רכיבי המשכל"></svg>
+        <div class="comp" style="--c:var(--an)"><i></i><h3>משכל אנליטי</h3><p>עיבוד מידע ופתרון בעיות: רכיבי רכישת ידע, רכיבי ביצוע ורכיבים מטה־קוגניטיביים, שבוחרים אסטרטגיה ומנטרים את ההתקדמות.</p></div>
+        <div class="comp" style="--c:var(--cr)"><i></i><h3>משכל יצירתי</h3><p>התמודדות עם שני מצבים מנוגדים: בעיות חדשות לגמרי, ומנגד ביצוע אוטומטי של משימות שגרתיות.</p></div>
+        <div class="comp" style="--c:var(--pr)"><i></i><h3>משכל מעשי</h3><p>ניהול ענייני היום־יום: הסתגלות להקשרים חדשים, בחירת הקשרים מתאימים ועיצוב הסביבה לצרכינו.</p></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- RELIABILITY / VALIDITY -->
+  <section class="lab" id="assessment" aria-labelledby="a-h">
+    <div class="lab-head">
+      <span class="lab-tag">מעבדה ג</span>
+      <div>
+        <h2 id="a-h">לוח המטרה: מהימנות, תוקף ותקנון</h2>
+        <p>מרכז הלוח הוא התכונה שהמבחן אמור למדוד. כל חץ הוא מדידה אחת של אותו אדם. פיזור החצים מראה את המהימנות, והמרחק מהמרכז מראה את התוקף.</p>
+      </div>
+    </div>
+    <div class="tabs" role="tablist" aria-label="תצוגות">
+      <button class="tab" role="tab" aria-selected="true" data-tab="board" id="tab-board">לוח המטרה</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="retest" id="tab-retest">מהימנות מבחן חוזר</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="norms" id="tab-norms">נורמות ותקנון</button>
+    </div>
+    <div class="rv">
+      <div class="panel board-wrap">
+        <canvas id="cvBoard" width="440" height="440" aria-label="לוח מטרה עם חצים"></canvas>
+        <canvas id="cvRetest" class="wide" width="520" height="390" hidden aria-label="תרשים פיזור של מבחן ומבחן חוזר"></canvas>
+        <canvas id="cvNorms" class="wide" width="520" height="390" hidden aria-label="עקומת נורמות"></canvas>
+        <span class="verdict" id="verdict" style="--c:var(--good)">מהימן ותקף</span>
+        <div class="legend-ex" id="exLegend" hidden>
+          <span style="--c:var(--an)"><i></i>בוחנת א: נותנת זמן נוסף</span>
+          <span style="--c:var(--cr)"><i></i>בוחן ב: הוראות לא ברורות</span>
+          <span style="--c:var(--pr)"><i></i>בוחן ג: מעודד ומדרבן</span>
+        </div>
+      </div>
+      <div class="panel rv-ctrl" id="rvCtrl">
+        <div class="big-sl" id="relBlock" style="--c:var(--accent)">
+          <div class="top"><label for="slRel">מהימנות</label><output id="outRel" class="mono">0.90</output></div>
+          <input type="range" id="slRel" min="0" max="100" value="90" style="--c:var(--accent)">
+          <small>עד כמה המבחן נותן תוצאות עקביות בכל פעם</small>
+        </div>
+        <div class="big-sl" id="valBlock" style="--c:var(--mark)">
+          <div class="top"><label for="slVal">תוקף</label><output id="outVal" class="mono">0.90</output></div>
+          <input type="range" id="slVal" min="0" max="100" value="90" style="--c:var(--mark)">
+          <small>עד כמה המבחן מודד את מה שהוא אמור למדוד</small>
+        </div>
+        <label class="toggle" id="stdToggle"><input type="checkbox" id="noStd"> ללא תקנון: כל בוחן מעביר את המבחן בתנאים אחרים</label>
+        <div id="normCtrls" hidden style="display:flex;flex-direction:column;gap:14px">
+          <div class="big-sl" style="--c:var(--accent)">
+            <div class="top"><label for="slRaw">הציון הגולמי שלכם בשאלון דיכאון</label><output id="outRaw" class="mono">18</output></div>
+            <input type="range" id="slRaw" min="0" max="40" value="18" style="--c:var(--accent)">
+          </div>
+          <div class="seg" role="group" aria-label="אוכלוסייה נורמטיבית">
+            <button type="button" data-norm="0" aria-pressed="true">סטודנטים בני גילכם</button>
+            <button type="button" data-norm="1" aria-pressed="false">מטופלים במרפאה</button>
+          </div>
+        </div>
+        <div class="readouts" id="readouts"></div>
+        <div class="presets" id="presets"></div>
+        <p class="explain" id="explain"></p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" type="button" id="throwBtn">זריקה חוזרת</button>
+        </div>
+      </div>
+    </div>
+    <div class="concepts">
+      <div class="panel cgroup" data-group="rel">
+        <h3>דרכים למדוד מהימנות <small>reliability</small></h3>
+        <div class="terms"></div>
+        <p class="term-def">בחרו מושג כדי לראות הגדרה.</p>
+      </div>
+      <div class="panel cgroup" data-group="val">
+        <h3>סוגי תוקף <small>validity</small></h3>
+        <div class="terms"></div>
+        <p class="term-def">בחרו מושג כדי לראות הגדרה.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="lab" id="quiz" aria-labelledby="q-h">
+    <div class="lab-head">
+      <span class="lab-tag">תרגול</span>
+      <div>
+        <h2 id="q-h">מבחן קצר לתרגול עצמי</h2>
+        <p>שש שאלות על מושגי המפתח של הפרק. אחרי כל תשובה מופיע הסבר.</p>
+      </div>
+    </div>
+    <div class="panel quiz" id="quizBox" aria-live="polite"></div>
+  </section>
+
+  <footer>
+    <span>מבוסס על פרק 9, ״משכל והערכת משכל״, בספר מבוא לפסיכולוגיה (Gerrig &amp; Zimbardo, Psychology and Life), מהדורה עברית של האוניברסיטה הפתוחה.</span>
+    <span>כלי לימוד בלבד. אינו מבחן פסיכולוגי.</span>
+  </footer>
+</main>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const NS="http://www.w3.org/2000/svg";
+const el=(tag,attrs={},parent)=>{const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e};
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function gauss(rng){let u=0,v=0;while(!u)u=rng();while(!v)v=rng();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+function erf(x){const s=Math.sign(x);x=Math.abs(x);const t=1/(1+0.3275911*x);const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return s*y}
+const ncdf=z=>0.5*(1+erf(z/Math.SQRT2));
+const npdf=z=>Math.exp(-z*z/2)/Math.sqrt(2*Math.PI);
+
+/* ---------- theme ---------- */
+const root=document.documentElement;
+const savedTheme=store.get("ch9-theme",null);
+if(savedTheme)root.setAttribute("data-theme",savedTheme);
+const listeners=[];
+$("#themeBtn").addEventListener("click",()=>{
+  const dark=root.getAttribute("data-theme")?root.getAttribute("data-theme")==="dark":matchMedia("(prefers-color-scheme: dark)").matches;
+  const next=dark?"light":"dark";root.setAttribute("data-theme",next);store.set("ch9-theme",next);listeners.forEach(f=>f());
+});
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>listeners.forEach(f=>f()));
+
+/* ---------- nav highlight ---------- */
+const navLinks=$$(".nav-links a");
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){navLinks.forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+e.target.id))}}),{rootMargin:"-40% 0px -55% 0px"});
+$$(".lab").forEach(s=>io.observe(s));
+
+/* =========================================================
+   HERO: IQ bell curve
+   ========================================================= */
+(function bell(){
+  const svg=$("#bell"),W=520,H=250,L=20,R=500,B=210,T=20;
+  const x=iq=>L+(iq-40)/(160-40)*(R-L), y=d=>B-d/npdf(0)*(B-T-10);
+  function pathFor(a,b){let d=`M${x(a)},${B}`;for(let i=a;i<=b;i+=1)d+=` L${x(i).toFixed(1)},${y(npdf((i-100)/15)).toFixed(1)}`;return d+` L${x(b)},${B} Z`}
+  const bands=[[40,55,.06],[55,70,.1],[70,85,.18],[85,115,.3],[115,130,.18],[130,145,.1],[145,160,.06]];
+  const g=el("g",{},svg);
+  bands.forEach(([a,b,o])=>el("path",{d:pathFor(a,b),fill:"var(--accent)","fill-opacity":o},g));
+  el("path",{d:pathFor(40,160).replace(/ Z$/,""),fill:"none",stroke:"var(--accent)","stroke-width":2.2},g);
+  const pct=[[62.5,"2%"],[77.5,"14%"],[92.5,"34%"],[107.5,"34%"],[122.5,"14%"],[137.5,"2%"]];
+  pct.forEach(([iq,t])=>{const tx=el("text",{x:x(iq),y:B-8,"text-anchor":"middle","font-size":12,fill:"var(--ink)","font-family":"IBM Plex Mono, monospace","fill-opacity":.75},g);tx.textContent=t});
+  el("line",{x1:L,x2:R,y1:B,y2:B,stroke:"var(--line)","stroke-width":1.5},g);
+  [55,70,85,100,115,130,145].forEach(v=>{el("line",{x1:x(v),x2:x(v),y1:B,y2:B+5,stroke:"var(--muted)"},g);const t=el("text",{x:x(v),y:B+20,"text-anchor":"middle","font-size":12,fill:"var(--muted)","font-family":"IBM Plex Mono, monospace"},g);t.textContent=v});
+  const shade=el("path",{fill:"var(--mark)","fill-opacity":.35},svg);
+  const line=el("line",{y1:T,y2:B,stroke:"var(--ink)","stroke-width":1.5,"stroke-dasharray":"3 3"},svg);
+  const dot=el("circle",{r:7,fill:"var(--mark)",stroke:"var(--ink)","stroke-width":2},svg);
+  let iq=115;
+  function set(v){iq=Math.max(45,Math.min(155,Math.round(v)));const z=(iq-100)/15;
+    shade.setAttribute("d",pathFor(40,iq));line.setAttribute("x1",x(iq));line.setAttribute("x2",x(iq));
+    dot.setAttribute("cx",x(iq));dot.setAttribute("cy",y(npdf(z)));
+    $("#bellIQ").textContent=iq;const p=ncdf(z)*100;$("#bellPct").textContent=(p<1?p.toFixed(1):p>99?p.toFixed(1):Math.round(p))+"%";}
+  set(iq);
+  let drag=false;
+  const toIQ=e=>{const r=svg.getBoundingClientRect();const px=(e.clientX-r.left)/r.width*W;return 40+(px-L)/(R-L)*120};
+  svg.addEventListener("pointerdown",e=>{drag=true;svg.setPointerCapture(e.pointerId);set(toIQ(e))});
+  svg.addEventListener("pointermove",e=>{if(drag||e.pointerType==="mouse")set(toIQ(e))});
+  svg.addEventListener("pointerup",()=>drag=false);
+  svg.setAttribute("tabindex","0");
+  svg.addEventListener("keydown",e=>{if(e.key==="ArrowLeft"){set(iq-1);e.preventDefault()}if(e.key==="ArrowRight"){set(iq+1);e.preventDefault()}});
+})();
+
+/* =========================================================
+   LAB A: Gardner radar
+   ========================================================= */
+const INT=[
+ {k:"log",n:"לוגי־מתמטי",c:"#2F64B0",end:"מדען, מתמטיקאי",core:"רגישות לתבניות הגיוניות או מספריות והיכולת להבחין בהן; יכולת לעסוק בשרשראות ארוכות של היסק.",
+   q:["אני נהנה/ית לפתור חידות היגיון ובעיות מספריות.","כשמשהו לא עובד, אני מחפש/ת את הסיבה צעד אחר צעד."]},
+ {k:"lin",n:"לשוני",c:"#8A4FBF",end:"משורר, עיתונאי",core:"רגישות לצלילי מילים, למקצב שלהן ולמשמעותן; רגישות לפונקציות השונות של שפה.",
+   q:["קל לי להסביר רעיון מסובך במילים פשוטות.","אני שם/ה לב לבחירת מילים ולניסוח של אחרים."]},
+ {k:"nat",n:"נטורליסטי",c:"#3D8B47",end:"ביולוג, איש איכות הסביבה",core:"רגישות להבדלים בין מגוון המינים; תקשורת טובה עם יצורים חיים.",
+   q:["אני מזהה בקלות סוגי צמחים, ציפורים או בעלי חיים.","בטבע אני מרגיש/ה בבית ושם לב לפרטים קטנים."]},
+ {k:"mus",n:"מוסיקלי",c:"#C0407A",end:"מלחין, כנר",core:"יכולת להפיק ולהעריך קצב, גובה צליל וגוון קול; הערכת צורות של הבעה מוסיקלית.",
+   q:["אני קולט/ת מנגינה אחרי שמיעה אחת או שתיים.","אני שומע/ת מיד כשמישהו שר או מנגן לא בדיוק."]},
+ {k:"spa",n:"מרחבי",c:"#D9822B",end:"נווט, פסל",core:"יכולת לתפוס את העולם החזותי־מרחבי בדייקנות ולערוך שינויים בתפיסות הראשוניות.",
+   q:["אני מתמצא/ת בקלות במקום חדש גם בלי מפה.","קל לי לדמיין איך חפץ ייראה אם יסובבו אותו."]},
+ {k:"bod",n:"גופני־קינסתטי",c:"#0E7C86",end:"רקדן, אתלט",core:"יכולת לשלוט בתנועות הגוף ולטפל בעצמים במיומנות.",
+   q:["אני לומד/ת תנועה חדשה (ריקוד, ספורט) מהר.","אני חושב/ת טוב יותר כשאני בתנועה או עושה משהו בידיים."]},
+ {k:"inter",n:"בין־אישי",c:"#B5483C",end:"מטפל, איש מכירות",core:"יכולת להבין מצבי רוח, מזג, מוטיבציה ותשוקה של אנשים אחרים ולהגיב עליהם כראוי.",
+   q:["אנשים פונים אליי כשהם צריכים עצה או אוזן קשבת.","אני מרגיש/ה מהר כשמשהו לא בסדר אצל מישהו."]},
+ {k:"intra",n:"תוך־אישי",c:"#5B6BA8",end:"אדם בעל מודעות עצמית מדויקת",core:"גישה לרגשות העצמי והיכולת להבחין ביניהם ולהיעזר בהם להכוונת ההתנהגות; הכרת הכוחות, החולשות והתשוקות של עצמך.",
+   q:["אני יודע/ת בדיוק מה מניע אותי ולמה.","אני מזהה את החוזקות והחולשות שלי בלי לייפות."]}
+];
+const SCHOOL=[9,9,3,2.5,3.5,2.5,3,3]; // relative emphasis in typical Western schooling (illustrative)
+const N=INT.length;
+let gVals=store.get("ch9-gardner",null)||[7,6,4,5,7,5,8,6];
+let gLik=store.get("ch9-likert",null)||INT.map(()=>[0,0]);
+let disp=gVals.slice(), focusIdx=6;
+const RAD=125, ang=i=>-Math.PI/2+i*2*Math.PI/N, pt=(i,v)=>[Math.cos(ang(i))*RAD*v/10,Math.sin(ang(i))*RAD*v/10];
+
+const radar=$("#radar");
+const rings=el("g",{},radar);
+[2,4,6,8,10].forEach(v=>{let d="";for(let i=0;i<N;i++){const[x,y]=pt(i,v);d+=(i?"L":"M")+x.toFixed(1)+","+y.toFixed(1)}el("path",{d:d+"Z",fill:v===10?"var(--surface-2)":"none",stroke:"var(--line)","stroke-width":1},rings)});
+for(let i=0;i<N;i++){const[x,y]=pt(i,10);el("line",{x1:0,y1:0,x2:x,y2:y,stroke:"var(--line)"},rings)}
+[2,4,6,8,10].forEach(v=>{const t=el("text",{x:4,y:-RAD*v/10-3,"font-size":10,fill:"var(--muted)","font-family":"IBM Plex Mono, monospace"},rings);t.textContent=v});
+const schoolPath=el("path",{fill:"var(--muted)","fill-opacity":.08,stroke:"var(--muted)","stroke-width":2,"stroke-dasharray":"6 5",visibility:"hidden"},radar);
+const shape=el("path",{fill:"var(--accent)","fill-opacity":.2,stroke:"var(--accent)","stroke-width":2.5,"stroke-linejoin":"round"},radar);
+const dots=[],labels=[];
+INT.forEach((it,i)=>{
+  const d=el("circle",{r:6,fill:it.c,stroke:"var(--surface)","stroke-width":2,style:"cursor:grab"},radar);dots.push(d);
+  const[lx,ly]=pt(i,12.6);const c=Math.cos(ang(i));
+  const g=el("g",{class:"radar-axis-label",tabindex:0,role:"button","aria-label":it.n},radar);
+  const t=el("text",{x:lx,y:ly+4,"text-anchor":Math.abs(c)<.2?"middle":c>0?"start":"end","font-size":14,"font-weight":600,fill:"var(--ink)"},g);t.textContent=it.n;
+  const v=el("text",{x:lx,y:ly+20,"text-anchor":Math.abs(c)<.2?"middle":c>0?"start":"end","font-size":12,fill:it.c,"font-family":"IBM Plex Mono, monospace","font-weight":600},g);
+  labels.push({g,t,v});
+  g.addEventListener("click",()=>setFocus(i));g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setFocus(i)}});
+  // drag dots directly on the radar
+  let dragging=false;
+  d.addEventListener("pointerdown",e=>{dragging=true;d.setPointerCapture(e.pointerId);setFocus(i)});
+  d.addEventListener("pointermove",e=>{if(!dragging)return;const m=radar.getScreenCTM().inverse();const p=new DOMPoint(e.clientX,e.clientY).matrixTransform(m);
+    const proj=(p.x*Math.cos(ang(i))+p.y*Math.sin(ang(i)))/RAD*10;setVal(i,Math.round(Math.max(0,Math.min(10,proj))))});
+  d.addEventListener("pointerup",()=>dragging=false);
+});
+schoolPath.setAttribute("d",SCHOOL.map((v,i)=>{const[x,y]=pt(i,v);return(i?"L":"M")+x+","+y}).join("")+"Z");
+
+// sliders
+const slWrap=$("#sliders");
+INT.forEach((it,i)=>{
+  const d=document.createElement("div");d.className="sl";d.style.setProperty("--c",it.c);
+  d.innerHTML=`<label for="g-${it.k}"><i></i>${it.n}</label><output id="go-${it.k}">${gVals[i]}</output><input type="range" id="g-${it.k}" min="0" max="10" step="1" value="${gVals[i]}" aria-label="${it.n}">`;
+  slWrap.appendChild(d);
+  const inp=$("input",d);inp.style.setProperty("--c",it.c);
+  inp.addEventListener("input",()=>setVal(i,+inp.value));
+  inp.addEventListener("focus",()=>setFocus(i));
+});
+// questionnaire
+const qWrap=$("#quest");
+const qOrder=[];INT.forEach((it,i)=>it.q.forEach((s,j)=>qOrder.push([i,j])));
+// interleave so the same intelligence is not adjacent
+qOrder.sort((a,b)=>a[1]-b[1]||((a[0]*3)%8)-((b[0]*3)%8));
+qOrder.forEach(([i,j])=>{
+  const it=INT[i];const d=document.createElement("div");d.className="q-item";d.style.setProperty("--c",it.c);
+  d.innerHTML=`<p><small>${it.n}</small>${it.q[j]}</p><div class="likert" role="group" aria-label="${it.q[j]}">${[1,2,3,4,5].map(n=>`<button type="button" data-n="${n}" aria-pressed="${gLik[i][j]===n}">${n}</button>`).join("")}</div>`;
+  qWrap.appendChild(d);
+  $$("button",d).forEach(b=>b.addEventListener("click",()=>{
+    gLik[i][j]=+b.dataset.n;$$("button",d).forEach(x=>x.setAttribute("aria-pressed",x===b));store.set("ch9-likert",gLik);
+    const [a,c]=gLik[i];const filled=[a,c].filter(Boolean);const avg=filled.reduce((s,v)=>s+v,0)/filled.length;
+    setVal(i,Math.round((avg-1)/4*10));setFocus(i);
+  }));
+});
+$("#modeSl").addEventListener("click",()=>{$("#modeSl").setAttribute("aria-pressed",true);$("#modeQ").setAttribute("aria-pressed",false);slWrap.hidden=false;$("#questWrap").hidden=true});
+$("#modeQ").addEventListener("click",()=>{$("#modeQ").setAttribute("aria-pressed",true);$("#modeSl").setAttribute("aria-pressed",false);slWrap.hidden=true;$("#questWrap").hidden=false});
+$("#gRandom").addEventListener("click",()=>{const profiles=[[4,9,3,8,5,4,8,9],[9,5,6,3,9,4,3,5],[3,4,8,6,7,10,6,5],[6,7,5,9,6,7,9,7]];const p=profiles[Math.floor(Math.random()*profiles.length)];p.forEach((v,i)=>setVal(i,v,true));renderG()});
+$("#gReset").addEventListener("click",()=>{gLik=INT.map(()=>[0,0]);store.set("ch9-likert",gLik);$$(".likert button").forEach(b=>b.setAttribute("aria-pressed",false));INT.forEach((_,i)=>setVal(i,5,true));renderG()});
+$("#schoolOverlay").addEventListener("change",e=>schoolPath.setAttribute("visibility",e.target.checked?"visible":"hidden"));
+
+function setVal(i,v,silent){gVals[i]=v;const inp=$("#g-"+INT[i].k);inp.value=v;$("#go-"+INT[i].k).textContent=v;inp.style.setProperty("--p",(v*10)+"%");store.set("ch9-gardner",gVals);if(!silent)renderG();kick()}
+function setFocus(i){focusIdx=i;$$(".sl").forEach((s,j)=>s.classList.toggle("hl",j===i));renderG()}
+function renderG(){
+  const it=INT[focusIdx];
+  const info=$("#gInfo");info.style.setProperty("--c",it.c);
+  info.innerHTML=`<div class="big">${it.n}<div class="mono" style="font-size:1rem;color:var(--muted)">${gVals[focusIdx]}/10</div></div><p class="core">${it.core}</p><p class="end">מצב סופי מייצג: <b>${it.end}</b></p>`;
+  const order=gVals.map((v,i)=>[v,i]).sort((a,b)=>b[0]-a[0]);
+  $("#top2").innerHTML=`<span class="pill" style="background:transparent;border:0;padding-inline:0">החזקים שלכם:</span>`+order.slice(0,2).map(([v,i])=>`<span class="pill" style="--c:${INT[i].c}"><i></i>${INT[i].n}</span>`).join("");
+  labels.forEach((l,i)=>{l.v.textContent=gVals[i];l.t.setAttribute("fill",i===focusIdx?INT[i].c:"var(--ink)")});
+  INT.forEach((_,i)=>$("#g-"+INT[i].k).style.setProperty("--p",(gVals[i]*10)+"%"));
+}
+let raf=0;
+function kick(){if(!raf)raf=requestAnimationFrame(tick)}
+function tick(){raf=0;let moving=false;
+  for(let i=0;i<N;i++){const d=gVals[i]-disp[i];if(Math.abs(d)>.01){disp[i]+=reduce?d:d*.18;moving=true}else disp[i]=gVals[i]}
+  let p="";for(let i=0;i<N;i++){const[x,y]=pt(i,disp[i]);p+=(i?"L":"M")+x.toFixed(2)+","+y.toFixed(2);dots[i].setAttribute("cx",x);dots[i].setAttribute("cy",y)}
+  shape.setAttribute("d",p+"Z");if(moving)kick()}
+renderG();setFocus(focusIdx);kick();
+
+/* =========================================================
+   LAB B: Sternberg scenario game
+   ========================================================= */
+const K={A:{n:"אנליטי",c:"var(--an)"},C:{n:"יצירתי",c:"var(--cr)"},P:{n:"מעשי",c:"var(--pr)"}};
+const SC=[
+ {t:"שתי חבילות סלולר",type:"A",
+  text:"חבילה א: 49 ₪ לחודש כולל 20GB. חבילה ב: 29 ₪ לחודש כולל 5GB, ועוד 5 ₪ לכל GB נוסף. בחודש רגיל אתם צורכים 9GB, ובחודשי חופשה עד 15GB.",
+  opts:[
+   {t:"לבדוק כמה צרכתם בחודשים האחרונים ולחשב את העלות של כל חבילה לפי הצריכה בפועל.",k:"A",ok:true,why:"בחודש רגיל שתי החבילות עולות 49 ₪, אבל בחודש חופשה חבילה ב עולה 79 ₪. חבילה א משתלמת."},
+   {t:"לשאול חבר איזו חבילה הוא לקח ולעשות אותו דבר.",k:"P",why:"פתרון מהיר, אבל הצריכה של החבר שונה משלכם."},
+   {t:"להציע לבן משפחה לפתוח יחד חבילה משפחתית ולחלק את הנפח.",k:"C",why:"רעיון מקורי, אבל הוא לא עונה על השאלה שלפניכם: איזו משתי החבילות זולה יותר."}],
+  lesson:"פירקתם את הבעיה, השוויתם נתונים והערכתם תוצאות. אלה רכיבי ביצוע של משכל אנליטי."},
+ {t:"האנגרמה התקועה",type:"A",
+  text:"אתם פותרים אנגרמות באנגלית, כמו בתרגיל של סטרנברג. את <code>T-R-H-O-S</code> פתרתם מהר (SHORT), אבל על <code>T-N-K-H-G-I</code> אתם תקועים כבר חמש דקות.",
+  opts:[
+   {t:"להמשיך לנסות מילים שמתחילות ב־TH, כי ככה מתחילות הרבה מילים באנגלית.",k:"A",why:"זו בדיוק המלכודת שסטרנברג מתאר: אסטרטגיה טובה בדרך כלל, שנכשלת כאן."},
+   {t:"לעצור ולהחליף אסטרטגיה: לבדוק צירופים פחות שכיחים בתחילת מילה, כמו KN.",k:"A",ok:true,why:"KNIGHT. הבחירה באסטרטגיה ומעקב אחר ההצלחה שלה הם רכיבים מטה־קוגניטיביים."},
+   {t:"לדלג ולחפש את התשובה בסוף הפרק.",k:"P",why:"זה יפתור את הדף, אבל לא את הבעיה."}],
+  lesson:"הרכיבים המטה־קוגניטיביים בוחרים אסטרטגיה ומנטרים את ההתקדמות. כשהאסטרטגיה הרגילה נכשלת, הם אלה שמחליפים אותה."},
+ {t:"מסיבת הפתעה בלי מקום",type:"C",
+  text:"שעתיים לפני מסיבת ההפתעה לחברה הכי טובה שלכם, המסעדה מבטלת את ההזמנה. חמישה־עשר אורחים כבר בדרך, וכל המקומות באזור מלאים.",
+  opts:[
+   {t:"להתקשר לעשר מסעדות ברצף ולקוות שתתפנה טבלה.",k:"P",why:"ניסיון סביר, אבל כבר ידוע שהכול מלא."},
+   {t:"להפוך את הביטול לחלק מההפתעה: פיקניק לילי בפארק הקרוב, משלוח אוכל, שמיכות ופנסים.",k:"C",ok:true,why:"מצב חדש לגמרי דורש פתרון חדש. זה משכל יצירתי."},
+   {t:"לבטל ולדחות את המסיבה לשבוע הבא.",k:"A",why:"שקלתם את המצב, אבל ויתרתם על האירוע."}],
+  lesson:"משכל יצירתי הוא היכולת להתמודד עם בעיות חדשות: למצוא דרך כשהמסלולים המוכרים חסומים."},
+ {t:"שבוע ראשון עם מערכת חדשה",type:"C",
+  text:"התחלתם עבודה חדשה עם תוכנה מסובכת. אחרי שבוע אתם עדיין מבזבזים כשעה ביום על אותן פעולות שגרתיות, ואין לכם פנאי לבעיות האמיתיות.",
+  opts:[
+   {t:"להכין דף קיצורים ותבנית עבודה קבועה, ולתרגל עד שהפעולות נעשות אוטומטיות.",k:"C",ok:true,why:"הפיכת משימות שגרתיות לאוטומטיות מפנה קשב לבעיות חדשות."},
+   {t:"לבקש מעמית ותיק שיעשה את הפעולות האלה במקומכם.",k:"P",why:"עובד היום, אבל מחר תצטרכו אותו שוב."},
+   {t:"להמשיך כרגיל. בעוד חודש זה יסתדר מעצמו.",k:"A",why:"אולי, אבל בינתיים אתם משלמים שעה ביום."}],
+  lesson:"מפתיע? לפי סטרנברג, משכל יצירתי כולל גם את הצד ההפוך לחדשנות: ביצוע אוטומטי של משימות מוכרות, כדי שהמשאבים יתפנו לחדש."},
+ {t:"שותפים רועשים בתקופת מבחנים",type:"P",all:true,
+  text:"השותפים בדירה מארחים חברים בדיוק בשעות שבהן אתם לומדים למבחן. כל אחד מהפתרונות כאן סביר. בחרו את מה שהייתם עושים.",
+  opts:[
+   {t:"ללמוד בשעות הבוקר המוקדמות ולקנות אטמי אוזניים.",k:"P",ok:true,why:"הסתגלות: אתם משנים את עצמכם כדי להתאים לסביבה."},
+   {t:"לעבור ללמוד בספרייה בתקופת המבחנים.",k:"P",ok:true,why:"בחירת סביבה: אתם עוברים להקשר שמתאים לכם יותר."},
+   {t:"לקבוע עם השותפים ״שעות שקט״ קבועות בלוח במטבח.",k:"P",ok:true,why:"עיצוב הסביבה: אתם משנים את ההקשר כך שיתאים לצרכים שלכם."}],
+  lesson:"שלוש הדרכים של משכל מעשי: להסתגל להקשר, לבחור הקשר אחר, או לעצב את ההקשר הקיים. אין כאן תשובה אחת נכונה."},
+ {t:"טעות במצגת של המנהלת",type:"P",
+  text:"יום שני שלכם בעבודה. בישיבת צוות המנהלת מציגה תוכנית תקציב, ואתם בטוחים שיש בה טעות בחישוב.",
+  opts:[
+   {t:"להצביע על הטעות מיד, מול כל הצוות.",k:"A",why:"החישוב שלכם אולי נכון, אבל ביום השני בעבודה זה עלול לעלות ביוקר."},
+   {t:"לחכות לסוף הישיבה, לגשת אליה בשקט ולהראות את החישוב.",k:"P",ok:true,why:"הטעות מתוקנת, ואתם מכבדים את הנורמות הלא־כתובות של המקום."},
+   {t:"לא להגיד כלום. אתם חדשים, וזה לא התפקיד שלכם.",k:"C",why:"שקט חברתי, אבל הטעות נשארת בתוכנית."}],
+  lesson:"משכל מעשי הוא ידע על ההקשר: לא רק מה נכון, אלא איך ומתי לפעול. ידע כזה כמעט אף פעם לא נמדד במבחני מנת משכל."}
+];
+let gs;
+function newGame(){gs={i:0,phase:"act",act:0,tag:0,picks:{A:0,C:0,P:0},correctBy:{A:[0,0],C:[0,0],P:[0,0]}};renderStage();renderTri()}
+function letter(n){return"אבגד"[n]}
+function renderStage(){
+  const st=$("#stage");
+  $("#scAct").textContent=gs.act+"/"+Math.min(gs.i+(gs.phase!=="act"?1:0),SC.length);
+  $("#scTag").textContent=gs.tag+"/"+Math.min(gs.i+(gs.phase==="done"?1:0),SC.length);
+  if(gs.i>=SC.length)return renderEnd();
+  const s=SC[gs.i];
+  st.innerHTML=`<div class="progress">${SC.map((_,j)=>`<span class="${j<gs.i?"done":j===gs.i?"now":""}"></span>`).join("")}</div>
+   <div class="scn-meta"><span class="mono">תרחיש ${gs.i+1} מתוך ${SC.length}</span><span>${gs.phase==="act"?"שלב 1: בחרו פתרון":gs.phase==="tag"?"שלב 2: איזה רכיב משכל זה?":"סיכום התרחיש"}</span></div>
+   <h3 class="scn-title">${s.t}</h3><p class="scn-text">${s.text}</p>
+   <div class="opts">${s.opts.map((o,j)=>`<button type="button" class="opt" data-j="${j}"><span class="bub">${letter(j)}</span><span>${o.t}<span class="why" hidden>${o.why}</span></span></button>`).join("")}</div>
+   <div id="after"></div>`;
+  $$(".opt",st).forEach(b=>b.addEventListener("click",()=>chooseAct(+b.dataset.j)));
+  if(gs.phase!=="act"){paintOpts();renderTagger()}
+}
+function paintOpts(){
+  const s=SC[gs.i];
+  $$("#stage .opt").forEach((b,j)=>{b.disabled=true;const o=s.opts[j];$(".why",b).hidden=false;
+    if(s.all){b.classList.toggle("right",j===gs.chosen);b.classList.toggle("dim",j!==gs.chosen)}
+    else if(o.ok)b.classList.add("right");else if(j===gs.chosen)b.classList.add("wrong");else b.classList.add("dim")});
+}
+function chooseAct(j){
+  const s=SC[gs.i];gs.chosen=j;const o=s.opts[j];
+  gs.picks[o.k]++; if(o.ok){gs.act++;gs.correctBy[s.type][0]++} gs.correctBy[s.type][1]++;
+  gs.phase="tag";paintOpts();renderTagger();renderTri();
+  $("#scAct").textContent=gs.act+"/"+(gs.i+1);
+}
+function renderTagger(){
+  const s=SC[gs.i],a=$("#after");
+  const o=s.opts[gs.chosen];
+  const head=s.all?`<div class="feedback" style="--c:var(--pr)">${o.why}</div>`:o.ok?`<div class="feedback" style="--c:var(--good)"><b>פתרון מצוין.</b> ${o.why}</div>`:`<div class="feedback" style="--c:var(--bad)"><b>לא הפעם.</b> ${o.why}</div>`;
+  a.innerHTML=head+`<div class="tagger" style="margin-top:12px"><p>איזה רכיב משכל מפעיל הפתרון ${s.all?"שבחרתם":"הטוב ביותר"}?</p><div class="tag-btns">${Object.keys(K).map(k=>`<button type="button" class="tag-btn" data-k="${k}" style="--c:${K[k].c}">${K[k].n}</button>`).join("")}</div></div><div id="lesson"></div>`;
+  $$(".tag-btn",a).forEach(b=>b.addEventListener("click",()=>chooseTag(b.dataset.k)));
+  if(gs.phase==="done")showLesson();
+}
+function chooseTag(k){
+  const s=SC[gs.i];gs.tagPick=k;if(k===s.type)gs.tag++;gs.phase="done";showLesson();
+  $("#scTag").textContent=gs.tag+"/"+(gs.i+1);
+}
+function showLesson(){
+  const s=SC[gs.i];
+  $$("#stage .tag-btn").forEach(b=>{b.disabled=true;if(b.dataset.k===s.type)b.classList.add("picked")});
+  const right=gs.tagPick===s.type;
+  $("#lesson").innerHTML=`<div class="feedback" style="--c:${K[s.type].c};margin-top:12px"><b>${right?"נכון: ":"התשובה: "}משכל ${K[s.type].n}.</b> ${s.lesson}</div>
+   <button class="btn" type="button" id="nextBtn" style="margin-top:12px">${gs.i<SC.length-1?"לתרחיש הבא":"לתוצאות"}</button>`;
+  $("#nextBtn").addEventListener("click",()=>{gs.i++;gs.phase="act";renderStage();$("#stage").scrollIntoView({behavior:reduce?"auto":"smooth",block:"nearest"})});
+  $("#nextBtn").focus({preventScroll:true});
+}
+function renderEnd(){
+  const st=$("#stage");const tot=gs.picks.A+gs.picks.C+gs.picks.P||1;
+  const lean=Object.keys(gs.picks).sort((a,b)=>gs.picks[b]-gs.picks[a])[0];
+  const msg={A:"אתם נוטים לפרק בעיות ולחשב. זה כוח גדול בבעיות מוגדרות היטב, אבל בחיים לא תמיד יש נתונים מלאים.",
+             C:"אתם נוטים לחפש פתרונות לא שגרתיים. זה כוח במצבים חדשים, וכדאי לבדוק מתי דווקא שגרה אוטומטית תחסוך לכם משאבים.",
+             P:"אתם נוטים לקרוא את ההקשר ולפעול בהתאם לו. זה המשכל שמבחני מנת משכל מודדים הכי פחות, ואחד החשובים בחיי היום־יום."}[lean];
+  st.innerHTML=`<div class="progress">${SC.map(()=>`<span class="done"></span>`).join("")}</div>
+   <p class="eyebrow">סיום המשחק</p><h3 class="scn-title">פתרתם ${gs.act} מתוך ${SC.length} תרחישים, וזיהיתם נכון ${gs.tag} רכיבים</h3>
+   <div class="feedback" style="--c:${K[lean].c}"><b>הנטייה הבולטת שלכם: משכל ${K[lean].n}.</b> ${msg}</div>
+   <p class="scn-text">לפי סטרנברג, אדם אינטליגנטי אינו מי שחזק בכל שלושת הרכיבים, אלא מי שמזהה איזה רכיב המצב דורש ומשתמש בו. המשולש בצד מראה איך התפלגו הבחירות שלכם.</p>
+   <button class="btn" type="button" id="againBtn">משחק חדש</button><canvas class="confetti" id="conf"></canvas>`;
+  $("#againBtn").addEventListener("click",newGame);renderTri(true);
+  if(!reduce)confetti($("#conf"));
+}
+function renderTri(final){
+  const svg=$("#tri");svg.innerHTML="";const R=105;const keys=["A","C","P"];
+  const a=i=>-Math.PI/2+i*2*Math.PI/3, p=(i,v)=>[Math.cos(a(i))*R*v,Math.sin(a(i))*R*v];
+  [1,.66,.33].forEach(v=>el("path",{d:keys.map((_,i)=>{const[x,y]=p(i,v);return(i?"L":"M")+x+","+y}).join("")+"Z",fill:v===1?"var(--surface-2)":"none",stroke:"var(--line)"},svg));
+  keys.forEach((k,i)=>{const[x,y]=p(i,1);el("line",{x1:0,y1:0,x2:x,y2:y,stroke:"var(--line)"},svg);
+    const[lx,ly]=p(i,1.2);const t=el("text",{x:lx,y:ly+(i===0?-2:14),"text-anchor":"middle","font-size":14,"font-weight":700,fill:K[k].c},svg);t.textContent=K[k].n;});
+  const tot=Math.max(1,gs.picks.A+gs.picks.C+gs.picks.P);const mx=Math.max(1,...keys.map(k=>gs.picks[k]));
+  const vals=keys.map(k=>.12+.88*gs.picks[k]/mx*(tot>0?1:0));
+  el("path",{d:keys.map((k,i)=>{const[x,y]=p(i,gs.picks[k]?vals[i]:.08);return(i?"L":"M")+x+","+y}).join("")+"Z",fill:"var(--mark)","fill-opacity":.35,stroke:"var(--mark)","stroke-width":2.5,"stroke-linejoin":"round"},svg);
+  keys.forEach((k,i)=>{const[x,y]=p(i,gs.picks[k]?vals[i]:.08);el("circle",{cx:x,cy:y,r:5,fill:K[k].c,stroke:"var(--surface)","stroke-width":2},svg)});
+  const cap=el("text",{x:0,y:126,"text-anchor":"middle","font-size":12,fill:"var(--muted)"},svg);cap.textContent=gs.i===0&&gs.phase==="act"?"המשולש יתמלא לפי הבחירות שלכם":"התפלגות הבחירות שלכם";
+}
+function confetti(cv){const r=cv.getBoundingClientRect();cv.width=r.width;cv.height=r.height;const ctx=cv.getContext("2d");
+  const cols=[css("--an"),css("--cr"),css("--pr"),css("--mark")];const ps=Array.from({length:90},()=>({x:Math.random()*cv.width,y:-20-Math.random()*cv.height*.5,vx:(Math.random()-.5)*2,vy:2+Math.random()*3,r:Math.random()*6,c:cols[Math.floor(Math.random()*4)],a:Math.random()*6}));
+  let f=0;(function loop(){ctx.clearRect(0,0,cv.width,cv.height);ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.a+=.1;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.a);ctx.fillStyle=p.c;ctx.fillRect(-4,-2,8,4);ctx.restore()});if(++f<160)requestAnimationFrame(loop);else ctx.clearRect(0,0,cv.width,cv.height)})()}
+newGame();
+
+/* =========================================================
+   LAB C: Reliability / Validity / Standardization
+   ========================================================= */
+const S={rel:.9,val:.9,noStd:false,tab:"board",norm:0,raw:18,seed:7};
+const ND=10, NP=60;
+let base,people;
+function sample(){const rng=mulberry32(S.seed);base=Array.from({length:ND},()=>[gauss(rng),gauss(rng)]);
+  people=Array.from({length:NP},()=>({t:gauss(rng),e1:gauss(rng),e2:gauss(rng)}))}
+sample();
+const EX=[[-.42,.12],[.28,.36],[.18,-.4]]; // examiner condition shifts (fraction of board radius)
+const BIAS_ANG=-2.35;
+let darts=[]; // display state
+function targets(){
+  const R=1, sigma=.04+(1-S.rel)*.36, bias=(1-S.val)*.62;
+  return base.map(([gx,gy],i)=>{let x=Math.cos(BIAS_ANG)*bias+gx*sigma, y=Math.sin(BIAS_ANG)*bias+gy*sigma;
+    if(S.noStd){x+=EX[i%3][0];y+=EX[i%3][1]}return{x,y,g:i%3}});
+}
+function throwDarts(){const now=performance.now();const tg=targets();darts=tg.map((t,i)=>({x:t.x,y:t.y,tx:t.x,ty:t.y,g:t.g,born:now+i*(reduce?0:110)}));loopC()}
+function retarget(){const tg=targets();tg.forEach((t,i)=>{if(darts[i]){darts[i].tx=t.x;darts[i].ty=t.y;darts[i].g=t.g}});loopC()}
+
+const cvB=$("#cvBoard"),cvR=$("#cvRetest"),cvN=$("#cvNorms");
+function fit(cv){const dpr=Math.min(2,window.devicePixelRatio||1);const w=+cv.getAttribute("width"),h=+cv.getAttribute("height");
+  if(cv._dpr!==dpr){cv._dpr=dpr;cv.width=w*dpr;cv.height=h*dpr;cv._w=w;cv._h=h}const ctx=cv.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);return ctx}
+let cRaf=0;function loopC(){if(!cRaf)cRaf=requestAnimationFrame(drawC)}
+function drawC(){cRaf=0;let again=false;
+  if(S.tab==="board")again=drawBoard();else if(S.tab==="retest")drawRetest();else drawNorms();
+  if(again)loopC()}
+function drawBoard(){
+  const ctx=fit(cvB),W=cvB._w,H=cvB._h,cx=W/2,cy=H/2,R=170;ctx.clearRect(0,0,W,H);
+  const surf=css("--surface"),s2=css("--surface-2"),line=css("--line"),ink=css("--ink"),mark=css("--mark"),acc=css("--accent"),muted=css("--muted");
+  const rings=[[1,s2],[.8,surf],[.6,s2],[.4,surf],[.2,mark]];
+  rings.forEach(([f,c],k)=>{ctx.beginPath();ctx.arc(cx,cy,R*f,0,7);ctx.fillStyle=c;ctx.fill();ctx.lineWidth=1.2;ctx.strokeStyle=line;ctx.stroke()});
+  ctx.beginPath();ctx.arc(cx,cy,R*.07,0,7);ctx.fillStyle=ink;ctx.fill();
+  ctx.strokeStyle=line;ctx.setLineDash([3,4]);ctx.beginPath();ctx.moveTo(cx-R,cy);ctx.lineTo(cx+R,cy);ctx.moveTo(cx,cy-R);ctx.lineTo(cx,cy+R);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle=muted;ctx.font="12px 'IBM Plex Sans Hebrew', sans-serif";ctx.textAlign="center";ctx.direction="rtl";
+  ctx.fillText("התכונה האמיתית",cx,cy+R*.2+16);
+  const now=performance.now();let again=false;const gc=[css("--an"),css("--cr"),css("--pr")];
+  const landed=[];
+  darts.forEach(d=>{const dx=d.tx-d.x,dy=d.ty-d.y;if(Math.abs(dx)+Math.abs(dy)>.001){d.x+=reduce?dx:dx*.16;d.y+=reduce?dy:dy*.16;again=true}else{d.x=d.tx;d.y=d.ty}
+    const age=now-d.born;if(age<0){again=true;return}
+    const p=Math.min(1,age/320);if(p<1)again=true;const e=1-Math.pow(1-p,3);
+    const px=cx+d.x*R,py=cy+d.y*R;const sc=1+(1-e)*2.2;
+    if(p<1){ctx.globalAlpha=e;}
+    // flight tail
+    const col=S.noStd?gc[d.g]:ink;
+    ctx.strokeStyle=col;ctx.lineWidth=2.4;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(px+14*sc,py+14*sc);ctx.stroke();
+    ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(px+14*sc,py+14*sc);ctx.lineTo(px+21*sc,py+12*sc);ctx.lineTo(px+19*sc,py+19*sc);ctx.lineTo(px+12*sc,py+21*sc);ctx.closePath();ctx.globalAlpha*=.7;ctx.fill();ctx.globalAlpha=p<1?e:1;
+    ctx.beginPath();ctx.arc(px,py,4.2*sc,0,7);ctx.fillStyle=col;ctx.fill();ctx.lineWidth=1.5;ctx.strokeStyle=surf;ctx.stroke();
+    if(p>=1&&p<1.6){}
+    if(p<1&&p>.85){ctx.beginPath();ctx.arc(px,py,4+(p-.85)*120,0,7);ctx.strokeStyle=col;ctx.globalAlpha=.4*(1-p)/.15;ctx.stroke()}
+    ctx.globalAlpha=1;if(p>=1)landed.push(d)});
+  if(landed.length===darts.length&&darts.length){
+    const mx=landed.reduce((s,d)=>s+d.x,0)/landed.length,my=landed.reduce((s,d)=>s+d.y,0)/landed.length;
+    const sd=Math.sqrt(landed.reduce((s,d)=>s+(d.x-mx)**2+(d.y-my)**2,0)/landed.length);
+    ctx.setLineDash([5,4]);ctx.strokeStyle=acc;ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(cx+mx*R,cy+my*R,Math.max(6,sd*R*1.2),0,7);ctx.stroke();ctx.setLineDash([]);
+    ctx.beginPath();ctx.moveTo(cx+mx*R-7,cy+my*R);ctx.lineTo(cx+mx*R+7,cy+my*R);ctx.moveTo(cx+mx*R,cy+my*R-7);ctx.lineTo(cx+mx*R,cy+my*R+7);ctx.strokeStyle=acc;ctx.lineWidth=2.5;ctx.stroke();
+    const dist=Math.hypot(mx,my);
+    if(dist>.12){ctx.setLineDash([2,4]);ctx.strokeStyle=muted;ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+mx*R,cy+my*R);ctx.stroke();ctx.setLineDash([])}
+  }
+  return again;
+}
+function retestR(){const k=Math.sqrt(1/Math.max(.02,S.rel*.98+.01)-1);const xs=people.map(p=>p.t+k*p.e1),ys=people.map(p=>p.t+k*p.e2);
+  const m=a=>a.reduce((s,v)=>s+v,0)/a.length;const mx=m(xs),my=m(ys);let sxy=0,sxx=0,syy=0;xs.forEach((x,i)=>{sxy+=(x-mx)*(ys[i]-my);sxx+=(x-mx)**2;syy+=(ys[i]-my)**2});
+  return{xs,ys,r:sxy/Math.sqrt(sxx*syy)}}
+function drawRetest(){
+  const ctx=fit(cvR),W=cvR._w,H=cvR._h;ctx.clearRect(0,0,W,H);const L=52,Rr=W-16,T=16,B=H-44;
+  const ink=css("--ink"),muted=css("--muted"),line=css("--line"),acc=css("--accent"),s2=css("--surface-2");
+  ctx.fillStyle=s2;ctx.fillRect(L,T,Rr-L,B-T);
+  const sx=v=>L+(v+4)/8*(Rr-L), sy=v=>B-(v+4)/8*(B-T);
+  ctx.strokeStyle=line;ctx.lineWidth=1;for(let v=-4;v<=4;v+=2){ctx.beginPath();ctx.moveTo(sx(v),T);ctx.lineTo(sx(v),B);ctx.moveTo(L,sy(v));ctx.lineTo(Rr,sy(v));ctx.stroke()}
+  ctx.setLineDash([4,4]);ctx.strokeStyle=muted;ctx.beginPath();ctx.moveTo(sx(-4),sy(-4));ctx.lineTo(sx(4),sy(4));ctx.stroke();ctx.setLineDash([]);
+  const {xs,ys,r}=retestR();
+  xs.forEach((x,i)=>{const X=Math.max(-3.9,Math.min(3.9,x)),Y=Math.max(-3.9,Math.min(3.9,ys[i]));ctx.beginPath();ctx.arc(sx(X),sy(Y),4.5,0,7);ctx.fillStyle=acc;ctx.globalAlpha=.75;ctx.fill();ctx.globalAlpha=1});
+  ctx.fillStyle=muted;ctx.font="13px 'IBM Plex Sans Hebrew', sans-serif";ctx.textAlign="center";ctx.direction="rtl";
+  ctx.fillText("ציון במבחן הראשון",(L+Rr)/2,H-14);
+  ctx.save();ctx.translate(18,(T+B)/2);ctx.rotate(-Math.PI/2);ctx.fillText("ציון במבחן החוזר",0,0);ctx.restore();
+  ctx.direction="ltr";ctx.textAlign="left";ctx.font="600 15px 'IBM Plex Mono', monospace";ctx.fillStyle=ink;ctx.fillText("r = "+r.toFixed(2),L+10,T+22);
+  S.lastR=r;
+}
+const NORMS=[{n:"סטודנטים בני גילכם",m:12,s:5},{n:"מטופלים במרפאה",m:24,s:6}];
+function drawNorms(){
+  const ctx=fit(cvN),W=cvN._w,H=cvN._h;ctx.clearRect(0,0,W,H);const L=24,Rr=W-24,T=40,B=H-48;
+  const ink=css("--ink"),muted=css("--muted"),line=css("--line"),acc=css("--accent"),mark=css("--mark");
+  const sx=v=>L+v/40*(Rr-L);const nm=NORMS[S.norm];
+  const groups=S.noStd?EX.map((e,i)=>({m:nm.m+[3,-3.5,2][i],s:nm.s,c:[css("--an"),css("--cr"),css("--pr")][i]})):[{m:nm.m,s:nm.s,c:acc}];
+  const peak=npdf(0)/nm.s;const sy=d=>B-d/peak*(B-T)*.92;
+  groups.forEach(g=>{
+    ctx.beginPath();ctx.moveTo(sx(0),B);for(let v=0;v<=Math.min(S.raw,40);v+=.25)ctx.lineTo(sx(v),sy(npdf((v-g.m)/g.s)/g.s));ctx.lineTo(sx(S.raw),B);ctx.closePath();ctx.fillStyle=g.c;ctx.globalAlpha=S.noStd?.12:.22;ctx.fill();ctx.globalAlpha=1;
+    ctx.beginPath();for(let v=0;v<=40;v+=.25){const X=sx(v),Y=sy(npdf((v-g.m)/g.s)/g.s);v?ctx.lineTo(X,Y):ctx.moveTo(X,Y)}ctx.strokeStyle=g.c;ctx.lineWidth=2.4;ctx.stroke();
+  });
+  ctx.strokeStyle=line;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(L,B);ctx.lineTo(Rr,B);ctx.stroke();
+  ctx.fillStyle=muted;ctx.font="12px 'IBM Plex Mono', monospace";ctx.textAlign="center";
+  for(let v=0;v<=40;v+=5){ctx.beginPath();ctx.moveTo(sx(v),B);ctx.lineTo(sx(v),B+5);ctx.stroke();ctx.fillText(v,sx(v),B+19)}
+  ctx.font="13px 'IBM Plex Sans Hebrew', sans-serif";ctx.direction="rtl";ctx.fillText("ציון גולמי בשאלון",(L+Rr)/2,H-8);
+  ctx.strokeStyle=ink;ctx.lineWidth=2;ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(sx(S.raw),T-14);ctx.lineTo(sx(S.raw),B);ctx.stroke();ctx.setLineDash([]);
+  ctx.beginPath();ctx.arc(sx(S.raw),T-14,6,0,7);ctx.fillStyle=mark;ctx.fill();ctx.strokeStyle=ink;ctx.stroke();
+  ctx.fillStyle=ink;ctx.font="600 13px 'IBM Plex Sans Hebrew', sans-serif";ctx.textAlign=S.raw>30?"right":S.raw<10?"left":"center";ctx.fillText("הציון שלכם: "+S.raw,sx(S.raw)+(S.raw>30?-10:S.raw<10?10:0),T-26+ (S.raw>30||S.raw<10?12:0));
+}
+function verdict(){
+  const v=$("#verdict");let t,c;
+  if(S.tab==="norms"){const nm=NORMS[S.norm];const z=(S.raw-nm.m)/nm.s;const p=ncdf(z)*100;
+    if(S.noStd){t="ללא תקנון, לאותו ציון יש כמה פירושים";c="var(--warn)"}
+    else if(p>=90){t="גבוה מאוד ביחס לנורמה";c="var(--bad)"}else if(p>=70){t="מעל הממוצע של הקבוצה";c="var(--warn)"}else if(p>30){t="בטווח הממוצע של הקבוצה";c="var(--good)"}else{t="מתחת לממוצע הקבוצה";c="var(--good)"}}
+  else if(S.noStd){t="ללא תקנון: התנאים מזיזים את התוצאות";c="var(--warn)"}
+  else if(S.rel>=.7&&S.val>=.7){t="מהימן ותקף";c="var(--good)"}
+  else if(S.rel>=.7){t="מהימן, אבל לא תקף";c="var(--warn)"}
+  else if(S.val>=.7){t="לא מהימן, ולכן גם לא תקף";c="var(--bad)"}
+  else{t="לא מהימן ולא תקף";c="var(--bad)"}
+  v.textContent=t;v.style.setProperty("--c",c);
+}
+function readouts(){
+  const ro=$("#readouts");let items;
+  if(S.tab==="norms"){const nm=NORMS[S.norm];const z=(S.raw-nm.m)/nm.s;items=[["ממוצע הקבוצה",nm.m],["ציון תקן z",(z>=0?"+":"")+z.toFixed(2)],["אחוזון",Math.round(ncdf(z)*100)]]}
+  else if(S.tab==="retest"){const{r}=retestR();items=[["מתאם מבחן חוזר",r.toFixed(2)],["אידיאלי","+1.00"],["אין קשר","0.00"]]}
+  else{const sigma=.04+(1-S.rel)*.36,bias=(1-S.val)*.62;items=[["פיזור החצים",(sigma*100).toFixed(0)],["מרחק מהמרכז",(bias*100).toFixed(0)],["תוקף אפקטיבי",Math.min(S.val,S.rel).toFixed(2)]]}
+  ro.innerHTML=items.map(([a,b])=>`<div class="ro"><span>${a}</span><b>${b}</b></div>`).join("");
+}
+function explain(){
+  const e=$("#explain");
+  if(S.tab==="norms"){const nm=NORMS[S.norm];const p=Math.round(ncdf((S.raw-nm.m)/nm.s)*100);
+    e.innerHTML=S.noStd?`כשכל בוחן מעביר את השאלון אחרת, יש לכם שלוש עקומות במקום אחת, וציון ${S.raw} מקבל אחוזון אחר בכל אחת מהן. <b>תקנון</b> פירושו שכל הנבחנים מקבלים את אותה בחינה, באותה דרך ובאותם תנאים.`
+      :`ציון ${S.raw} לבדו אינו אומר דבר. רק ההשוואה ל<b>אוכלוסייה נורמטיבית</b> נותנת לו משמעות: ביחס ל${nm.n} הוא גבוה מ־${p}% מהקבוצה. החליפו קבוצה וראו איך אותו ציון משנה את משמעותו.`;return}
+  if(S.tab==="retest"){e.innerHTML=`כל נקודה היא אדם שעשה את המבחן פעמיים. ככל שהמבחן <b>מהימן</b> יותר, הנקודות מתקרבות לאלכסון והמתאם מתקרב ל־1.00+. במבחן לא מהימן, מי שקיבל ציון גבוה בפעם הראשונה עשוי לקבל ציון נמוך בפעם השנייה.`;return}
+  if(S.noStd){e.innerHTML=`כל צבע הוא בוחן אחר. בוחנת אחת נותנת עוד זמן, בוחן אחר מסביר פחות טוב. גם מבחן טוב מפזר את התוצאות כשהתנאים לא אחידים. לכן מבחן פורמלי דורש <b>תקנון</b>: אותם הוראות, זמן ותנאים לכל הנבחנים.`;return}
+  if(S.rel>=.7&&S.val>=.7)e.innerHTML=`החצים צפופים ופוגעים במרכז: המבחן נותן תוצאות עקביות, והוא מודד את מה שהוא אמור למדוד.`;
+  else if(S.rel>=.7)e.innerHTML=`החצים צפופים, אבל במקום הלא נכון. כמו מדידת גובה כמדד למשכל: התוצאה יוצאת זהה בכל פעם, אבל היא לא מודדת משכל. <b>מבחן יכול להיות מהימן ולא תקף.</b>`;
+  else if(S.val>=.7)e.innerHTML=`הממוצע קרוב למרכז, אבל כל חץ בודד מפספס. מבחן כזה לא יכול לנבא אפילו את עצמו, ולכן בוודאי לא קריטריון חיצוני. <b>מבחן שאינו מהימן אינו יכול להיות תקף.</b>`;
+  else e.innerHTML=`החצים מפוזרים וגם רחוקים מהמרכז. המבחן לא עקבי, וגם לא מודד את התכונה. כך נראה שאלון שנכתב בלי עבודה פסיכומטרית.`;
+}
+const PRESETS=[
+  {t:"המבחן האידיאלי",d:"מהימן ותקף",rel:.95,val:.95},
+  {t:"סרגל גובה כמבחן משכל",d:"מהימן, לא תקף",rel:.96,val:.12},
+  {t:"שאלון מרושל",d:"לא מהימן",rel:.18,val:.85},
+  {t:"ניחוש",d:"לא מהימן ולא תקף",rel:.15,val:.2}];
+$("#presets").innerHTML=PRESETS.map((p,i)=>`<button type="button" class="preset" data-i="${i}">${p.t}<span>${p.d}</span></button>`).join("");
+$$("#presets .preset").forEach(b=>b.addEventListener("click",()=>{const p=PRESETS[+b.dataset.i];
+  if(S.tab==="norms")selectTab("board");$("#noStd").checked=false;S.noStd=false;
+  setRV(p.rel,p.val);S.seed++;sample();throwDarts();if(S.tab!=="board")loopC();}));
+function setRV(rel,val){S.rel=rel;S.val=val;$("#slRel").value=Math.round(rel*100);$("#slVal").value=Math.round(val*100);syncRV()}
+function syncRV(){
+  $("#outRel").textContent=S.rel.toFixed(2);$("#outVal").textContent=S.val.toFixed(2);
+  $("#slRel").style.setProperty("--p",S.rel*100+"%");$("#slVal").style.setProperty("--p",S.val*100+"%");
+  $("#exLegend").hidden=!S.noStd||S.tab==="retest";
+  verdict();readouts();explain();
+}
+$("#slRel").addEventListener("input",e=>{S.rel=e.target.value/100;syncRV();retarget()});
+$("#slVal").addEventListener("input",e=>{S.val=e.target.value/100;syncRV();retarget()});
+$("#noStd").addEventListener("change",e=>{S.noStd=e.target.checked;syncRV();retarget()});
+$("#slRaw").addEventListener("input",e=>{S.raw=+e.target.value;$("#outRaw").textContent=S.raw;$("#slRaw").style.setProperty("--p",S.raw/40*100+"%");syncRV();loopC()});
+$$("[data-norm]").forEach(b=>b.addEventListener("click",()=>{S.norm=+b.dataset.norm;$$("[data-norm]").forEach(x=>x.setAttribute("aria-pressed",x===b));syncRV();loopC()}));
+$("#throwBtn").addEventListener("click",()=>{S.seed++;sample();if(S.tab==="board")throwDarts();else{syncRV();loopC()}});
+function selectTab(t){S.tab=t;$$(".tab").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));
+  cvB.hidden=t!=="board";cvR.hidden=t!=="retest";cvN.hidden=t!=="norms";
+  $("#valBlock").hidden=t!=="board";$("#relBlock").hidden=t==="norms";$("#normCtrls").hidden=t!=="norms";$("#stdToggle").hidden=t==="retest";
+  $("#presets").hidden=t!=="board";
+  $("#throwBtn").textContent=t==="board"?"זריקה חוזרת":t==="retest"?"קבוצת נבחנים חדשה":"זריקה חוזרת";$("#throwBtn").hidden=t==="norms";
+  $("#stdToggle").lastChild.textContent=t==="norms"?" ללא תקנון: כל בוחן מעביר את השאלון אחרת":" ללא תקנון: כל בוחן מעביר את המבחן בתנאים אחרים";
+  syncRV();loopC()}
+$$(".tab").forEach(b=>b.addEventListener("click",()=>selectTab(b.dataset.tab)));
+$("#slRaw").style.setProperty("--p",S.raw/40*100+"%");
+syncRV();throwDarts();
+listeners.push(loopC);
+window.addEventListener("resize",loopC);
+
+// concept chips
+const TERMS={
+ rel:[["מהימנות מבחן חוזר","המתאם בין הציונים של אותם אנשים, באותו מבחן, בשתי הזדמנויות שונות. מבחן מהימן לחלוטין יניב מתאם של 1.00+."],
+      ["נוסחים מקבילים","נותנים לאותם נבחנים נוסחים חלופיים של המבחן במקום אותו מבחן פעמיים. כך מנטרלים תרגול קודם וזכירת שאלות."],
+      ["עקביות פנימית","בודקת אם החלקים של מבחן יחיד מודדים את אותו דבר, למשל השוואת ציוני הפריטים הזוגיים לאי־זוגיים (מהימנות מבחן חצוי)."],
+      ["מהימנות בין שופטים","מידת ההסכמה בין צופים שמקודדים אותה התנהגות בעזרת סכמת קידוד. דורשת אימון של השופטים."]],
+ val:[["תוקף נראה","המבחן נראה כאילו הוא מודד את התכונה. נוח, אבל לא מספיק: נבחנים יכולים לשלוט ברושם שהם עושים."],
+      ["תוקף קריטריון (ניבוי)","המתאם בין ציון המבחן לבין מדד חיצוני שקשור למה שהמבחן מודד, למשל ציונים באוניברסיטה עבור מבחן שנועד לנבא הצלחה בלימודים."],
+      ["תוקף מבנה","המידה שבה המבחן מודד את המבנה התאורטי, למשל חרדה או דיכאון: מתאם עם מדדים קשורים, והיעדר מתאם עם תכונות שאינן קשורות."],
+      ["נורמות ותקנון","נורמות מאפשרות לפרש ציון בהשוואה לאוכלוסייה נורמטיבית. תקנון מבטיח שכל הנבחנים נבחנו באותם תנאים, כדי שההשוואה תהיה משמעותית."]]};
+$$(".cgroup").forEach(g=>{const list=TERMS[g.dataset.group],box=$(".terms",g),def=$(".term-def",g);
+  list.forEach(([n,d],i)=>{const b=document.createElement("button");b.type="button";b.className="term";b.textContent=n;b.setAttribute("aria-expanded","false");
+    b.addEventListener("click",()=>{$$(".term",g).forEach(x=>x.setAttribute("aria-expanded",x===b));def.innerHTML=`<b>${n}.</b> ${d}`});box.appendChild(b);
+    if(i===0)b.click()})});
+
+/* =========================================================
+   QUIZ
+   ========================================================= */
+const QZ=[
+ {q:"חוקרת מעבירה מבחן לאותם אנשים פעמיים, בהפרש של חודש, ומקבלת מתאם של 0.92. מה היא בדקה?",o:["תוקף ניבוי","מהימנות מבחן חוזר","תוקף נראה","תקנון"],a:1,e:"המתאם בין שתי העברות של אותו מבחן לאותם אנשים הוא מהימנות מבחן חוזר."},
+ {q:"מבחן שמודד גובה כדי להעריך משכל יהיה ככל הנראה:",o:["תקף אך לא מהימן","מהימן ותקף","מהימן אך לא תקף","לא מהימן ולא תקף"],a:2,e:"הגובה נמדד בעקביות רבה (מהימן), אבל אינו מודד משכל (לא תקף)."},
+ {q:"מה נכון לגבי הקשר בין מהימנות לתוקף?",o:["מבחן לא מהימן יכול להיות תקף מאוד","מבחן שאינו מהימן אינו יכול להיות תקף","תוקף גבוה מבטיח מהימנות נמוכה","אין קשר ביניהם"],a:1,e:"מבחן שאינו יכול לנבא את עצמו לא יכול לנבא קריטריון חיצוני."},
+ {q:"לפי סטרנברג, הפיכת משימה שגרתית לאוטומטית שייכת למשכל:",o:["אנליטי","יצירתי","מעשי","בין־אישי"],a:1,e:"משכל יצירתי כולל גם התמודדות עם בעיות חדשות וגם ביצוע אוטומטי של משימות מוכרות."},
+ {q:"נווט מאיי קרוליין שמנווט מרחקים ארוכים בלי מפה מפגין לפי גרדנר בעיקר משכל:",o:["לוגי־מתמטי","לשוני","מרחבי וגופני־קינסתטי","תוך־אישי"],a:2,e:"גרדנר משתמש בדוגמה הזאת כדי להראות שתרבויות שונות מעריכות סוגי משכל שונים."},
+ {q:"ציון 18 בשאלון דיכאון מקבל משמעות רק כאשר:",o:["משווים אותו לנורמות של אוכלוסייה נורמטיבית","יש למבחן תוקף נראה","הנבחן עונה מהר","המבחן ארוך מספיק"],a:0,e:"נורמות מאפשרות לפרש ציון אישי בהשוואה לציונים טיפוסיים של קבוצה דומה."}];
+let qs={i:0,score:0,answered:false};
+function renderQuiz(){
+  const b=$("#quizBox");
+  if(qs.i>=QZ.length){b.innerHTML=`<p class="eyebrow">סיימתם</p><p class="qtext">ענית נכון על ${qs.score} מתוך ${QZ.length} שאלות.</p><p class="cite">${qs.score===QZ.length?"שליטה מלאה בחומר.":qs.score>=4?"כמעט מושלם. עברו שוב על המושגים שטעיתם בהם.":"כדאי לחזור למעבדות ולנסות שוב."}</p><button class="btn" type="button" id="qAgain">מבחן חוזר</button>`;
+    $("#qAgain").addEventListener("click",()=>{qs={i:0,score:0};renderQuiz()});return}
+  const q=QZ[qs.i];qs.answered=false;
+  b.innerHTML=`<div class="progress">${QZ.map((_,j)=>`<span class="${j<qs.i?"done":j===qs.i?"now":""}"></span>`).join("")}</div><span class="qcount">שאלה ${qs.i+1} מתוך ${QZ.length} · ניקוד ${qs.score}</span><p class="qtext">${q.q}</p>
+   <div class="opts">${q.o.map((o,j)=>`<button type="button" class="opt" data-j="${j}"><span class="bub">${letter(j)}</span><span>${o}</span></button>`).join("")}</div><div id="qfb"></div>`;
+  $$(".opt",b).forEach(btn=>btn.addEventListener("click",()=>{if(qs.answered)return;qs.answered=true;const j=+btn.dataset.j;const ok=j===q.a;if(ok)qs.score++;
+    $$(".opt",b).forEach((x,k)=>{x.disabled=true;if(k===q.a)x.classList.add("right");else if(k===j)x.classList.add("wrong");else x.classList.add("dim")});
+    $("#qfb").innerHTML=`<div class="feedback" style="--c:${ok?"var(--good)":"var(--bad)"}"><b>${ok?"נכון.":"לא מדויק."}</b> ${q.e}</div><button class="btn" type="button" id="qNext" style="margin-top:12px">${qs.i<QZ.length-1?"לשאלה הבאה":"לתוצאה"}</button>`;
+    $("#qNext").addEventListener("click",()=>{qs.i++;renderQuiz()});$("#qNext").focus({preventScroll:true})}));
+}
+renderQuiz();
+})();
+</script>
