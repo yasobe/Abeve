@@ -73,6 +73,19 @@
     return HB.iso(u === 'w' ? HB.addDays(d, 7 * n) : u === 'm' ? HB.addMonths(d, n) : HB.addMonths(d, 12 * n));
   };
 
+  /* ---------- home profile (emergency card) ---------- */
+  HB.HOME_FIELDS = [
+    ['water', 'ברז מים ראשי', 'למשל: ארון המים בקומה, הברז השני משמאל', 'place'],
+    ['power', 'לוח חשמל ומפסק ראשי', 'למשל: מסדרון, מאחורי הדלת', 'place'],
+    ['gas', 'ברז גז ראשי', 'למשל: מרפסת שירות, ליד הבלונים', 'place'],
+    ['heater', 'מפסק הדוד', 'למשל: ליד דלת האמבטיה', 'place'],
+    ['plumber', 'אינסטלטור', 'שם וטלפון', 'contact'],
+    ['electrician', 'חשמלאי', 'שם וטלפון', 'contact'],
+    ['handyman', 'הנדימן / טכנאי', 'שם וטלפון', 'contact'],
+    ['waterco', 'מוקד תאגיד המים', 'מספר המוקד העירוני', 'contact'],
+    ['notes', 'הערות', 'קוד לשער, מיקום מפתח רזרבי, מספר ועד הבית…', 'note'],
+  ];
+
   /* ---------- store ---------- */
   const KEY = 'bayit.v1';
   HB.store = {
@@ -121,6 +134,8 @@
         ah: HB.clamp(num(x.ah, 2), 0.5, 20), rated: HB.clamp(num(x.rated, 500), 50, 5000), cycles: Math.max(0, Math.round(num(x.cycles))),
         bought: date(x.bought, t), log: arr(x.log).filter(HB.validIso).slice(-400), notes: str(x.notes, 300),
       })),
+      home: Object.fromEntries(HB.HOME_FIELDS.map(([k]) => [k, str(s.home && s.home[k], 300)])),
+      recent: arr(s.recent).filter((r) => r && typeof r.tree === 'string').slice(0, 8).map((r) => ({ tree: str(r.tree, 40), sol: str(r.sol, 40), path: str(r.path, 60).replace(/[^0-9-]/g, ''), at: date(r.at, t) })),
       settings: { theme: ['light', 'dark', 'system'].includes(s.settings?.theme) ? s.settings.theme : 'system' },
       checks: typeof s.checks === 'object' && s.checks ? Object.fromEntries(Object.entries(s.checks).slice(0, 200).map(([k, v]) => [str(k, 80), arr(v).map(Number).filter(Number.isInteger).slice(0, 40)])) : {},
     };
@@ -178,6 +193,17 @@
     snow: '<path d="M2 12h20M12 2v20M20 16l-4-4 4-4M4 8l4 4-4 4M16 4l-4 4-4-4M8 20l4-4 4 4"/>',
     dots: '<circle cx="12" cy="5" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/><circle cx="12" cy="19" r="1.4" fill="currentColor"/>',
     history: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/>',
+    washer: '<rect x="4" y="2" width="16" height="20" rx="2"/><circle cx="12" cy="13" r="5"/><path d="M8 6h.01M11 6h.01"/>',
+    fridge: '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M5 10h14M9 5v2M9 13v3"/>',
+    blinds: '<path d="M3 3h18M20 7H4M20 11H4M20 15H4M4 3v15M20 3v15M12 18v3"/>',
+    dish: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 8h18M7 5.5h.01M10 5.5h.01"/><circle cx="12" cy="14.5" r="3.5"/>',
+    bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+    roller: '<rect x="3" y="3" width="16" height="6" rx="2"/><path d="M19 6h2v5H11v4"/><rect x="9" y="15" width="4" height="7" rx="1"/>',
+    gauge: '<path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/>',
+    siren: '<path d="M7 18v-6a5 5 0 1 1 10 0v6"/><path d="M5 21a1 1 0 0 1-1-1v-1a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1a1 1 0 0 1-1 1zM21 12h1M18.5 4.5 18 5M2 12h1M12 2v1M4.93 4.93l.71.71"/>',
+    pin: '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>',
+    user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+    paste: '<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>',
   };
   HB.icon = (name, cls = '') => `<svg class="ic ${cls}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${I[name] || I.info}</svg>`;
 
@@ -229,7 +255,8 @@
   document.addEventListener('DOMContentLoaded', () => {
     const d = dlg();
     d.addEventListener('click', (e) => { if (e.target === d || e.target.closest('[data-close]')) HB.closeModal(); });
-    d.addEventListener('close', () => { const f = onModalClose; onModalClose = null; d.innerHTML = ''; if (f) f(); });
+    // The 'close' event is async: if another modal already opened in the meantime, leave it alone.
+    d.addEventListener('close', () => { if (d.open) return; const f = onModalClose; onModalClose = null; d.innerHTML = ''; if (f) f(); });
     d.addEventListener('cancel', (e) => { e.preventDefault(); HB.closeModal(); });
   });
 

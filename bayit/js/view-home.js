@@ -54,7 +54,7 @@
         const d = HB.addDays(HB.today(), i); const iso = HB.iso(d);
         const items = open.filter((t) => (i === 0 ? t.due <= iso : t.due === iso));
         tl.push(`<div class="tl-day${i === 0 ? ' today' : ''}" title="${esc(HB.fmtDate(iso))}: ${items.length ? esc(items.map((t) => t.title).join(', ')) : 'אין משימות'}">
-          <span>${i === 0 ? 'היום' : HB.fmtWeekday(d)}</span>
+          <span>${i === 0 ? 'היום' : 'אבגדהוש'[d.getDay()] + '׳'}</span>
           <div class="bar">${items.slice(0, 4).map((t) => `<i class="${t.due < HB.todayIso() ? 'overdue' : ''}"></i>`).join('')}</div>
           <b>${d.getDate()}</b></div>`);
       }
@@ -70,6 +70,7 @@
             <a class="btn primary" href="#/diagnose">${icon('compass')}משהו התקלקל? אבחון</a>
             <a class="btn soft" href="#/diagrams">${icon('layers')}תרשימי מערכות</a>
             <button class="btn soft" type="button" data-new-task>${icon('plus')}משימה חדשה</button>
+            <button class="btn soft hero-sos" type="button" data-sos>${icon('siren')}חירום</button>
           </div>
         </section>
 
@@ -92,13 +93,14 @@
             </section>
           </div>
           <div class="col">
+            ${HB.emergencyCard()}
             ${season ? `<section class="card season">
               <h3>${icon(season.icon)}המלצות לעונה: ${esc(season.title)}</h3>
               <ul>${season.items.map((it, i) => `<li><span>${esc(it.title)}</span>${hasTask(it.title) ? `<span class="badge ok">${icon('check')}ברשימה</span>` : `<button class="btn sm outline" type="button" data-season="${i}">${icon('plus', 'sm')}הוספה</button>`}</li>`).join('')}</ul>
             </section>` : ''}
             <section class="card">
               <div class="card-head"><h2>${icon('compass')}אבחון מהיר</h2><a class="link" href="#/diagnose">הכול ${icon('fwd', 'sm')}</a></div>
-              <div class="quick-trees">${HB.TREES.slice(0, 6).map((t) => `<a class="qt" href="#/diagnose/${t.id}">${icon(t.icon)}<span>${esc(t.title)}</span></a>`).join('')}</div>
+              <div class="quick-trees">${['faucet', 'heater', 'electric', 'drain', 'toilet', 'damp', 'washer', 'shutter'].map(HB.tree).map((t) => `<a class="qt" href="#/diagnose/${t.id}">${icon(t.icon)}<span>${esc(t.title)}</span></a>`).join('')}</div>
             </section>
             <section class="card">
               <div class="card-head"><h2>${icon('battery')}סוללות 18V</h2><a class="link" href="#/maintain/batteries">פירוט ${icon('fwd', 'sm')}</a></div>
@@ -117,6 +119,7 @@
         HB.addTaskFrom({ ...it, prio: 'mid' });
       }));
       HB.bindTaskRows(el);
+      HB.bindEmergency(el);
     },
   };
 })();

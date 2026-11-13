@@ -15,6 +15,17 @@
 
   let filter = { q: '', cat: '' };
 
+  function recentHtml() {
+    const s = HB.store.state;
+    const items = (s.recent || []).map((r) => {
+      const t = HB.tree(r.tree); const sol = t && t.sols[r.sol];
+      if (!sol) return '';
+      const total = sol.steps.length; const doneN = (s.checks[`${t.id}:${r.sol}`] || []).length;
+      return `<a class="recent-item" href="#/diagnose/${t.id}/${r.path}">${icon(t.icon)}<span><b>${esc(sol.t)}</b><small>${esc(HB.ago(r.at))} · ${doneN ? `${doneN}/${total} שלבים` : esc(t.title)}</small></span>${doneN === total ? `<span class="badge ok">${icon('check')}</span>` : ''}</a>`;
+    }).filter(Boolean).slice(0, 4);
+    return items.length ? `<section class="recent" aria-label="האבחונים האחרונים"><h2 class="section-title" style="margin-top:0">${icon('history', 'sm')}האבחונים האחרונים שלך</h2><div class="recent-list">${items.join('')}</div></section>` : '';
+  }
+
   function renderList(el) {
     const cats = [...new Set(HB.TREES.map((t) => t.cat))];
     const hay = (t) => norm([t.title, t.sub, t.cat, ...Object.values(t.nodes).flatMap((n) => [n.q, ...n.opts.map((o) => o[0])]), ...Object.values(t.sols).map((s) => s.t)].join(' '));
@@ -35,6 +46,7 @@
         <h1>מה התקלקל?</h1>
         <p>בחר את הבעיה, ענה על 2–3 שאלות קצרות, וקבל פתרון צעד־אחר־צעד — כולל כלים, חומרים ממלאי הבית, ואזהרות בטיחות.</p>
       </div></header>
+      ${recentHtml()}
       <div class="toolbar">
         <label class="search"><span class="sr-only">חיפוש תקלה</span>${icon('search')}<input type="search" placeholder="חיפוש: טפטוף, פחת, עובש, ריח…" value="${esc(filter.q)}" data-q></label>
       </div>
@@ -121,6 +133,9 @@
     const key = `${tree.id}:${solId}`;
     const state = HB.store.state;
     const done = new Set(state.checks[key] || []);
+    // remember this result for the "recent diagnoses" list
+    state.recent = [{ tree: tree.id, sol: solId, path: path.join('-'), at: HB.todayIso() }, ...(state.recent || []).filter((r) => !(r.tree === tree.id && r.sol === solId))].slice(0, 8);
+    HB.store.save(true);
     const [lic, ltext] = LVL[sol.lvl] || LVL.diy;
     const [dgId, partId] = sol.dg ? sol.dg.split(':') : [];
     const dgObj = dgId && HB.diagram(dgId);

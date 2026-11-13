@@ -93,7 +93,7 @@
   /* ======================================================================
      Tabs
      ====================================================================== */
-  const ui = { taskFilter: 'open', taskCat: '', invQ: '', invCat: '', invLow: false };
+  const ui = (HB.maintainUI = { taskFilter: 'open', taskCat: '', invQ: '', invCat: '', invLow: false });
 
   const TABS = [
     { id: 'tasks', label: 'משימות', icon: 'list', count: () => S().tasks.filter((t) => !t.done).length, hot: () => S().tasks.some((t) => HB.taskState(t) === 'overdue') },

@@ -78,6 +78,10 @@
       b.innerHTML = b.classList.contains('icon') ? icon(ic) : `${icon(ic)}<span>${label}</span>`;
       b.setAttribute('aria-label', label); b.title = label;
     });
+    $$('[data-act="search"]').forEach((b) => {
+      b.innerHTML = b.classList.contains('icon') ? icon('search') : `${icon('search')}<span>חיפוש</span><span class="kbd">/</span>`;
+      b.setAttribute('aria-label', 'חיפוש'); b.title = 'חיפוש (/)';
+    });
     $$('[data-act="settings"]').forEach((b) => {
       b.innerHTML = b.classList.contains('icon') ? icon('sliders') : `${icon('sliders')}<span>הגדרות וגיבוי</span>`;
       b.setAttribute('aria-label', 'הגדרות וגיבוי'); b.title = 'הגדרות וגיבוי';
@@ -106,12 +110,12 @@
         <h3 class="section-title" style="margin-top:22px">הנתונים שלך</h3>
         <p class="tiny" style="margin:-4px 2px 12px">כל המידע נשמר רק בדפדפן הזה. מומלץ לייצא גיבוי מדי פעם.</p>
         <div class="data-list">
-          <div class="data-item"><span class="tool-ic">${icon('download')}</span><div><b>ייצוא גיבוי</b><small>${s.tasks.length} משימות · ${s.inventory.length} פריטי מלאי · ${s.tools.length} כלים · ${s.batteries.length} סוללות</small></div><button class="btn sm outline" data-x="export">ייצוא</button></div>
-          <div class="data-item"><span class="tool-ic">${icon('upload')}</span><div><b>שחזור מגיבוי</b><small>קובץ JSON שיוצא מהאפליקציה</small></div><button class="btn sm outline" data-x="import">בחירת קובץ</button><input type="file" accept="application/json,.json" hidden data-file></div>
+          <div class="data-item"><span class="tool-ic">${icon('download')}</span><div><b>ייצוא גיבוי</b><small>${s.tasks.length} משימות · ${s.inventory.length} פריטי מלאי · ${s.tools.length} כלים · ${s.batteries.length} סוללות</small></div><button class="btn sm outline" data-x="copy">${icon('copy', 'sm')}העתקה</button><button class="btn sm outline" data-x="export">קובץ</button></div>
+          <div class="data-item"><span class="tool-ic">${icon('upload')}</span><div><b>שחזור מגיבוי</b><small>מקובץ גיבוי, או מטקסט גיבוי שהעתקת</small></div><button class="btn sm outline" data-x="paste">${icon('paste', 'sm')}הדבקה</button><button class="btn sm outline" data-x="import">קובץ</button><input type="file" accept="application/json,.json" hidden data-file></div>
           <div class="data-item"><span class="tool-ic">${icon('refresh')}</span><div><b>טעינת נתוני הדגמה</b><small>מחליף את הנתונים הנוכחיים בדוגמה</small></div><button class="btn sm outline" data-x="demo">טעינה</button></div>
           <div class="data-item"><span class="tool-ic" style="color:var(--red)">${icon('trash')}</span><div><b>מחיקת כל הנתונים</b><small>מתחילים מדף נקי</small></div><button class="btn sm danger-ghost" data-x="wipe">מחיקה</button></div>
         </div>
-        <p class="tiny" style="margin-top:18px">קיצורי מקלדת: 1–4 מעבר בין מסכים · Esc סגירה · חיצים בין חלקים בתרשים · מספרים לבחירת תשובה באבחון.</p>`,
+        <p class="tiny" style="margin-top:18px">קיצורי מקלדת: / חיפוש · 1–4 מעבר בין מסכים · Esc סגירה · חיצים בין חלקים בתרשים · מספרים לבחירת תשובה באבחון.</p>`,
     });
     const b = m.body;
     b.querySelectorAll('[data-theme-set]').forEach((btn) => btn.addEventListener('click', () => {
@@ -124,7 +128,27 @@
       const act = x.dataset.x;
       if (act === 'export') {
         HB.download(`bayit-backup-${HB.todayIso()}.json`, JSON.stringify(HB.store.state, null, 2));
-        HB.toast('הגיבוי ירד למכשיר', { icon: 'download' });
+        HB.toast('אם הקובץ לא ירד, השתמש ב"העתקה" ושמור את הטקסט בפתקים', { icon: 'download' });
+      } else if (act === 'copy') {
+        const ok = await HB.copy(JSON.stringify(HB.store.state));
+        HB.toast(ok ? 'הגיבוי הועתק. הדבק אותו בפתקים או שלח לעצמך במייל' : 'ההעתקה נכשלה', { icon: 'copy', tone: ok ? '' : 'danger' });
+      } else if (act === 'paste') {
+        HB.closeModal();
+        setTimeout(() => {
+          const pm = HB.openModal({
+            title: 'שחזור מטקסט', icon: 'paste',
+            body: '<p class="muted" style="margin-bottom:10px">הדבק כאן את טקסט הגיבוי שהעתקת. הנתונים הנוכחיים יוחלפו.</p><textarea id="pasteBackup" rows="8" dir="ltr" style="font-family:ui-monospace,monospace;font-size:12px" placeholder="{&quot;v&quot;:1, ...}"></textarea>',
+            footer: '<span class="spacer"></span><button type="button" class="btn soft" data-close>ביטול</button><button type="button" class="btn primary" data-restore>שחזור</button>',
+          });
+          pm.el.querySelector('[data-restore]').addEventListener('click', () => {
+            try {
+              const data = JSON.parse(pm.el.querySelector('#pasteBackup').value.trim());
+              if (!data || data.v !== 1) throw new Error('bad');
+              HB.store.state = HB.clean(data); HB.store.save(); applyTheme(); HB.closeModal();
+              HB.toast('הגיבוי שוחזר בהצלחה');
+            } catch (err) { HB.toast('הטקסט אינו גיבוי תקין. העתק אותו שוב במלואו', { tone: 'danger' }); }
+          });
+        }, 180);
       } else if (act === 'import') file.click();
       else if (act === 'demo') {
         if (!(await HB.confirm('הנתונים הנוכחיים יוחלפו בנתוני הדגמה.', { title: 'טעינת הדגמה', ok: 'טעינה' }))) return;
@@ -164,10 +188,12 @@
       const a = e.target.closest('[data-act]'); if (!a) return;
       if (a.dataset.act === 'theme') HB.cycleTheme();
       if (a.dataset.act === 'settings') openSettings();
+      if (a.dataset.act === 'search') HB.openSearch();
     });
     document.addEventListener('keydown', (e) => {
       if (e.metaKey || e.ctrlKey || e.altKey || $('#modal').open) return;
       if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
+      if (e.key === '/') { e.preventDefault(); HB.openSearch(); return; }
       if (current && current.view === 'diagnose' && HB.views.diagnose.captureKeys) return;
       const n = NAV.find((x) => x.key === e.key);
       if (n) { e.preventDefault(); HB.go(n.r); }
