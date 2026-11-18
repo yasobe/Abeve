@@ -1,0 +1,35 @@
+name: Tzalul tests
+
+on:
+  push:
+    paths: ["docs/tzalul/**", "tests/tzalul/**", ".github/workflows/tzalul-tests.yml"]
+  pull_request:
+    paths: ["docs/tzalul/**", "tests/tzalul/**"]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Unit tests
+        run: node --test tests/tzalul/*.test.mjs
+      - name: Install Playwright (Chromium)
+        run: |
+          npm install --no-save --no-package-lock playwright@1.63.0
+          npx playwright install --with-deps chromium
+      - name: End-to-end test
+        run: node tests/tzalul/e2e.cjs
+      - name: Upload failure screenshot
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-failure
+          path: tests/tzalul/e2e-failure.png
+          if-no-files-found: ignore

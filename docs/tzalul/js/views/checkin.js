@@ -14,7 +14,7 @@ function render(ctx, [date]) {
   const v = c || { mood: 0, sleep: 0, energy: 0, craving: 3, symptoms: [], used: false, win: "", note: "" };
   return html`
     ${head(`צ׳ק־אין · ${relDay(key)}`, { back: true, sub: "דקה אחת. אין תשובות נכונות." })}
-    <form data-form="save" class="form checkin">
+    <form data-form="save" class="form checkin" novalidate>
       <input type="hidden" name="date" value="${key}">
       <section class="card">${scale("mood", MOODS, v.mood, { legend: "איך מצב הרוח?" })}</section>
       <section class="card">${scale("sleep", SLEEP, v.sleep, { legend: "איך הייתה השינה בלילה?" })}</section>

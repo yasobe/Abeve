@@ -81,7 +81,7 @@ export function greeting(d = new Date()) {
   return "לילה טוב";
 }
 
-/** Inline gender markers in content: "{מוכן|מוכנה}" → g("מוכן","מוכנה"). */
+/** Inline gender markers in content: "{מוכן|מוכנה}" or "{m|f|neutral}" → g(...). */
 export function gx(s) {
-  return String(s).replace(/\{([^|{}]*)\|([^|{}]*)\}/g, (_, m, f) => g(m, f));
+  return String(s).replace(/\{([^|{}]*)\|([^|{}]*)(?:\|([^|{}]*))?\}/g, (_, m, f, n) => g(m, f, n));
 }

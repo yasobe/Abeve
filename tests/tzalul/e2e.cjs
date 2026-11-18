@@ -52,7 +52,7 @@ const server = http.createServer((req, res) => {
       await page.click(".scale-opt.s4 >> nth=0");
       await page.click(".scale-opt.s3 >> nth=1");
       await page.click(".chip >> text=קושי להירדם");
-      await page.click("text=שמירה");
+      await page.click("button[type=submit]:has-text(\"שמירה\")");
       await page.waitForSelector("dialog.sheet >> text=כמה דברים שעוזרים");
       await page.click("dialog.sheet >> text=הבנתי");
       await page.waitForSelector("text=הצ׳ק־אין של היום נשמר");
@@ -62,14 +62,14 @@ const server = http.createServer((req, res) => {
       await page.goto(URL0 + "#/craving");
       await page.click(".chip >> text=ערב / אחרי העבודה");
       await page.click(".chip >> text=הליכה / יציאה החוצה");
-      await page.click("text=שמירה");
+      await page.click("button[type=submit]:has-text(\"שמירה\")");
       await page.waitForSelector(".entry.craving >> text=עברתי את זה");
     });
 
     await step("journal entry", async () => {
       await page.goto(URL0 + "#/journal/new");
       await page.fill("textarea[name=text]", "היום היה קשה בערב, אבל יצאתי להליכה.");
-      await page.click("text=שמירה");
+      await page.click("button[type=submit]:has-text(\"שמירה\")");
       await page.waitForSelector(".entry >> text=יצאתי להליכה");
     });
 
@@ -128,7 +128,7 @@ const server = http.createServer((req, res) => {
       await page.click("text=הגדרת קוד נעילה");
       await page.fill("dialog input[name=a]", "2468");
       await page.fill("dialog input[name=b]", "2468");
-      await page.click("dialog >> text=שמירה");
+      await page.click("dialog button[type=submit]");
       await page.waitForSelector("text=המידע מוצפן במכשיר");
       const raw = await page.evaluate(() => localStorage.getItem("tzalul_v1"));
       assert.ok(raw.includes('"enc"') && !raw.includes("יצאתי להליכה"));
@@ -140,7 +140,8 @@ const server = http.createServer((req, res) => {
       await page.waitForSelector("text=הקוד שגוי");
       await page.fill("#code", "2468");
       await page.click("text=פתיחה");
-      await page.waitForSelector(".hero-days");
+      await page.waitForSelector("text=המידע מוצפן במכשיר"); // back where we were
+      assert.equal(await page.locator(".nav .tab").count(), 5);
     });
 
     await step("desktop layout + dark mode render", async () => {

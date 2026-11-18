@@ -41,8 +41,10 @@ export default {
         s.slips.push({ id: uid(), ts: ts.toISOString(), trigger: String(fd.get("trigger") || "") || null, note: fdStr(fd, "note"), learn: fdStr(fd, "learn"), reset });
         if (reset) {
           const start = new Date(s.profile.quitAt);
-          if (ts > start) s.attempts.push({ start: start.toISOString(), end: ts.toISOString() });
-          s.profile.quitAt = ts > start ? ts.toISOString() : new Date().toISOString();
+          // the picker has minute precision: a slip "now" can round to before the streak start
+          const at = ts > start ? ts : new Date();
+          if (at > start) s.attempts.push({ start: start.toISOString(), end: at.toISOString() });
+          s.profile.quitAt = at.toISOString();
           if (s.profile.mode === "taper") s.profile.mode = "quit";
         }
       }, { render: false });

@@ -91,7 +91,7 @@ function surfView() {
     ${head("עברת את הגל", { back: "sos" })}
     <form data-form="surfSave" class="card form">
       <div class="burst center" aria-hidden="true">${icon("shield", 40)}</div>
-      <p class="lead center">${g("נשארת", "נשארת", "נשארת")} עם החשק ${g("ולא נתת לו לנהל אותך", "ולא נתת לו לנהל אותך")}. זה בדיוק השריר שבונים.</p>
+      <p class="lead center">נשארת עם החשק ולא נתת לו לנהל אותך. זה בדיוק השריר שבונים.</p>
       ${range("after", { min: 0, max: 10, value: Math.max(0, surf.before - 3), label: "כמה חזק החשק עכשיו?", unit: "מתוך 10" })}
       <p class="small muted">התחלת ב־<span class="num">${surf.before}</span>/10.</p>
       <button class="btn primary wide" type="submit">לשמור ביומן החשקים</button>
