@@ -515,3 +515,6 @@ body.bare .toast { bottom: calc(22px + env(safe-area-inset-bottom, 0px)); }
   .nav, .toast, .btn, .icon-btn { display: none !important; }
   .card { box-shadow: none; break-inside: avoid; }
 }
+
+/* number-like inputs type left-to-right, but their Hebrew placeholder reads right-to-left */
+input[dir="ltr"]:placeholder-shown { direction: rtl; text-align: right; }

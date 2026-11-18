@@ -31,6 +31,10 @@ const TABS = [
   { k: "more", label: "עוד", icon: "grid" },
 ];
 
+// Hebrew is right-to-left. Set it from code too, so it holds even when the page is embedded in a host document.
+document.documentElement.setAttribute("dir", "rtl");
+document.documentElement.setAttribute("lang", "he");
+
 const $main = document.getElementById("main");
 const $nav = document.getElementById("nav");
 const app = { state: null, locked: false, view: null, route: "", params: [], cleanup: null, hiddenAt: 0 };
