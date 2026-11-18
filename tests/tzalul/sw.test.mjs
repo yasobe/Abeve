@@ -14,7 +14,7 @@ test("service worker precaches every shipped asset", () => {
   const sw = readFileSync(join(root, "sw.js"), "utf8");
   const listed = new Set([...sw.matchAll(/"\.\/([^"]*)"/g)].map(m => m[1]));
   for (const f of files) {
-    if (f === "sw.js" || f.endsWith(".txt")) continue;
+    if (f === "sw.js" || f.endsWith(".txt") || f.startsWith("audio/")) continue;
     assert.ok(listed.has(f), `${f} missing from sw.js ASSETS`);
   }
   for (const f of listed) if (f) assert.ok(files.includes(f), `sw.js lists missing file ${f}`);
@@ -32,5 +32,16 @@ test("views never assign raw innerHTML from user data", () => {
   for (const f of files.filter(f => f.startsWith("js/views/"))) {
     const src = readFileSync(join(root, f), "utf8");
     assert.ok(!/innerHTML\s*=/.test(src.replace(/btn\.innerHTML = `\$\{icon\("wind", 18\)\} להתחיל`/, "")), `${f} sets innerHTML`);
+  }
+});
+
+test("every library article has a narration file", () => {
+  const ids = [...readFileSync(join(root, "js/content.js"), "utf8").matchAll(/^    id: "([a-z]+)"/gm)].map(m => m[1]);
+  assert.equal(ids.length, 8);
+  for (const id of ids) {
+    const f = join(root, "audio", `${id}.mp3`);
+    let size = 0;
+    try { size = statSync(f).size; } catch { /* missing */ }
+    assert.ok(size > 10000, `audio/${id}.mp3 missing or empty`);
   }
 });

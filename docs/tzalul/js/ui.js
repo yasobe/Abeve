@@ -72,6 +72,9 @@ const P = {
   gift: "M3 9h18v4H3zM5 13h14v8H5zM12 9v12M12 9C10 5 6.5 5 6.5 7S9 9 12 9Zm0 0c2-4 5.5-4 5.5-2S15 9 12 9Z",
   map: "M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2ZM9 4v14M15 6v14",
   flag: "M5 21V4M5 4h11l-2 4 2 4H5",
+  play: "M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z",
+  pause: "M8 5v14M16 5v14",
+  headphones: "M4 15v-3a8 8 0 0 1 16 0v3M4 15a2 2 0 0 1 2-2h1v7H6a2 2 0 0 1-2-2v-3ZM20 15a2 2 0 0 0-2-2h-1v7h1a2 2 0 0 0 2-2v-3Z",
 };
 export function icon(name, size = 22, cls = "") {
   const d = P[name] || P.spark;

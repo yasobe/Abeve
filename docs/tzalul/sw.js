@@ -1,6 +1,6 @@
 // Offline-first service worker. Bump VERSION on every release so installed apps update.
 // tests/tzalul/sw.test.mjs checks that every shipped file is listed in ASSETS.
-const VERSION = "tzalul-v1.0.0";
+const VERSION = "tzalul-v1.1.0";
 const ASSETS = [
   "./",
   "./index.html",
@@ -14,6 +14,7 @@ const ASSETS = [
   "./icons/icon-maskable-512.png",
   "./icons/apple-touch-icon.png",
   "./js/main.js",
+  "./js/audio.js",
   "./js/store.js",
   "./js/crypto.js",
   "./js/calc.js",
@@ -56,6 +57,8 @@ self.addEventListener("fetch", e => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin || !url.pathname.startsWith(new URL(self.registration.scope).pathname)) return;
+  // narration MP3s stream from the network (range requests); they are not precached
+  if (url.pathname.includes("/audio/")) return;
   if (req.mode === "navigate") {
     // app shell: cached index first (works offline), refreshed in the background
     e.respondWith(caches.match("./index.html").then(hit => {

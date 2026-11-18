@@ -518,3 +518,29 @@ body.bare .toast { bottom: calc(22px + env(safe-area-inset-bottom, 0px)); }
 
 /* number-like inputs type left-to-right, but their Hebrew placeholder reads right-to-left */
 input[dir="ltr"]:placeholder-shown { direction: rtl; text-align: right; }
+
+/* ---- narration player ------------------------------------------------------------------ */
+.player { display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-radius: var(--r); background: var(--soft); }
+.player-main { flex: 1; min-width: 0; display: grid; gap: 4px; }
+.player-label { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--accent); }
+.player-time { direction: ltr; unicode-bidi: isolate; }
+.player.failed .player-time { color: var(--warn); }
+.play-btn { flex: none; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; border: 0; cursor: pointer;
+  background: var(--accent); color: var(--accent-ink); box-shadow: 0 4px 14px var(--accent-soft); transition: transform .12s; }
+.play-btn:active { transform: scale(.94); }
+.play-btn .ic { fill: currentColor; }
+.play-btn .pi-pause, .player.playing .play-btn .pi-play { display: none; }
+.player.playing .play-btn .pi-pause { display: grid; }
+.play-btn > span { display: grid; place-items: center; }
+.player.loading .play-btn { animation: pulse 1s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .6; } }
+/* the seek bar fills from the right, like Hebrew reading */
+.player-seek { direction: rtl; height: 24px !important; margin: 0; }
+.player.compact { padding: 0; background: none; gap: 0; flex-direction: column; justify-content: center; width: 44px; }
+.player.compact .play-btn { width: 40px; height: 40px; box-shadow: none; }
+.ptrack { display: block; width: 32px; height: 3px; border-radius: 2px; background: var(--track); overflow: hidden; margin-top: 6px; visibility: hidden; }
+.ptrack > span { display: block; height: 100%; background: var(--accent); margin-inline-start: 0; }
+.player.compact.playing .ptrack, .player.compact.started .ptrack { visibility: visible; }
+.article-row { grid-template-columns: 1fr auto; align-items: center; gap: 10px; }
+.article-row .article-card { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 14px; text-decoration: none; color: inherit; min-width: 0; }
+.article-row .article-card > span:last-child { display: grid; gap: 2px; }
