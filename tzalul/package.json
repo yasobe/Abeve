@@ -1,0 +1,13 @@
+{
+  "name": "tzalul",
+  "version": "1.0.0",
+  "private": true,
+  "description": "צלול – Hebrew (RTL) offline-first PWA for alcohol cessation and recovery",
+  "type": "module",
+  "scripts": {
+    "start": "python3 -m http.server 8790",
+    "test": "node --test tests/unit.test.mjs",
+    "e2e": "node tests/e2e.cjs"
+  },
+  "license": "UNLICENSED"
+}

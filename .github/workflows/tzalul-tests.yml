@@ -1,0 +1,31 @@
+name: tzalul tests
+
+on:
+  push:
+    paths: ["tzalul/**", ".github/workflows/tzalul-tests.yml"]
+  pull_request:
+    paths: ["tzalul/**"]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tzalul
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Unit tests
+        run: npm test
+      - name: Install Playwright (Chromium)
+        run: npm install --no-save playwright@1.49.1 && npx playwright install --with-deps chromium
+      - name: Browser tests
+        run: |
+          python3 -m http.server 8790 >/dev/null 2>&1 &
+          sleep 1
+          node tests/e2e.cjs
