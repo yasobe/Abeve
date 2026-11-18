@@ -1,5 +1,5 @@
 // Shared view fragments and form widgets.
-import { html, icon } from "../ui.js";
+import { html, icon, esc, raw } from "../ui.js";
 import { gx } from "../i18n.js";
 
 let n = 0;
@@ -55,13 +55,16 @@ export function emptyState(ic, title, body, cta) {
   return html`<div class="empty">${icon(ic, 34)}<p class="empty-title">${title}</p>${body ? html`<p class="muted small">${body}</p>` : ""}${cta || ""}</div>`;
 }
 
+/** Inline **bold** and *italic* inside already-escaped text (escape first, then add tags). */
+export const rich = s => raw(esc(gx(s)).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\*(.+?)\*/g, "<em>$1</em>"));
+
 /** Article body blocks: string | {h} | {ul:[]} | {ol:[]} */
 export function blocks(list) {
   return list.map(b => {
-    if (typeof b === "string") return html`<p>${gx(b)}</p>`;
-    if (b.h) return html`<h3>${gx(b.h)}</h3>`;
-    if (b.ul) return html`<ul>${b.ul.map(x => html`<li>${gx(x)}</li>`)}</ul>`;
-    if (b.ol) return html`<ol>${b.ol.map(x => html`<li>${gx(x)}</li>`)}</ol>`;
+    if (typeof b === "string") return html`<p>${rich(b)}</p>`;
+    if (b.h) return html`<h3>${rich(b.h)}</h3>`;
+    if (b.ul) return html`<ul>${b.ul.map(x => html`<li>${rich(x)}</li>`)}</ul>`;
+    if (b.ol) return html`<ol>${b.ol.map(x => html`<li>${rich(x)}</li>`)}</ol>`;
     return "";
   });
 }
