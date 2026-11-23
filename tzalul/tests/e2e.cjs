@@ -213,7 +213,8 @@ async function go(p, route) {
   await shot(p, "13-lock");
   await p.fill("#pin", "1111");
   await p.click(".lock-form button.btn");
-  await p.waitForFunction(() => /שגוי/.test(document.getElementById("lock-msg")?.textContent || ""), null, { timeout: 15000 });
+  // locator waits instead of waitForFunction: the app's CSP blocks eval-based polling in some Playwright versions
+  await p.locator("#lock-msg", { hasText: "שגוי" }).waitFor({ timeout: 15000 });
   for (const k of "2580") await p.click(`.keypad [data-k="${k}"]`);
   await p.click(".lock-form button.btn");
   await p.waitForSelector(".settings", { timeout: 15000 });
@@ -286,7 +287,6 @@ async function go(p, route) {
 
   // offline: service worker serves the app
   await d.goto(BASE);
-  await d.waitForFunction(() => navigator.serviceWorker?.controller, null, { timeout: 10000 }).catch(() => {});
   const ready = await d.evaluate(() => navigator.serviceWorker.ready.then(() => true));
   assert.ok(ready);
   await dctx.setOffline(true);
