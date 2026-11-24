@@ -3,7 +3,7 @@
 <meta name="description" content="אתר לימוד אינטראקטיבי לפרק 9 בספר מבוא לפסיכולוגיה: משכל והערכת משכל">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Hebrew:wght@400;500;600;700&family=Suez+One&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Hebrew:wght@400;600;700&family=Suez+One&display=swap">
 <style>
 /* Layout: a psychometric "lab notebook" on answer-sheet grid paper. One column of chapter sections in book order, each tagged with its page range; every section pairs a control panel with a live display. */
 :root{
@@ -11,8 +11,10 @@
   --ink:#152238; --muted:#5A6781; --line:#D5DCE7; --grid:rgba(21,34,56,.045);
   --accent:#0E7C86; --accent-soft:rgba(14,124,134,.12);
   --mark:#F0B429; --mark-soft:rgba(240,180,41,.22);
-  --an:#2F64B0; --cr:#C0407A; --pr:#3D8B47;
-  --good:#2E8B57; --warn:#B86E05; --bad:#C2413A;
+  --an:#2F64B0; --cr:#AE336C; --pr:#2F7A39;
+  --good:#237347; --warn:#965500; --bad:#B8372F;
+  /* Gardner intelligences, AA contrast on surface and surface-2 */
+  --g0:#2B5DA8; --g1:#7A3FB0; --g2:#2E7A36; --g3:#AE336C; --g4:#A35400; --g5:#0B6F78; --g6:#A93A2F; --g7:#4A5A9E;
   --shadow:0 1px 2px rgba(21,34,56,.06),0 8px 24px rgba(21,34,56,.07);
   --f-display:"Suez One","Rubik","Arial Hebrew",serif;
   --f-body:"IBM Plex Sans Hebrew","Rubik","Segoe UI","Arial Hebrew",Arial,sans-serif;
@@ -22,12 +24,12 @@
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --paper:#0D1422;--surface:#141D2F;--surface-2:#192439;--ink:#E6EBF4;--muted:#9AA7BF;--line:#2A374F;--grid:rgba(230,235,244,.035);
   --accent:#3BBFC8;--accent-soft:rgba(59,191,200,.14);--mark:#F5C451;--mark-soft:rgba(245,196,81,.18);
-  --an:#7CA6EA;--cr:#EB86B4;--pr:#7CCB85;--good:#5BC48A;--warn:#E9A23B;--bad:#EE6B63;
+  --an:#7CA6EA;--cr:#EB86B4;--pr:#7CCB85;--good:#5BC48A;--warn:#E9A23B;--bad:#EE6B63;--g0:#86AEF2;--g1:#C6A0F2;--g2:#80CF89;--g3:#F193BF;--g4:#F2A65A;--g5:#52D1D9;--g6:#F4917F;--g7:#AEB8F2;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.28);color-scheme:dark}}
 :root[data-theme="dark"]{
   --paper:#0D1422;--surface:#141D2F;--surface-2:#192439;--ink:#E6EBF4;--muted:#9AA7BF;--line:#2A374F;--grid:rgba(230,235,244,.035);
   --accent:#3BBFC8;--accent-soft:rgba(59,191,200,.14);--mark:#F5C451;--mark-soft:rgba(245,196,81,.18);
-  --an:#7CA6EA;--cr:#EB86B4;--pr:#7CCB85;--good:#5BC48A;--warn:#E9A23B;--bad:#EE6B63;
+  --an:#7CA6EA;--cr:#EB86B4;--pr:#7CCB85;--good:#5BC48A;--warn:#E9A23B;--bad:#EE6B63;--g0:#86AEF2;--g1:#C6A0F2;--g2:#80CF89;--g3:#F193BF;--g4:#F2A65A;--g5:#52D1D9;--g6:#F4917F;--g7:#AEB8F2;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.28);color-scheme:dark}
 
 *{box-sizing:border-box}
@@ -49,14 +51,14 @@ button{font:inherit;color:inherit;cursor:pointer}
 /* nav */
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
 .nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)));
-  padding:8px max(16px,env(safe-area-inset-right,0px));background:color-mix(in srgb,var(--paper) 90%,transparent);
-  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  padding:8px max(16px,env(safe-area-inset-right,0px));background:color-mix(in srgb,var(--paper) 97%,transparent);
+  border-bottom:1px solid var(--line)}
 .nav .wrap{display:flex;align-items:center;gap:10px}
 .brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-size:1.05rem;text-decoration:none;color:var(--ink);flex:none}
 .brand b{display:grid;place-items:center;width:30px;height:30px;border-radius:8px;background:var(--ink);color:var(--paper);font-weight:400}
 .nav-links{display:flex;gap:2px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none;padding-block:2px}
 .nav-links::-webkit-scrollbar{display:none}
-.nav-links a{color:var(--muted);text-decoration:none;font-size:.86rem;padding:6px 10px;border-radius:999px;font-weight:500;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:.86rem;padding:6px 10px;border-radius:999px;font-weight:400;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
 .nav-links a::before{content:"";width:7px;height:7px;border-radius:50%;border:1.5px solid currentColor;opacity:.6;flex:none}
 .nav-links a.done::before{background:var(--good);border-color:var(--good);opacity:1}
 .nav-links a:hover,.nav-links a.on{color:var(--ink);background:var(--surface)}
@@ -96,7 +98,8 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .map-head h2{font-size:1.3rem}
 
 /* sections */
-.lab{margin-top:64px;scroll-margin-top:72px}
+.lab{margin-top:64px;scroll-margin-top:72px;content-visibility:auto;contain-intrinsic-size:auto 1100px}
+.lab:focus{outline:none}
 .lab-head{display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px;align-items:end;margin-bottom:22px}
 .lab-tag{font-family:var(--f-mono);font-size:.8rem;color:var(--paper);background:var(--ink);border-radius:10px;padding:8px 12px;white-space:nowrap;text-align:center;line-height:1.3}
 .lab-tag b{display:block;font-family:var(--f-display);font-weight:400;font-size:1.05rem}
@@ -366,6 +369,16 @@ blockquote footer{margin-top:6px;font-size:.82rem;color:var(--muted);border:0;pa
   #radar .rv-val{display:none}
   #radar .radar-axis-label text{font-size:19px}
 }
+@media (pointer:coarse){
+  input[type=range]{height:44px}
+  .nav-links a{min-height:40px}
+  .theme-btn{width:44px;height:44px}
+  .btn.sm,.seg button,.term,.tab,.preset,.chip-link,.tag-btn{min-height:44px}
+  .likert{gap:6px}
+  .likert button{width:40px;height:40px}
+  .toggle{min-height:44px}
+  .toggle input{width:22px;height:22px}
+}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
@@ -374,7 +387,7 @@ blockquote footer{margin-top:6px;font-size:.82rem;color:var(--muted);border:0;pa
   <div class="wrap">
     <a class="brand" href="#top"><b>9</b><span class="bt">מעבדת המשכל</span></a>
     <div class="nav-links" id="navLinks"></div>
-    <div class="prog" id="prog" title="התקדמות בפרק"></div>
+    <div class="prog" id="prog" role="img" title="התקדמות בפרק"></div>
     <button class="theme-btn" id="themeBtn" type="button" aria-label="החלפת ערכת צבעים">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
     </button>
@@ -593,7 +606,7 @@ blockquote footer{margin-top:6px;font-size:.82rem;color:var(--muted);border:0;pa
       </div>
       <div class="grid-2" style="align-items:center">
         <p class="explain" id="gcOut"></p>
-        <div class="scroll-x"><svg id="cube" viewBox="0 0 560 450" role="img" aria-label="קובית מבנה האינטלקט"></svg></div>
+        <div class="scroll-x" tabindex="0" role="region" aria-label="קוביית גילפורד, אפשר לגלול לצדדים"><svg id="cube" viewBox="0 0 560 450" role="img" aria-label="קובית מבנה האינטלקט"></svg></div>
       </div>
     </div>
   </section>
@@ -609,7 +622,7 @@ blockquote footer{margin-top:6px;font-size:.82rem;color:var(--muted);border:0;pa
     </div>
     <div class="game">
       <div class="panel stage" id="stage" aria-live="polite"></div>
-      <aside class="panel side">
+      <div class="panel side">
         <div class="score-row">
           <div class="score-box"><span>פתרונות מוצלחים</span><b id="scAct">0/0</b></div>
           <div class="score-box"><span>זיהוי רכיב</span><b id="scTag">0/0</b></div>
@@ -618,7 +631,7 @@ blockquote footer{margin-top:6px;font-size:.82rem;color:var(--muted);border:0;pa
         <div class="comp" style="--c:var(--an)"><i></i><h3>משכל אנליטי</h3><p>עיבוד מידע ופתרון בעיות: רכיבי רכישת ידע, רכיבי ביצוע, ורכיבים מטה־קוגניטיביים שבוחרים אסטרטגיה ומנטרים את ההתקדמות.</p></div>
         <div class="comp" style="--c:var(--cr)"><i></i><h3>משכל יצירתי</h3><p>התמודדות עם שני מצבים מנוגדים: בעיות חדשות לגמרי, ומנגד ביצוע אוטומטי של משימות שגרתיות.</p></div>
         <div class="comp" style="--c:var(--pr)"><i></i><h3>משכל מעשי</h3><p>ניהול ענייני היום־יום: הסתגלות להקשרים חדשים, בחירת הקשרים מתאימים ועיצוב הסביבה לצרכינו.</p></div>
-      </aside>
+      </div>
     </div>
   </section>
 
@@ -654,7 +667,7 @@ blockquote footer{margin-top:6px;font-size:.82rem;color:var(--muted);border:0;pa
           <span class="pill ex" id="exPill">פרופיל לדוגמה. שנו ערך כדי להתחיל.</span>
           <label class="toggle"><input type="checkbox" id="schoolOverlay"> הדגשים טיפוסיים בבית הספר (המחשה)</label>
         </div>
-        <svg id="radar" viewBox="-250 -185 500 370" role="img" aria-label="תרשים מכ״ם של שמונה סוגי המשכל"></svg>
+        <svg id="radar" viewBox="-250 -185 500 370" role="group" aria-label="תרשים מכ״ם של שמונה סוגי המשכל. אפשר לגרור נקודות, או להשתמש במחוונים."></svg>
         <div class="result" aria-live="polite">
           <div class="result-h"><h3 id="resTitle">הפרופיל לדוגמה</h3><span class="cite">לחצו על שורה לפרטים</span></div>
           <p class="result-lead" id="resLead"></p>
@@ -797,8 +810,11 @@ blockquote footer{margin-top:6px;font-size:.82rem;color:var(--muted);border:0;pa
 <script>
 (function(){
 "use strict";
+document.documentElement.lang="he";
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
-const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+// Theme colours for canvas drawing, cached so animation frames do not force style recalculation.
+const cssCache=new Map();
+const css=n=>{let v=cssCache.get(n);if(v===undefined){v=getComputedStyle(document.documentElement).getPropertyValue(n).trim();cssCache.set(n,v)}return v};
 const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
 const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 const NS="http://www.w3.org/2000/svg";
@@ -819,7 +835,7 @@ const MONO="IBM Plex Mono, monospace";
 const root=document.documentElement;
 const savedTheme=store.get("ch9-theme",null);
 if(savedTheme)root.setAttribute("data-theme",savedTheme);
-const themeListeners=[];
+const themeListeners=[()=>cssCache.clear()];
 const isDark=()=>root.getAttribute("data-theme")?root.getAttribute("data-theme")==="dark":matchMedia("(prefers-color-scheme: dark)").matches;
 $("#themeBtn").addEventListener("click",()=>{const next=isDark()?"light":"dark";root.setAttribute("data-theme",next);store.set("ch9-theme",next);themeListeners.forEach(f=>f())});
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>themeListeners.forEach(f=>f()));
@@ -852,6 +868,13 @@ renderProgress();
 const navLinks=$$("#navLinks a");
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){navLinks.forEach(a=>{const on=a.dataset.id===e.target.id;a.classList.toggle("on",on);if(on){const c=a.parentElement.getBoundingClientRect(),r=a.getBoundingClientRect();if(r.left<c.left||r.right>c.right)a.scrollIntoView({block:"nearest",inline:"center",behavior:"auto"})}})}}),{rootMargin:"-40% 0px -55% 0px"});
 $$(".lab").forEach(s=>io.observe(s));
+function jumpTo(t){
+  t.scrollIntoView({block:"start"});let n=0;
+  (function settle(){requestAnimationFrame(()=>{const want=parseFloat(getComputedStyle(t).scrollMarginTop)||0;if(Math.abs(t.getBoundingClientRect().top-want)>2)t.scrollIntoView({block:"start"});if(++n<6)settle()})})();
+  if(t.classList.contains("lab")){t.setAttribute("tabindex","-1");t.focus({preventScroll:true})}
+}
+document.addEventListener("click",e=>{const a=e.target.closest&&e.target.closest('a[href^="#"]');if(!a)return;const id=a.getAttribute("href").slice(1);const t=id&&document.getElementById(id);if(!t)return;e.preventDefault();jumpTo(t)});
+if(location.hash.length>1){const t=document.getElementById(location.hash.slice(1));if(t)requestAnimationFrame(()=>jumpTo(t))}
 
 /* =========================================================
    HERO bell
@@ -1105,7 +1128,9 @@ function makeSorter(host,cats,items,onDone){
       const k=+b.dataset.k,ok=k===it.a;if(ok)score++;placed[it.a].push({t:it.t,ok,a:it.a});
       $$(".sort-btns button",host).forEach(x=>{x.disabled=true;if(+x.dataset.k===it.a)x.classList.add("picked")});
       $(".fb",host).innerHTML=`<div class="feedback" style="--c:${ok?"var(--good)":"var(--bad)"}"><b>${ok?"נכון.":"לא בדיוק."}</b> ${it.w}</div>`;
-      setTimeout(()=>{i++;render();const f=$(".sort-btns button",host);if(f)f.focus({preventScroll:true})},ok?900:2200);
+      const next=()=>{i++;render();const f=$(".sort-btns button,button",host);if(f)f.focus({preventScroll:true})};
+      if(ok)setTimeout(next,reduce?400:900);
+      else{const nb=document.createElement("button");nb.type="button";nb.className="btn sm";nb.style.marginTop="10px";nb.textContent=i<order.length-1?"לפריט הבא":"לתוצאה";nb.addEventListener("click",next);$(".fb",host).appendChild(nb);nb.focus({preventScroll:true})}
     }));
   }
   start();
@@ -1330,14 +1355,14 @@ newGame();
    6. GARDNER
    ========================================================= */
 const INT=[
- {k:"log",n:"לוגי־מתמטי",c:"#2F64B0",end:"מדען, מתמטיקאי",core:"רגישות לתבניות הגיוניות או מספריות והיכולת להבחין בהן; יכולת לעסוק בשרשראות ארוכות של היסק.",q:["אני נהנה/ית לפתור חידות היגיון ובעיות מספריות.","כשמשהו לא עובד, אני מחפש/ת את הסיבה צעד אחר צעד."]},
- {k:"lin",n:"לשוני",c:"#8A4FBF",end:"משורר, עיתונאי",core:"רגישות לצלילי מילים, למקצב שלהן ולמשמעותן; רגישות לפונקציות השונות של שפה.",q:["קל לי להסביר רעיון מסובך במילים פשוטות.","אני שם/ה לב לבחירת מילים ולניסוח של אחרים."]},
- {k:"nat",n:"נטורליסטי",c:"#3D8B47",end:"ביולוג, איש איכות הסביבה",core:"רגישות להבדלים בין מגוון המינים; תקשורת טובה עם יצורים חיים.",q:["אני מזהה בקלות סוגי צמחים, ציפורים או בעלי חיים.","בטבע אני מרגיש/ה בבית ושם/ה לב לפרטים קטנים."]},
- {k:"mus",n:"מוסיקלי",c:"#C0407A",end:"מלחין, כנר",core:"יכולת להפיק ולהעריך קצב, גובה צליל וגוון קול; הערכת צורות של הבעה מוסיקלית.",q:["אני קולט/ת מנגינה אחרי שמיעה אחת או שתיים.","אני שומע/ת מיד כשמישהו שר או מנגן לא בדיוק."]},
- {k:"spa",n:"מרחבי",c:"#D9822B",end:"נווט, פסל",core:"יכולת לתפוס את העולם החזותי־מרחבי בדייקנות ולערוך שינויים בתפיסות הראשוניות.",q:["אני מתמצא/ת בקלות במקום חדש גם בלי מפה.","קל לי לדמיין איך חפץ ייראה אם יסובבו אותו."]},
- {k:"bod",n:"גופני־קינסתטי",c:"#0E7C86",end:"רקדן, אתלט",core:"יכולת לשלוט בתנועות הגוף ולטפל בעצמים במיומנות.",q:["אני לומד/ת תנועה חדשה (ריקוד, ספורט) מהר.","אני חושב/ת טוב יותר כשאני בתנועה או עושה משהו בידיים."]},
- {k:"inter",n:"בין־אישי",c:"#B5483C",end:"מטפל, איש מכירות",core:"יכולת להבין מצבי רוח, מזג, מוטיבציה ותשוקה של אנשים אחרים ולהגיב עליהם כראוי.",q:["אנשים פונים אליי כשהם צריכים עצה או אוזן קשבת.","אני מרגיש/ה מהר כשמשהו לא בסדר אצל מישהו."]},
- {k:"intra",n:"תוך־אישי",c:"#5B6BA8",end:"אדם בעל מודעות עצמית מדויקת",core:"גישה לרגשות העצמי והיכולת להבחין ביניהם ולהיעזר בהם להכוונת ההתנהגות; הכרת הכוחות, החולשות והתשוקות של עצמך.",q:["אני יודע/ת בדיוק מה מניע אותי ולמה.","אני מזהה את החוזקות והחולשות שלי בלי לייפות."]}];
+ {k:"log",n:"לוגי־מתמטי",c:"var(--g0)",end:"מדען, מתמטיקאי",core:"רגישות לתבניות הגיוניות או מספריות והיכולת להבחין בהן; יכולת לעסוק בשרשראות ארוכות של היסק.",q:["אני נהנה/ית לפתור חידות היגיון ובעיות מספריות.","כשמשהו לא עובד, אני מחפש/ת את הסיבה צעד אחר צעד."]},
+ {k:"lin",n:"לשוני",c:"var(--g1)",end:"משורר, עיתונאי",core:"רגישות לצלילי מילים, למקצב שלהן ולמשמעותן; רגישות לפונקציות השונות של שפה.",q:["קל לי להסביר רעיון מסובך במילים פשוטות.","אני שם/ה לב לבחירת מילים ולניסוח של אחרים."]},
+ {k:"nat",n:"נטורליסטי",c:"var(--g2)",end:"ביולוג, איש איכות הסביבה",core:"רגישות להבדלים בין מגוון המינים; תקשורת טובה עם יצורים חיים.",q:["אני מזהה בקלות סוגי צמחים, ציפורים או בעלי חיים.","בטבע אני מרגיש/ה בבית ושם/ה לב לפרטים קטנים."]},
+ {k:"mus",n:"מוסיקלי",c:"var(--g3)",end:"מלחין, כנר",core:"יכולת להפיק ולהעריך קצב, גובה צליל וגוון קול; הערכת צורות של הבעה מוסיקלית.",q:["אני קולט/ת מנגינה אחרי שמיעה אחת או שתיים.","אני שומע/ת מיד כשמישהו שר או מנגן לא בדיוק."]},
+ {k:"spa",n:"מרחבי",c:"var(--g4)",end:"נווט, פסל",core:"יכולת לתפוס את העולם החזותי־מרחבי בדייקנות ולערוך שינויים בתפיסות הראשוניות.",q:["אני מתמצא/ת בקלות במקום חדש גם בלי מפה.","קל לי לדמיין איך חפץ ייראה אם יסובבו אותו."]},
+ {k:"bod",n:"גופני־קינסתטי",c:"var(--g5)",end:"רקדן, אתלט",core:"יכולת לשלוט בתנועות הגוף ולטפל בעצמים במיומנות.",q:["אני לומד/ת תנועה חדשה (ריקוד, ספורט) מהר.","אני חושב/ת טוב יותר כשאני בתנועה או עושה משהו בידיים."]},
+ {k:"inter",n:"בין־אישי",c:"var(--g6)",end:"מטפל, איש מכירות",core:"יכולת להבין מצבי רוח, מזג, מוטיבציה ותשוקה של אנשים אחרים ולהגיב עליהם כראוי.",q:["אנשים פונים אליי כשהם צריכים עצה או אוזן קשבת.","אני מרגיש/ה מהר כשמשהו לא בסדר אצל מישהו."]},
+ {k:"intra",n:"תוך־אישי",c:"var(--g7)",end:"אדם בעל מודעות עצמית מדויקת",core:"גישה לרגשות העצמי והיכולת להבחין ביניהם ולהיעזר בהם להכוונת ההתנהגות; הכרת הכוחות, החולשות והתשוקות של עצמך.",q:["אני יודע/ת בדיוק מה מניע אותי ולמה.","אני מזהה את החוזקות והחולשות שלי בלי לייפות."]}];
 const SCHOOL=[9,9,3,2.5,3.5,2.5,3,3];
 const SAMPLES=[[7,6,4,5,7,5,8,6],[4,9,3,8,5,4,8,9],[9,5,6,3,9,4,3,5],[3,4,8,6,7,10,6,5],[6,7,5,9,6,7,9,7]];
 const N=INT.length;
@@ -1345,6 +1370,7 @@ let gState=store.get("ch9-g2",null)||{vals:SAMPLES[0].slice(),lik:INT.map(()=>[0
 let gVals=gState.vals,gLik=gState.lik,sampleIdx=0;
 let disp=gVals.slice(),selIdx=null;
 const saveG=()=>store.set("ch9-g2",{vals:gVals,lik:gLik,touched:gState.touched});
+const HIT=matchMedia("(pointer:coarse)").matches?26:16;
 const RAD=125,ang=i=>-Math.PI/2+i*2*Math.PI/N,pt=(i,v)=>[Math.cos(ang(i))*RAD*v/10,Math.sin(ang(i))*RAD*v/10];
 const radar=$("#radar");
 const rings=el("g",{},radar);
@@ -1356,7 +1382,7 @@ schoolPath.setAttribute("d",SCHOOL.map((v,i)=>{const[x,y]=pt(i,v);return(i?"L":"
 const shape=el("path",{fill:"var(--accent)","fill-opacity":.2,stroke:"var(--accent)","stroke-width":2.5,"stroke-linejoin":"round"},radar);
 const dots=[],labels=[];
 INT.forEach((it,i)=>{
-  const hit=el("circle",{r:16,fill:"transparent",class:"dragdot"},radar);
+  const hit=el("circle",{r:HIT,fill:"transparent",class:"dragdot"},radar);
   const d=el("circle",{r:6.5,fill:it.c,stroke:"var(--surface)","stroke-width":2,"pointer-events":"none"},radar);dots.push([d,hit]);
   const[lx,ly]=pt(i,12.6);const c=Math.cos(ang(i)),anchor=Math.abs(c)<.2?"middle":c>0?"start":"end";
   const g=el("g",{class:"radar-axis-label",tabindex:0,role:"button","aria-label":"פרטים על "+it.n},radar);
@@ -1371,7 +1397,7 @@ const toSvg=e=>new DOMPoint(e.clientX,e.clientY).matrixTransform(radar.getScreen
 radar.addEventListener("touchstart",e=>{if(e.target.classList&&e.target.classList.contains("dragdot"))e.preventDefault()},{passive:false});
 radar.addEventListener("pointerdown",e=>{
   if(!(e.target.classList&&e.target.classList.contains("dragdot")))return;
-  const p0=toSvg(e),c=[];for(let i=0;i<N;i++){const[x,y]=pt(i,disp[i]);if(Math.hypot(x-p0.x,y-p0.y)<=18)c.push(i)}
+  const p0=toSvg(e),c=[];for(let i=0;i<N;i++){const[x,y]=pt(i,disp[i]);if(Math.hypot(x-p0.x,y-p0.y)<=HIT+2)c.push(i)}
   if(!c.length)return;
   drag={id:e.pointerId,c,axis:c.length===1?c[0]:null,x0:p0.x,y0:p0.y};
   try{radar.setPointerCapture(e.pointerId)}catch(_){}
