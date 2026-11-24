@@ -217,7 +217,7 @@ svg text{font-family:var(--f-body)}
 .result-lead{font-size:.98rem}
 .result-lead b{color:var(--c)}
 .rank{position:relative}
-.rank-row{position:absolute;inset-inline:0;top:0;height:32px;display:grid;grid-template-columns:7.2em minmax(0,1fr) 2.2em;gap:10px;align-items:center;
+.rank-row{position:absolute;inset-inline:0;top:0;height:var(--row-h,32px);display:grid;grid-template-columns:7.2em minmax(0,1fr) 2.2em;gap:10px;align-items:center;
   transition:transform .45s cubic-bezier(.2,.8,.2,1);background:none;border:0;padding:0 6px;border-radius:8px;text-align:right}
 .rank-row:hover,.rank-row.sel{background:var(--surface-2)}
 .rank-row .nm{font-size:.88rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -373,6 +373,9 @@ blockquote footer{margin-top:6px;font-size:.82rem;color:var(--muted);border:0;pa
   input[type=range]{height:44px}
   .nav-links a{min-height:40px}
   .theme-btn{width:44px;height:44px}
+  .brand{min-height:44px}
+  .brand b{width:40px;height:40px}
+  .rank{--row-h:44px}
   .btn.sm,.seg button,.term,.tab,.preset,.chip-link,.tag-btn{min-height:44px}
   .likert{gap:6px}
   .likert button{width:40px;height:40px}
@@ -1370,7 +1373,7 @@ let gState=store.get("ch9-g2",null)||{vals:SAMPLES[0].slice(),lik:INT.map(()=>[0
 let gVals=gState.vals,gLik=gState.lik,sampleIdx=0;
 let disp=gVals.slice(),selIdx=null;
 const saveG=()=>store.set("ch9-g2",{vals:gVals,lik:gLik,touched:gState.touched});
-const HIT=matchMedia("(pointer:coarse)").matches?26:16;
+const COARSE=matchMedia("(pointer:coarse)").matches,HIT=COARSE?26:16,ROW=COARSE?46:34;
 const RAD=125,ang=i=>-Math.PI/2+i*2*Math.PI/N,pt=(i,v)=>[Math.cos(ang(i))*RAD*v/10,Math.sin(ang(i))*RAD*v/10];
 const radar=$("#radar");
 const rings=el("g",{},radar);
@@ -1461,9 +1464,9 @@ function renderResult(){
   const lt=INT[ranked[0].i];
   $("#liveTop").innerHTML=max-min<=1?`הפרופיל כרגע שטוח (${min}–${max}).`:tops.length>1?`בולטים כרגע (תיקו, ${max}): ${tops.map(r=>`<b style="--c:${INT[r.i].c}">${INT[r.i].n}</b>`).join(", ")}`:`הבולט ביותר כרגע: <b style="--c:${lt.c}">${lt.n}</b> (${max}/10). הדירוג המלא מתחת למכ״ם.`;
   const rank=$("#rank");
-  if(!rank.children.length){rank.style.height=(N*34)+"px";INT.forEach((it,i)=>{const b=document.createElement("button");b.type="button";b.className="rank-row";b.dataset.i=i;b.style.setProperty("--c",it.c);
+  if(!rank.children.length){rank.style.height=(N*ROW)+"px";INT.forEach((it,i)=>{const b=document.createElement("button");b.type="button";b.className="rank-row";b.dataset.i=i;b.style.setProperty("--c",it.c);
     b.innerHTML=`<span class="nm">${it.n}</span><span class="bar"><i></i></span><span class="v"></span>`;b.addEventListener("click",()=>select(i));rank.appendChild(b)})}
-  ranked.forEach((r,pos)=>{const b=rank.children[r.i];b.style.transform=`translateY(${pos*34}px)`;$("i",b).style.width=(r.v*10)+"%";$(".v",b).textContent=r.v;
+  ranked.forEach((r,pos)=>{const b=rank.children[r.i];b.style.transform=`translateY(${pos*ROW}px)`;$("i",b).style.width=(r.v*10)+"%";$(".v",b).textContent=r.v;
     b.classList.toggle("top",r.v===max&&max-min>1);b.classList.toggle("sel",r.i===selIdx);b.setAttribute("aria-label",`${INT[r.i].n}: ${r.v} מתוך 10, מקום ${pos+1}`)});
   const di=selIdx??ranked[0].i,it=INT[di];
   $("#gDetail").style.setProperty("--c",it.c);
