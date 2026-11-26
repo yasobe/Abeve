@@ -1,0 +1,7 @@
+{
+  "name": "shaar-tests",
+  "private": true,
+  "type": "module",
+  "description": "Tests for the Shaar gate: SQL state machine and Edge Function (run against a local Postgres 16)",
+  "devDependencies": { "pg": "8.13.1" }
+}

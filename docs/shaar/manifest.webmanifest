@@ -1,0 +1,25 @@
+{
+  "name": "שער – רגע לפני שנכנסים",
+  "short_name": "שער",
+  "description": "שומר בשער לאפליקציות מסיחות: מודעות ברגע הדחף, חוזה זמן, נעילה רכה וחשבון מאמץ.",
+  "lang": "he",
+  "dir": "rtl",
+  "id": "./?a=home",
+  "start_url": "./?a=home",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5f3ee",
+  "theme_color": "#f5f3ee",
+  "categories": ["productivity", "health", "lifestyle"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ],
+  "shortcuts": [
+    { "name": "נעילה", "url": "./?a=home", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "צעד מאמץ", "url": "./?a=effort", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}
