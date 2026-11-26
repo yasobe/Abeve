@@ -1,7 +1,7 @@
 // שער service worker: the gate must paint instantly, even on a weak connection.
 // App shell is served from cache first and refreshed in the background. API calls are never cached.
 // Bump VERSION on every release.
-const VERSION = "shaar-v1.0.0";
+const VERSION = "shaar-v1.1.0";
 const FILES = ["./", "./index.html", "./app.css", "./app.js", "./manifest.webmanifest",
   "./icons/icon.svg", "./icons/icon-192.png", "./icons/apple-touch-icon.png"];
 

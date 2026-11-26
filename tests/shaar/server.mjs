@@ -1,6 +1,7 @@
 // Local stand-in for Supabase, for tests and for trying the web app on a laptop:
 //   - a tiny PostgREST look-alike for POST /rest/v1/rpc/shaar_api (backed by a real Postgres),
-//   - the Edge Function itself (supabase/functions/shaar/index.ts) on Node's http server,
+//   - the Edge Function itself on Node's http server: supabase/functions/shaar/index.ts (AI version),
+//     or with engine "rules" (SHAAR_ENGINE=rules) supabase/functions/shaar-rules/index.ts (no AI),
 //   - a static server for docs/shaar,
 //   - a fake Claude that answers deterministically (no API key, no cost).
 // Usage: PGURL=postgres://... node tests/shaar/server.mjs   → http://localhost:8765/shaar/
@@ -9,7 +10,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
-import { createHandler, makeRpc } from "../../supabase/functions/shaar/index.ts";
+import * as aiFn from "../../supabase/functions/shaar/index.ts";
+import * as rulesFn from "../../supabase/functions/shaar-rules/index.ts";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "../..");
@@ -90,7 +92,7 @@ export function staticServer(dir, mount = "/shaar/") {
   });
 }
 
-export async function start({ pgUrl, rpcPort = 54400, fnPort = 54401, webPort = 8765, token = "test-token-0123456789abcdef", schema = true } = {}) {
+export async function start({ pgUrl, rpcPort = 54400, fnPort = 54401, webPort = 8765, token = "test-token-0123456789abcdef", schema = true, engine = "ai" } = {}) {
   const pool = new pg.Pool({ connectionString: pgUrl, max: 4 });
   if (schema) {
     const c = await pool.connect();
@@ -104,11 +106,14 @@ export async function start({ pgUrl, rpcPort = 54400, fnPort = 54401, webPort = 
   const clock = { offsetSec: 0 };
   const claudeLog = [];
   const appUrl = `http://localhost:${webPort}/shaar/`;
-  const handler = createHandler({
-    env: { token, anthropicKey: "fake", gateModel: "claude-haiku-5-5", coachModel: "claude-opus-5-5", appUrl, allowOrigins: [] },
-    rpc: makeRpc(`http://localhost:${rpcPort}`, "service-role-test-key"),
-    anthropic: fakeAnthropic(claudeLog),
-  });
+  const rpcUrl = `http://localhost:${rpcPort}`;
+  const handler = engine === "rules"
+    ? rulesFn.createHandler({ env: { token, appUrl, allowOrigins: [] }, rpc: rulesFn.makeRpc(rpcUrl, "service-role-test-key") })
+    : aiFn.createHandler({
+        env: { token, anthropicKey: "fake", gateModel: "claude-haiku-5-5", coachModel: "claude-opus-5-5", appUrl, allowOrigins: [] },
+        rpc: aiFn.makeRpc(rpcUrl, "service-role-test-key"),
+        anthropic: fakeAnthropic(claudeLog),
+      });
   const servers = [rpcShim(pool, clock).listen(rpcPort), serveFetch(handler).listen(fnPort),
                    staticServer(path.join(root, "docs/shaar")).listen(webPort)];
   await new Promise((r) => setTimeout(r, 100));
@@ -119,7 +124,7 @@ export async function start({ pgUrl, rpcPort = 54400, fnPort = 54401, webPort = 
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
-  const s = await start({ pgUrl: process.env.PGURL });
+  const s = await start({ pgUrl: process.env.PGURL, engine: process.env.SHAAR_ENGINE || "ai" });
   console.log(`web app:  ${s.appUrl}#k=${s.token}&api=${encodeURIComponent(s.fnUrl)}`);
   console.log(`shortcut: ${s.fnUrl}/s/open/instagram?k=${s.token}`);
 }
