@@ -76,7 +76,22 @@
    - `SHAAR_TOKEN` = הטוקן משלב 1
    - `ANTHROPIC_API_KEY` = המפתח של Anthropic
 6. בדיקה ב-Safari:
-   `https://albvjenyvyanzzlmvmqa.supabase.co/functions/v1/shaar/s/ping?k=הטוקן` → אמור להופיע `ok`.
+   `https://albvjenyvyanzzlmvmqa.supabase.co/functions/v1/shaar/s/check?k=הטוקן` → אמורות להופיע שלוש שורות עם ✓ (טוקן, מסד נתונים, מפתח Anthropic). שורה עם ✗ אומרת מה חסר. הבדיקה לא קוראת ל-Claude ולא עולה כסף.
+
+#### אילו מפתחות של Supabase צריך? אף אחד.
+- **לא** מעתיקים את ה-`anon` key ולא את ה-`service_role` / `secret` key לשום מקום – לא לאפליקציה, לא לקיצור ולא לסודות.
+- Supabase מזריק לבד לכל Edge Function את `SUPABASE_URL` ואת מפתח השירות (`SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_SECRET_KEYS`). הפונקציה משתמשת בהם בצד השרת בלבד.
+- ה-PWA לא מדברת עם מסד הנתונים בכלל. היא מדברת רק עם הפונקציה, עם הטוקן האישי שלך. כתובת הפונקציה כבר כתובה ב-`docs/shaar/app.js` (`DEFAULT_API`) – היא לא סוד.
+- למה אין מדיניות RLS? כי אין משתמשי Supabase באפליקציה הזו. כל מדיניות שתפתח את הטבלאות ל-`anon` הייתה פותחת אותן לכל מי שיש לו את המפתח הציבורי של "טיק". RLS דלוק בלי מדיניות = סגור לגמרי, וזה המצב הנכון.
+- רק שני סודות נכנסים ל-Supabase: `SHAAR_TOKEN` ו-`ANTHROPIC_API_KEY`.
+
+> לוודא שהטבלאות סגורות (SQL Editor) – כל השורות אמורות להראות `rls = true` ו-`policies = 0`:
+> ```sql
+> select c.relname, c.relrowsecurity as rls,
+>        (select count(*) from pg_policies p where p.tablename = c.relname) as policies
+> from pg_class c join pg_namespace n on n.oid = c.relnamespace
+> where n.nspname = 'public' and c.relname like 'shaar\_%' and c.relkind = 'r';
+> ```
 
 > מהמחשב, אותו דבר ב-CLI:
 > `supabase functions deploy shaar --project-ref albvjenyvyanzzlmvmqa --no-verify-jwt`
@@ -154,6 +169,7 @@
 | נפתח "הקיצור לא מחובר" | הטוקן ב-Text של הקיצור לא זהה לסוד `SHAAR_TOKEN`. |
 | אינסטגרם נפתח וכלום לא קורה | האוטומציה כבויה / לא מוגדרת "הפעלה מיידית" / אין רשת (נכשל פתוח – בכוונה). |
 | הטיימר לא מתחיל | ה-Start Timer לא מקבל את `Contents of URL` (ראו Get Numbers from Input למעלה). |
+| לא בטוח מה לא עובד | לפתוח `…/functions/v1/shaar/s/check?k=הטוקן` ב-Safari – כל שורה עם ✗ אומרת מה חסר. |
 | "שגיאה בשרת" באפליקציה | ה-SQL לא הורץ, או שהפונקציה לא נקראת `shaar`, או ש-Verify JWT עדיין דולק. |
 | Claude לא עונה | `ANTHROPIC_API_KEY` חסר/שגוי – השער ממשיך לעבוד עם כללים פשוטים, ומסומן `ai_ok=false` בהיסטוריה. |
 
@@ -172,7 +188,7 @@
 cd tests/shaar && npm install            # pg
 # Postgres 16 מקומי (כל מסד ריק; הבדיקות מוחקות ובונות את public מחדש)
 PGURL=postgres://postgres@localhost:5432/shaar_test node sql.test.mjs        # מכונת המצבים (13)
-PGURL=postgres://postgres@localhost:5432/shaar_fn   node function.test.mjs   # הפונקציה ב-HTTP, Claude מדומה (12)
+PGURL=postgres://postgres@localhost:5432/shaar_fn   node function.test.mjs   # הפונקציה ב-HTTP, Claude מדומה (13)
 PGURL=postgres://postgres@localhost:5432/shaar_e2e  node e2e.mjs             # מעבר מלא בדפדפן (Playwright)
 PGURL=postgres://postgres@localhost:5432/shaar_dev  node server.mjs          # הרצה מקומית: http://localhost:8765/shaar/
 ```
