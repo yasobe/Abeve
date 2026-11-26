@@ -25,6 +25,14 @@ try {
     assert.equal(await sget("ping"), "ok");
   });
 
+  await test("setup check: token, database and Claude key, no secrets in the output", async () => {
+    assert.match(await sget("check", "wrong"), /^✗ טוקן/);
+    const out = await sget("check");
+    assert.match(out, /✓ טוקן/);
+    assert.match(out, /✓ מסד נתונים/);
+    assert.ok(!out.includes(S.token));
+  });
+
   await test("shortcut: first open returns the gate URL with the token in the fragment", async () => {
     assert.equal(await sget("open/instagram"), `${S.appUrl}?a=gate&app=instagram#k=${S.token}`);
   });

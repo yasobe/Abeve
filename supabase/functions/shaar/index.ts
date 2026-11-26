@@ -341,6 +341,25 @@ export function createHandler(deps: Deps) {
     }
   }
 
+  // Setup check, opened by hand in Safari: /s/check?k=TOKEN. Plain Hebrew lines, never a secret.
+  // It reads state only (no Claude call, no cost), so it is safe to open any time.
+  async function check(k: string) {
+    if (!tokenOk(k)) return text("✗ טוקן: לא תואם לסוד SHAAR_TOKEN (או שהסוד חסר / קצר מ-16 תווים)");
+    const lines = ["✓ טוקן: תקין"];
+    try {
+      await deps.rpc("state", { app: "" });
+      lines.push("✓ מסד נתונים: מחובר (shaar_api עונה)");
+    } catch (e) {
+      const msg = String((e as Error)?.message || e).slice(0, 200);
+      lines.push(`✗ מסד נתונים: ${msg}`);
+      lines.push("  → להריץ את supabase/shaar.sql ב-SQL Editor, ולוודא שהפונקציה נקראת shaar");
+    }
+    lines.push(deps.env.anthropicKey
+      ? "✓ מפתח Anthropic: מוגדר (לא נבדק מול Anthropic)"
+      : "✗ מפתח Anthropic: חסר הסוד ANTHROPIC_API_KEY (השער יעבוד עם כללים פשוטים)");
+    return text(lines.join("\n"));
+  }
+
   async function api(action: string, b: any) {
     switch (action) {
       case "state":
@@ -422,6 +441,7 @@ export function createHandler(deps: Deps) {
     const [, area, action, arg] = m;
 
     if (area === "s") {
+      if (req.method === "GET" && action === "check") return check(url.searchParams.get("k") || "");
       if (req.method !== "GET" || !["open", "close", "ping"].includes(action)) return text("not found", 404);
       let app = arg || (action === "ping" ? "ping" : "");
       try { app = decodeURIComponent(app); } catch { app = ""; }
