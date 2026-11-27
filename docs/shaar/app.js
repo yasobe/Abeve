@@ -4,7 +4,7 @@
 "use strict";
 (() => {
   const VERSION = "1.0.0";
-  const DEFAULT_API = "https://albvjenyvyanzzlmvmqa.supabase.co/functions/v1/shaar";
+  const DEFAULT_API = "https://azsopganhicwbdirfxon.supabase.co/functions/v1/shaar";
 
   // ---------------------------------------------------------------- apps
   const APPS = {
@@ -40,6 +40,8 @@
   let API = store.get(LS.api) || DEFAULT_API;
   let FORM = store.get(LS.form) || "m";
   const G = (m, f) => (FORM === "f" ? f : m);
+  // the rules version of the function (no AI) says so in its settings; texts and the rules box follow it
+  const RULES = () => !!(state && state.settings && state.settings.engine === "rules");
 
   let state = null;
   try { state = JSON.parse(store.get(LS.state) || "null"); } catch (_) { state = null; }
@@ -328,7 +330,7 @@
           const tasks = (state && state.tasks) || [];
           return `${head}
             <h1 class="q">מה ${G("אתה", "את")} דוחה?</h1>
-            <p class="muted">Claude יפרק את זה לצעד ראשון קטן. אחרי ${G("שתעשה ותדווח", "שתעשי ותדווחי")} — ${locked ? "הנעילה תשתחרר" : `${G("תקבל", "תקבלי")} קרדיט מאמץ לשחרור עתידי`}.</p>
+            <p class="muted">${RULES() ? "השומר ייתן צעד ראשון קטן וקבוע" : "Claude יפרק את זה לצעד ראשון קטן"}. אחרי ${G("שתעשה ותדווח", "שתעשי ותדווחי")} — ${locked ? "הנעילה תשתחרר" : `${G("תקבל", "תקבלי")} קרדיט מאמץ לשחרור עתידי`}.</p>
             ${tasks.length ? `<div class="stack">${tasks.map((t) => `<button class="taskbtn" data-act="task" data-id="${t.id}"><span>${esc(t.title)}</span><small>${t.steps ? `${t.steps} צעדים` : "חדשה"}</small></button>`).join("")}</div><hr>` : ""}
             <form data-form="task">
               <textarea name="t" rows="2" maxlength="200" placeholder="משימה חדשה, למשל: להגיש דוח הוצאות" ${tasks.length ? "" : "data-autofocus"}></textarea>
@@ -478,10 +480,12 @@
         <section class="card">
           <h2>הכללים שלי</h2>
           <form data-form="rules">
-            <textarea name="t" rows="4" maxlength="1500" placeholder="למשל: יוטיוב רק אחרי 20:00. אחרי 23:00 — רק הודעות.">${esc(st.rules || "")}</textarea>
+            <textarea name="t" rows="${RULES() ? 6 : 4}" maxlength="1500" placeholder="${RULES() ? "כלל בכל שורה, למשל:\nיוטיוב רק אחרי 20:00\nטיקטוק: חסום\nאינסטגרם: 5 דקות\nמותר: הרצאה, מתכון\nאסור: חדשות\nדקות ביום: 60" : "למשל: יוטיוב רק אחרי 20:00. אחרי 23:00 — רק הודעות."}">${esc(st.rules || "")}</textarea>
             <button class="btn soft block" type="submit">שמירה</button>
           </form>
-          <p class="fine">השומר קורא אותם בכל החלטה.</p>
+          ${RULES() ? `<p class="fine">כלל בכל שורה. אפשר: "יוטיוב רק אחרי 20:00", "טיקטוק: חסום", "אינסטגרם: 5 דקות", "מותר: …", "אסור: …", "לילה: 23:00-06:00", "דקות ביום: 90", "כניסות ביום: 6".</p>
+          ${(st.rules_summary || []).length ? `<h3>מה השומר הבין</h3><ul class="fine">${st.rules_summary.map((l) => `<li>${esc(l)}</li>`).join("")}</ul>` : ""}`
+          : '<p class="fine">השומר קורא אותם בכל החלטה.</p>'}
         </section>
         <section class="card">
           <h2>חיבור לקיצור באייפון</h2>

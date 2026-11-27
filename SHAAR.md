@@ -55,7 +55,7 @@
 
 ## התקנה – צעד אחר צעד
 
-צריך: הפרויקט ב-Supabase (הקיים, `albvjenyvyanzzlmvmqa`), מפתח API של Anthropic ‏(console.anthropic.com → API Keys), ואייפון עם iOS 17 ומעלה. הכול אפשר לעשות מהאייפון.
+צריך: הפרויקט ב-Supabase (של שער, `azsopganhicwbdirfxon`), מפתח API של Anthropic ‏(console.anthropic.com → API Keys), ואייפון עם iOS 17 ומעלה. הכול אפשר לעשות מהאייפון.
 
 ### 1. טוקן אישי
 פותחים את `https://yasobe.github.io/Abeve/shaar/` ב-Safari → "אין לי טוקן עדיין" → **ליצור טוקן**. הוא מועתק ללוח – שומרים אותו בפתקים / במנהל הסיסמאות. (כל מחרוזת אקראית של 16 תווים ומעלה עובדת.)
@@ -76,11 +76,26 @@
    - `SHAAR_TOKEN` = הטוקן משלב 1
    - `ANTHROPIC_API_KEY` = המפתח של Anthropic
 6. בדיקה ב-Safari:
-   `https://albvjenyvyanzzlmvmqa.supabase.co/functions/v1/shaar/s/ping?k=הטוקן` → אמור להופיע `ok`.
+   `https://azsopganhicwbdirfxon.supabase.co/functions/v1/shaar/s/check?k=הטוקן` → אמורות להופיע שלוש שורות עם ✓ (טוקן, מסד נתונים, מפתח Anthropic). שורה עם ✗ אומרת מה חסר. הבדיקה לא קוראת ל-Claude ולא עולה כסף.
+
+#### אילו מפתחות של Supabase צריך? אף אחד.
+- **לא** מעתיקים את ה-`anon` key ולא את ה-`service_role` / `secret` key לשום מקום – לא לאפליקציה, לא לקיצור ולא לסודות.
+- Supabase מזריק לבד לכל Edge Function את `SUPABASE_URL` ואת מפתח השירות (`SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_SECRET_KEYS`). הפונקציה משתמשת בהם בצד השרת בלבד.
+- ה-PWA לא מדברת עם מסד הנתונים בכלל. היא מדברת רק עם הפונקציה, עם הטוקן האישי שלך. כתובת הפונקציה כבר כתובה ב-`docs/shaar/app.js` (`DEFAULT_API`) – היא לא סוד.
+- למה אין מדיניות RLS? כי אין משתמשי Supabase באפליקציה הזו. כל מדיניות שתפתח את הטבלאות ל-`anon` הייתה פותחת אותן לכל מי שיש לו את המפתח הציבורי של "טיק". RLS דלוק בלי מדיניות = סגור לגמרי, וזה המצב הנכון.
+- רק שני סודות נכנסים ל-Supabase: `SHAAR_TOKEN` ו-`ANTHROPIC_API_KEY`.
+
+> לוודא שהטבלאות סגורות (SQL Editor) – כל השורות אמורות להראות `rls = true` ו-`policies = 0`:
+> ```sql
+> select c.relname, c.relrowsecurity as rls,
+>        (select count(*) from pg_policies p where p.tablename = c.relname) as policies
+> from pg_class c join pg_namespace n on n.oid = c.relnamespace
+> where n.nspname = 'public' and c.relname like 'shaar\_%' and c.relkind = 'r';
+> ```
 
 > מהמחשב, אותו דבר ב-CLI:
-> `supabase functions deploy shaar --project-ref albvjenyvyanzzlmvmqa --no-verify-jwt`
-> `supabase secrets set SHAAR_TOKEN=… ANTHROPIC_API_KEY=… --project-ref albvjenyvyanzzlmvmqa`
+> `supabase functions deploy shaar --project-ref azsopganhicwbdirfxon --no-verify-jwt`
+> `supabase secrets set SHAAR_TOKEN=… ANTHROPIC_API_KEY=… --project-ref azsopganhicwbdirfxon`
 
 ### 4. ה-PWA במסך הבית
 1. Safari → `https://yasobe.github.io/Abeve/shaar/`
@@ -94,7 +109,7 @@
 אפליקציית **קיצורים** → **+** → שם: `שער`. מוסיפים את הפעולות לפי הסדר (שמות הפעולות באנגלית, ובסוגריים כפי שהן בערך בעברית):
 
 1. **Text** (טקסט) – בונים כתובת משלושה חלקים צמודים, בלי רווחים:
-   - מדביקים: `https://albvjenyvyanzzlmvmqa.supabase.co/functions/v1/shaar/s/`
+   - מדביקים: `https://azsopganhicwbdirfxon.supabase.co/functions/v1/shaar/s/`
    - מקישים על המקלדת על **משתנים** → **Shortcut Input** (קלט הקיצור)
    - מדביקים: `?k=` ואחריו הטוקן
    (בהגדרות של שער יש כפתורי "להעתיק חלק 1 / חלק 2" בדיוק לזה.)
@@ -138,6 +153,47 @@
 
 ---
 
+## גרסה בלי AI (כללים קבועים)
+
+אותה אפליקציה, אותו קיצור, אותו מסד נתונים ואותו חוזה זמן וקנסות, אבל בלי Claude ובלי מפתח API. השומר שואל שאלה קבועה ומחליט לפי רשימות ומגבלות שכתובות בקובץ [`supabase/functions/shaar-rules/index.ts`](supabase/functions/shaar-rules/index.ts).
+
+**התקנה:** כמו בשלב 3, רק שמדביקים את `supabase/functions/shaar-rules/index.ts` לפונקציה בשם `shaar` (באותו שם, היא מחליפה את גרסת ה-AI). הסוד היחיד שצריך הוא `SHAAR_TOKEN`. את `ANTHROPIC_API_KEY` אפשר למחוק. ה-SQL וה-PWA לא משתנים. כדי לחזור לגרסת ה-AI מדביקים שוב את `supabase/functions/shaar/index.ts`.
+בדיקה: `…/functions/v1/shaar/s/check?k=הטוקן` אמור להראות "✓ שומר: כללים קבועים, בלי AI", ומתחת את הכללים שהשומר הבין.
+
+**איך השער מחליט** (הכלל הראשון שמתאים קובע):
+
+| # | מצב | החלטה |
+|---|---|---|
+| 1 | לפי הכללים שלי האפליקציה חסומה, או שעכשיו מחוץ לשעות שלה | המתנה 5 דק׳, ואז כניסה של עד 2–3 דק׳ |
+| 2 | הגעתי למגבלת הדקות היומית (ברירת מחדל 90) | המתנה 5 דק׳, ואז עד 3 דק׳ |
+| 3 | התשובה ברשימת "לא מטרה" (סתם, משעמם, רק להציץ, לגלול, לא יודע…) | המתנה של דקה ומעלה |
+| 4 | חוזה נשבר בשעה האחרונה | המתנה של 3 דק׳ ומעלה, ואז כניסה קצרה |
+| 5 | התשובה ברשימת מטרות | מעבר. הודעה 3 דק׳, חיפוש/קנייה 5, פרסום 5, עבודה 10, צפייה מסוימת (הרצאה, שיעור, פרק) 15. תמיד עד "זמן מקסימלי לכניסה" |
+| 6 | אף אחת מהרשימות | שאלה קבועה אחת: "מה בדיוק תעשה שם, ואיך תדע שסיימת?". תשובה עם מטרה, או משפט קונקרטי (4 מילים ומעלה), עוברת ל-5 דק׳. אחרת המתנה |
+
+- **לילה** (ברירת מחדל 23:00–06:00): ההמתנות ארוכות פי 1.5, כניסה עם מטרה מוגבלת ל-5 דק׳, ובמקום השאלה יש המתנה.
+- **הרבה כניסות היום** (מהכניסה ה-7): כניסה עם מטרה מוגבלת ל-3 דק׳, ובמקום השאלה יש המתנה. בנוסף, כבר מהכניסה הרביעית כל המתנה מתארכת ב-15 שניות לכל כניסה מעבר ל-3.
+- ההמתנה היא תמיד בין 30 שניות ל-5 דקות. אחריה עדיין אפשר להיכנס לזמן קצר, או לוותר. בדיוק כמו בגרסת ה-AI.
+
+**הכללים שלי** (הגדרות → "הכללים שלי", כלל אחד בכל שורה. מתחת לתיבה מופיע "מה השומר הבין", כולל שורות שלא הובנו):
+```
+יוטיוב רק אחרי 20:00        (או: רק לפני 9:00 / רק בין 20:00 ל-23:00 / יוטיוב: 20:00-23:00)
+טיקטוק: חסום
+אינסטגרם: 5 דקות            מקסימום לכל כניסה לאפליקציה הזו
+מותר: הרצאה, מתכון          מילים נוספות שנחשבות מטרה
+אסור: חדשות, כדורגל         מילים נוספות שאף פעם לא נחשבות מטרה
+לילה: 22:00-07:00           או "לילה: בלי"
+דקות ביום: 60
+כניסות ביום: 4
+```
+שמות אפליקציות בעברית או באנגלית (`youtube`, `tiktok`…).
+
+**חשבון המאמץ בלי AI:** צעדים קבועים שמתקדמים. צעד 1 (2 דק׳): לכתוב בשורה אחת מה הפעולה הפיזית הבאה. צעד 2 (5 דק׳): לעשות בדיוק את מה שכתבתי בדיווח הקודם. מצעד 3 (10 דק׳): להמשיך מאיפה שעצרתי. דיווח מתקבל אם יש בו לפחות 3 מילים ופרט, ואין בו "לא הספקתי / עוד לא / מחר". "עשיתי" לבד, או העתקה של הצעד, לא מתקבלים. ההמתנה המינימלית לפני דיווח (עד 2 דק׳) נשארת.
+
+בהיסטוריה, החלטות של גרסה זו נשמרות עם `model = "rules-v1"` ו-`ai_ok = false`.
+
+---
+
 ## איך משתמשים
 
 - **בשער:** לענות בכנות. "סתם / משעמם" → המתנה עם ספירה לאחור והצעה קטנה. "ויתרתי — זה יכול לחכות" נרשם כדחף שנדחה (זה הניצחון).
@@ -154,6 +210,7 @@
 | נפתח "הקיצור לא מחובר" | הטוקן ב-Text של הקיצור לא זהה לסוד `SHAAR_TOKEN`. |
 | אינסטגרם נפתח וכלום לא קורה | האוטומציה כבויה / לא מוגדרת "הפעלה מיידית" / אין רשת (נכשל פתוח – בכוונה). |
 | הטיימר לא מתחיל | ה-Start Timer לא מקבל את `Contents of URL` (ראו Get Numbers from Input למעלה). |
+| לא בטוח מה לא עובד | לפתוח `…/functions/v1/shaar/s/check?k=הטוקן` ב-Safari – כל שורה עם ✗ אומרת מה חסר. |
 | "שגיאה בשרת" באפליקציה | ה-SQL לא הורץ, או שהפונקציה לא נקראת `shaar`, או ש-Verify JWT עדיין דולק. |
 | Claude לא עונה | `ANTHROPIC_API_KEY` חסר/שגוי – השער ממשיך לעבוד עם כללים פשוטים, ומסומן `ai_ok=false` בהיסטוריה. |
 
@@ -172,7 +229,9 @@
 cd tests/shaar && npm install            # pg
 # Postgres 16 מקומי (כל מסד ריק; הבדיקות מוחקות ובונות את public מחדש)
 PGURL=postgres://postgres@localhost:5432/shaar_test node sql.test.mjs        # מכונת המצבים (13)
-PGURL=postgres://postgres@localhost:5432/shaar_fn   node function.test.mjs   # הפונקציה ב-HTTP, Claude מדומה (12)
+PGURL=postgres://postgres@localhost:5432/shaar_fn   node function.test.mjs   # הפונקציה ב-HTTP, Claude מדומה (13)
+PGURL=postgres://postgres@localhost:5432/shaar_rules node rules.test.mjs     # גרסת הכללים בלי AI (15)
 PGURL=postgres://postgres@localhost:5432/shaar_e2e  node e2e.mjs             # מעבר מלא בדפדפן (Playwright)
 PGURL=postgres://postgres@localhost:5432/shaar_dev  node server.mjs          # הרצה מקומית: http://localhost:8765/shaar/
+SHAAR_ENGINE=rules PGURL=postgres://postgres@localhost:5432/shaar_dev node server.mjs  # הרצה מקומית של גרסת הכללים
 ```
