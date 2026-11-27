@@ -4,7 +4,7 @@
 "use strict";
 (() => {
   const VERSION = "1.0.0";
-  const DEFAULT_API = "https://albvjenyvyanzzlmvmqa.supabase.co/functions/v1/shaar";
+  const DEFAULT_API = "https://azsopganhicwbdirfxon.supabase.co/functions/v1/shaar";
 
   // ---------------------------------------------------------------- apps
   const APPS = {

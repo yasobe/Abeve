@@ -55,7 +55,7 @@
 
 ## התקנה – צעד אחר צעד
 
-צריך: הפרויקט ב-Supabase (הקיים, `albvjenyvyanzzlmvmqa`), מפתח API של Anthropic ‏(console.anthropic.com → API Keys), ואייפון עם iOS 17 ומעלה. הכול אפשר לעשות מהאייפון.
+צריך: הפרויקט ב-Supabase (של שער, `azsopganhicwbdirfxon`), מפתח API של Anthropic ‏(console.anthropic.com → API Keys), ואייפון עם iOS 17 ומעלה. הכול אפשר לעשות מהאייפון.
 
 ### 1. טוקן אישי
 פותחים את `https://yasobe.github.io/Abeve/shaar/` ב-Safari → "אין לי טוקן עדיין" → **ליצור טוקן**. הוא מועתק ללוח – שומרים אותו בפתקים / במנהל הסיסמאות. (כל מחרוזת אקראית של 16 תווים ומעלה עובדת.)
@@ -76,7 +76,7 @@
    - `SHAAR_TOKEN` = הטוקן משלב 1
    - `ANTHROPIC_API_KEY` = המפתח של Anthropic
 6. בדיקה ב-Safari:
-   `https://albvjenyvyanzzlmvmqa.supabase.co/functions/v1/shaar/s/check?k=הטוקן` → אמורות להופיע שלוש שורות עם ✓ (טוקן, מסד נתונים, מפתח Anthropic). שורה עם ✗ אומרת מה חסר. הבדיקה לא קוראת ל-Claude ולא עולה כסף.
+   `https://azsopganhicwbdirfxon.supabase.co/functions/v1/shaar/s/check?k=הטוקן` → אמורות להופיע שלוש שורות עם ✓ (טוקן, מסד נתונים, מפתח Anthropic). שורה עם ✗ אומרת מה חסר. הבדיקה לא קוראת ל-Claude ולא עולה כסף.
 
 #### אילו מפתחות של Supabase צריך? אף אחד.
 - **לא** מעתיקים את ה-`anon` key ולא את ה-`service_role` / `secret` key לשום מקום – לא לאפליקציה, לא לקיצור ולא לסודות.
@@ -94,8 +94,8 @@
 > ```
 
 > מהמחשב, אותו דבר ב-CLI:
-> `supabase functions deploy shaar --project-ref albvjenyvyanzzlmvmqa --no-verify-jwt`
-> `supabase secrets set SHAAR_TOKEN=… ANTHROPIC_API_KEY=… --project-ref albvjenyvyanzzlmvmqa`
+> `supabase functions deploy shaar --project-ref azsopganhicwbdirfxon --no-verify-jwt`
+> `supabase secrets set SHAAR_TOKEN=… ANTHROPIC_API_KEY=… --project-ref azsopganhicwbdirfxon`
 
 ### 4. ה-PWA במסך הבית
 1. Safari → `https://yasobe.github.io/Abeve/shaar/`
@@ -109,7 +109,7 @@
 אפליקציית **קיצורים** → **+** → שם: `שער`. מוסיפים את הפעולות לפי הסדר (שמות הפעולות באנגלית, ובסוגריים כפי שהן בערך בעברית):
 
 1. **Text** (טקסט) – בונים כתובת משלושה חלקים צמודים, בלי רווחים:
-   - מדביקים: `https://albvjenyvyanzzlmvmqa.supabase.co/functions/v1/shaar/s/`
+   - מדביקים: `https://azsopganhicwbdirfxon.supabase.co/functions/v1/shaar/s/`
    - מקישים על המקלדת על **משתנים** → **Shortcut Input** (קלט הקיצור)
    - מדביקים: `?k=` ואחריו הטוקן
    (בהגדרות של שער יש כפתורי "להעתיק חלק 1 / חלק 2" בדיוק לזה.)
